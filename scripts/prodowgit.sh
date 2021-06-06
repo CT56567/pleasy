@@ -89,7 +89,7 @@ while true; do
   case "$1" in
   -h | --help)
     print_help
-    exit 2; ;;
+    exit 0; ;;
   -s | --step)
     flag_step=1
     shift
@@ -173,6 +173,7 @@ ocmsg "Name of sql backup: $Name "
  # Move sql backup to proddb and push
  echo "Using git method to push db and files to production"
 # push database
+if [[ ! -d "$folderpath/sitebackups/proddb" ]] ; then mkdir "$folderpath/sitebackups/proddb" ; fi
  cd "$folderpath/sitebackups/proddb"
 
 ocmsg "Making sure we have the latest git"

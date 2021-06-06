@@ -38,6 +38,7 @@ Usage: pl makedb [OPTION] ... [SITE]
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -d --debug              Provide messages to help with debugging this function
 
 Examples:
 END HELP"
@@ -77,7 +78,9 @@ eval set -- "$args"
 while true; do
   case "$1" in
   -h | --help)
-    print_help; exit 0; ;;
+    print_help;
+    exit 2 # works
+    ;;
   --)
   shift
   break; ;;

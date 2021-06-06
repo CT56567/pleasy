@@ -1,5 +1,91 @@
 #!/bin/bash
 
+cd /var/www/oc/loc/docroot
+
+  result_rom=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
+  echo "$result_rom"
+  if [[ ! "$result_rom" == "" ]]; then
+  echo "OK"
+  fi
+exit 0
+parse_pl_yml
+ echo "Adding: $(dirname $(dirname $script_root))/.ssh/key"
+
+exit 0
+
+result=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
+echo "result: $result"
+  if [ ! "$result" == "" ]; then
+  drush @$sitename_var cset readonlymode.settings enabled 0 -y
+  else
+    echo "no readonly"
+  fi
+
+  exit 0
+parse_pl_yml
+sitename_var="bak"
+import_site_config $sitename_var
+
+drush @$sitename_var cr 2>/dev/null | grep -v '+' | cut -d' ' -f2
+if [[ "${PIPESTATUS[0]}" == "1" ]]; then
+  # If there is an error, it is most likely due to a drush issue so reinstall drush.
+  rm "$site_path/$sitename_var/vendor/drush" -rf
+  cd "$site_path/$sitename_var/"
+  composer install --no-dev
+  sudo chown :www-data vendor/drush -R
+  fi
+
+exit 0
+
+parse_pl_yml
+# https://askubuntu.com/questions/623933/how-to-create-a-rotation-animation-using-shell-script
+
+
+
+
+readonly_en="$(ssh -t cathnet "cd $prod_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }"   )"
+
+#readonly_ena=$( echo "$readonly_en" | { grep 'ocsss' || true; } )
+
+echo "Read only: $readonly_en"
+exit
+
+sitename_var="t4"
+  import_result="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+  # Process the result
+#  echo "cim result $import_result result"
+echo "$import_result" > deleteme.txt
+echo "$import_result"
+python ~/pleasy/scripts/lib/regx-delete.py deleteme.txt
+
+
+
+exit 0
+sitename_var="test"
+
+
+  rsync -rav --delete-during --exclude 'docroot/sites/default/settings.*' \
+            --exclude 'docroot/sites/default/services.yml' \
+            --exclude 'docroot/sites/default/files/' \
+            --exclude '.git/' \
+            --exclude '.gitignore' \
+            --exclude 'private/' \
+            "$site_path/$sitename_var"  "$prod_site"
+
+#drush @test sset system.maintenance_mode TRUE
+echo "done"
+exit 0
+cd /var/www/oc/stg/docroot/
+echo "collected outputa"
+#drush cim -y || true
+hello="$(drush @stg cim -y --pipe 2>&1 >/dev/null || true)"
+#hello="$($(drush @stg cim -y --pipe 2>/dev/null))"
+
+echo "collected output"
+bconfig=`echo $hello | sed -r '(?<=Configuration <em class="placeholder">)(.*?)(?=<\/em>)'`
+#((?<=Configuration <em class="placeholder">)(.*?)(?=<\/em>))+
+echo $bconfig
+exit 0
 
 Color_Off='\033[0m'       # Text Reset
 

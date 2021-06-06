@@ -1,27 +1,14 @@
 #!/bin/bash
 ################################################################################
-#                 Git commit and backup files For Pleasy Library
+#                 Information For Pleasy Library
 #
-#  Composer update, git commit changes and backup. This script follows the
-#  correct path to git commit changes You just need to state the
-#  sitename, eg dev.
-#
-#  https://events.drupal.org/vienna2017/sessions/
-#  advanced-configuration-management-config-split-et-al
-#  at 29:36
-#  That is a combination of (always presume sharing and do a backup first):
-#
-#  The safe sequence for updating
-#  Update code: composer update
-#  Run updates: drush updb
-#  Export updated config: drush cex
-#  Commit git add && git commit
-#  Push: git push
+#  This script is used to provide various information
+#  You just need to state the sitename, eg dev and the type (or leave blank for all)
 #
 #  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
+#  2019 - 2020  Robert Zaar   Original code creation and testing,
 #                                   prelim commenting
-#  29/02/2020 James Lim  Getopt parsing implementation, script documentation
+#  2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
 #
@@ -34,12 +21,13 @@
 ################################################################################
 ################################################################################
 #                                TODO LIST
+# Implement message function - DONE
 #
 ################################################################################
 ################################################################################
 
 # Set script name for general file use
-scriptname='gcomup'
+scriptname='info'
 
 # Help menu
 ################################################################################
@@ -47,21 +35,19 @@ scriptname='gcomup'
 ################################################################################
 print_help() {
 echo \
-"Git commit and backup
-Usage: pl $scriptname [OPTION] ... [SITE] [MESSAGE]
-Composer update, git commit changes and backup. This script follows the
-correct path to git commit changes You just need to state the
-sitename, eg dev.
+"Information on site(s)
+Usage: pl info [SITE] [TYPE] [OPTION]
+This script is used to provide various information about a site.
+You just need to state the sitename, eg dev and optionally the type of information
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
 
 Examples:
-pl $scriptname -h
-pl $scriptname dev (relative dev folder)
-pl $scriptname tim 'First tim backup'
+pl info -h
+pl info dev
 END HELP"
-
 }
 
 # start timer
@@ -75,14 +61,14 @@ SECONDS=0
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -o h -l help, --name "$scriptname" -- "$@")
+args=$(getopt -o hd -l help,debug: --name "$scriptname" -- "$@")
 # echo "$args"
 
 ################################################################################
 # If getopt outputs error to error variable, quit program displaying error
 ################################################################################
 [ $? -eq 0 ] || {
-    echo "please do '$scriptname --help' for more options"
+    echo "please do 'pl info --help' for more options"
     exit 1
 }
 
@@ -98,63 +84,65 @@ eval set -- "$args"
 while true; do
   case "$1" in
   -h | --help)
-    print_help; exit 0; ;;
+    print_help;
+    exit 3 # pass
+    ;;
+  -d | --debug)
+  verbose="debug"
+  shift
+  ;;
   --)
-  shift; break; ;;
+  shift
+  break; ;;
   *)
   "Programming error, this should not show up!"
   exit 1; ;;
   esac
 done
 
+
+# No arguments
 ################################################################################
-
-parse_pl_yml
-
-if [ $1 == "gcomup" ] && [ -z "$2" ]; then
-  sitename_var="$sites_dev"
-  elif [ -z "$2" ]; then
-    sitename_var=$1
-    msg="Updating."
-   else
-    sitename_var=$1
-    msg=$2
+# if no argument found exit and display error. User must input directory for
+# backup else this script will fail.
+################################################################################
+if [[ "$1" == "info" ]] && [[ -z "$2" ]]; then
+ echo "No site specified."
+ elif [[ "$1" == "info" ]] ; then
+   sitename_var=$2
+elif [[ -z "$2" ]]; then
+  sitename_var=$1
+ echo "No type specified."
+else
+  sitename_var=$1
+  type="$*"
 fi
 
-echo "This will update to the latest composer code, commit and backup"
+# (what do these do?)
+echo -e "\e[34mbackup $1 \e[39m"
 
-# Check number of arguments
 ################################################################################
-# If no arguments given, prompt user for arguments
+# Read variables from pl.yml
 ################################################################################
-if [ "$#" = 0 ]; then
-  print_help
-  exit 2
-fi
-
 parse_pl_yml
+
+################################################################################
+# Import the site config for chosen site
+################################################################################
 import_site_config $sitename_var
+if [[ ! -d "$site_path/$sitename_var" ]]; then
+  echo "Cannot find directory for "$sitename_var", please try again or use --help for more options"
+fi
+################################################################################
+# Now backup the site
+################################################################################
+site_info $type
 
-ocmsg "Composer update"
-cd $site_path/$sitename_var
-composer update
+#This isn't needed (yet?)
+# backup_git $msg
 
-ocmsg "Run db updates"
-drush @$sitename_var dbup
-
-ocmsg "Export config: drush cex will need sudo"
-sudo chown $user:www-data $site_path/$sitename_var -R
-chmod g+w $site_path/$sitename_var/cmi -R
-drush @$sitename_var cex --destination=../cmi -y
-
-# Check?
-
-echo "Add credentials."
-ssh-add ~/.ssh/$github_key
-
-ocmsg "Commit git add && git commit with msg $msg"
-git add .
-git commit -m msg
-
-ocmsg "Backup site $sitename_var with msg $msg"
-backup_site $sitename_var $msg
+# End timer
+################################################################################
+# Finish script, display time taken
+################################################################################
+echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

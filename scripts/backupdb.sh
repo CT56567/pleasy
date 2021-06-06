@@ -57,7 +57,6 @@ print_help() {
   pl backupdb tim -m 'First tim backup'
   pl backupdb --message='Love' love
   END HELP"
-  exit 0
 }
 
 # start timer
@@ -100,7 +99,7 @@ while true; do
   case "$1" in
   -h | --help)
     print_help
-    exit 0
+    exit 2 # works
     ;;
   -m | --message)
     shift

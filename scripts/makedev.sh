@@ -14,7 +14,7 @@
 ################################################################################
 ################################################################################
 #
-#  Core Maintainer:  Rob Zar
+#  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
 ################################################################################
@@ -157,5 +157,7 @@ drupal site:mode dev
 #clear cache
 echo "Clear cache"
 drush @$sitename_var cr
+
+//todo make sure the git is the dev git not the prod git.
 
 echo 'H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

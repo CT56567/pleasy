@@ -62,10 +62,49 @@ Git is the fastest and easiest way to move files. There are three repositories
 
 Opencourse (ocrepo): A repo for just the code for opencourse (dev environment)
 
-Production site repo (prodrepo): A repo of all of the site files (prod environment)
+Production site repo (prodrepo): A repo of all of the site files (prod environment) Master branch stores prod. Dev
+branch stores the new prod to be pushed up.
 
 Production database repo (prod.sql): A private secure repo for the live database (ocback).
 
+The suggest best way to run workflow is explained in this presentation: 
+https://events.drupal.org/vienna2017/sessions/advanced-configuration-management-config-split-et-al
+  at 29:36
+  
+This has been implemented with the following commands
+Merge dev into master (or other branch)
+```
+pl gcom #will export config and commit to git
+git pull # Check the pull works.
+git merge master
+pl runup #will run any updates. Check all is good.
+git checkout master 
+git merge dev #check for errors.
+git push
+git checkout dev # back to work
+```
+Process to push to production
+```
+pl proddown stg #copy prod to stg
+pl gcom loc
+pl dev2stg loc #will use git to move dev files to stg. stg has prodrepo.
+pl runup stg #run updates on stage and check site.
+```
+You can repeat these steps to set up the live test site on the production server
+
+```
+pl updateprod stg -td
+```
+And/or you can run them on the live production server.
+```
+pl updateprod # This repeats the steps on Prod. Check all is well.
+```
+If there is a problem on production.
+
+```
+pl restoreprod  #This restores Prod to the old site. Only if needed.
+```
+ 
 # PLEASY RATIONALE
 
 What makes pleasy different? Pleasy is trying to use the simplest tools (bash scripting) to leverage drupal and varbase tools 
@@ -131,7 +170,7 @@ Usage: pl addc [OPTION]
 
 <details>
 
-**<summary>backupdb: [34mbackup --help [39m :question: </summary>**
+**<summary>backupdb: [34mbackup --help [39m :white_check_mark: </summary>**
 --**BROKEN DOCUMENTATION**--
 Backs up the database only
     Usage: pl backupdb [OPTION] ... [SOURCE]
@@ -149,22 +188,6 @@ Backs up the database only
   pl backupdb --message='Love' love
   END HELP
 --**BROKEN DOCUMENTATION**--
-
-</details>
-
-<details>
-
-**<summary>backupprod: Backs up the production site :white_check_mark: </summary>**
-Usage: pl backup [OPTION] ... [MESSAGE]
-  This script is used to backup prod site's files and database. You can
-  add an optional message. The production site details are in pl.yml.
-
-  Mandatory arguments to long options are mandatory for short options too.
-    -h --help               Display help (Currently displayed)
-
-  Examples:
-  pl backupprod -h
-  pl backupprod 'First tim backup'
 
 </details>
 
@@ -206,6 +229,21 @@ Examples:
 
 <details>
 
+**<summary>copypt: Copy the production site to the test site. :white_check_mark: </summary>**
+Usage: pl copypt [OPTION]
+  This script is used to copy the production site to the test site. The site
+  details are in pl.yml.
+
+  Mandatory arguments to long options are mandatory for short options too.
+    -h --help               Display help (Currently displayed)
+
+  Examples:
+  pl copypt 
+
+</details>
+
+<details>
+
 **<summary>copy: Copies one site to another site. :heavy_check_mark: </summary>**
     Usage: pl copy [OPTION] ... [SOURCE] [DESTINATION]
 This script will copy one site to another site. It will copy all
@@ -224,21 +262,25 @@ Examples:
 
 <details>
 
-**<summary>devpush: Usage: pl devpush [OPTION] :question: </summary>**
---**BROKEN DOCUMENTATION**--
-Include help Rob!
+**<summary>dev2stg: Uses git to update a stage site with the dev files. :white_check_mark: </summary>**
+Usage: pl dev2stg [OPTION] ... [SOURCE]
+This script will use git to update the files from dev repo (ocdev) on the stage
+site dev to stg. If one argument is given it will copy dev to the site
+specified. If two arguments are give it will copy the first to the second.
+Presumes the dev git has already been pushed. Git is used for this rather than
+simple file transfer so it follows the requirements in .gitignore.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
 
 Examples:
---**BROKEN DOCUMENTATION**--
 
 </details>
 
 <details>
 
-**<summary>enmod: Usage: pl enmod [OPTION] ... [SITE] [MODULE] :question: </summary>**
+**<summary>enmod: Usage: pl enmod [OPTION] ... [SITE] [MODULE] :white_check_mark: </summary>**
 --**BROKEN DOCUMENTATION**--
 This script will install a module first using composer, then fix the file/dir
 ownership and then enable the module using drush automatically.
@@ -283,26 +325,13 @@ Examples:
 
 <details>
 
-**<summary>gcompushmaster: Git merge branch with master and push :question: </summary>**
-Usage: pl gcompushmaster [OPTION] ... [SITE] [MESSAGE]
-This will merge branch with master You just need to state the sitename, eg
-dev.
-
-Mandatory arguments to long options are mandatory for short options too.
-  -h --help               Display help (Currently displayed)
-
-Examples:
-
-</details>
-
-<details>
-
-**<summary>gcom: args:  --help -- :question: </summary>**
+**<summary>gcom: args:  --help -- :white_check_mark: </summary>**
 --**BROKEN DOCUMENTATION**--
 Git commit code with optional backup
 Usage: pl gcom [SITE] [MESSAGE] [OPTION]
-This script will git commit changes to [SITE] with [MESSAGE].\
-If you have access rights, you can commit changes to pleasy itself by using pl for [SITE] or pleasy.
+This script will export config and git commit changes to [SITE] with [MESSAGE].\
+If you have access rights, you can commit changes to pleasy itself by using pl
+for [SITE] or pleasy.
 
 OPTIONS
   -h --help               Display help (Currently displayed)
@@ -319,45 +348,9 @@ pl gcom pl "Improved gcom."
 
 <details>
 
-**<summary>gcomsh: Git push after master merge :question: </summary>**
-Usage: pl gcomsh [OPTION] ... [SITE] [MESSAGE]
-This will git commit changes with msg after merging with master. You just
-need to state the sitename, eg dev.
-
-Mandatory arguments to long options are mandatory for short options too.
-  -h --help               Display help (Currently displayed)
-
-Examples:
-pl gcomsh -h
-pl gcomsh dev (relative dev folder)
-pl gcomsh tim 'First tim backup'
-
-</details>
-
-<details>
-
-**<summary>gcomup2upstream: Git commit with upstream merge :question: </summary>**
-Usage: pl gcomup2upstream [OPTION] ... [SITE] [MESSAGE]
-This will merge branch with master, and update to the upstream git. It
-presupposes you have already merged. You just need to state the sitename, eg
-dev.
-                                    branch with master
-Mandatory arguments to long options are mandatory for short options too.
-  -h --help               Display help (Currently displayed)
-
-Examples:
-pl gcomup2upstream -h
-pl gcomup2upstream dev (relative dev folder)
-pl gcomup2upstream tim 'First tim backup'
-END HELP
-
-</details>
-
-<details>
-
-**<summary>gcomup: Git commit and backup :question: </summary>**
-Usage: pl gcomup [OPTION] ... [SITE] [MESSAGE]
-Composer update, git commit changes and backup. This script follows the
+**<summary>gcomvup: Git commit and update to latest varbase stable :question: </summary>**
+Usage: pl gcomvup [OPTION] ... [SITE] [MESSAGE]
+Varbase update, git commit changes and backup. This script follows the
 correct path to git commit changes You just need to state the
 sitename, eg dev.
 
@@ -365,9 +358,9 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
 Examples:
-pl gcomup -h
-pl gcomup dev (relative dev folder)
-pl gcomup tim 'First tim backup'
+pl gcomvup -h
+pl gcomvup dev (relative dev folder)
+pl gcomvup tim 'First tim backup'
 END HELP
 
 </details>
@@ -393,15 +386,18 @@ END HELP
 
 <details>
 
-**<summary>importdev: Copy localprod to stg, then import dev to stg :question: </summary>**
-Usage: pl importdev [OPTION] ... [SOURCE-SITE] [DEST-SITE]
-@ROB add description please
+**<summary>info: Information on site(s) :heavy_check_mark: </summary>**
+Usage: pl info [SITE] [TYPE] [OPTION]
+This script is used to provide various information about a site.
+You just need to state the sitename, eg dev and optionally the type of information
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
 
 Examples:
-pl importdev 
+pl info -h
+pl info dev
 END HELP
 
 </details>
@@ -422,6 +418,7 @@ Mandatory arguments to long options are mandatory for short options too.
     -n --nopassword         Nopassword. This will give the user full sudo access without requireing a password!
                             This could be a security issue for some setups. Use with caution!
     -t --test            This option is only for test environments like Travis, eg there is no mysql root password.
+    -l --lando              This will install lando
 
 Examples:
 git clone git@github.com:rjzaar/pleasy.git [sitename]  #eg git clone git@github.com:rjzaar/pleasy.git mysite.org
@@ -470,7 +467,8 @@ Mandatory arguments to long options are mandatory for short options too.
   -s --step=[INT]         Restart at the step specified.
   -b --build-step=[INT]   Restart the build at step specified (step=6)
   -d --debug              Provide debug information when running this script.
-  -t --test            This option is only for test environments like Travis, eg there is no mysql root password.
+  -t --test               This option is only for test environments like Travis, eg there is no mysql root password.
+  -e --extras             Install extra features like yarn and bower
 
 Examples:
 pl install d8
@@ -482,7 +480,7 @@ END HELP
 
 <details>
 
-**<summary>main: Turn maintenance mode on or off :question: </summary>**
+**<summary>main: Turn maintenance mode on or off :white_check_mark: </summary>**
 Usage: pl main [OPTION] ... [SITE] [MODULES]
 This script will turn maintenance mode on or off. You will need to specify the
 site first than on or off, eg pl main loc on
@@ -499,12 +497,13 @@ END HELP
 
 <details>
 
-**<summary>makedb: Create the database for a site :question: </summary>**
+**<summary>makedb: Create the database for a site :white_check_mark: </summary>**
 Usage: pl makedb [OPTION] ... [SITE]
 <ADD DESC HERE>
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -d --debug              Provide messages to help with debugging this function
 
 Examples:
 END HELP
@@ -546,27 +545,44 @@ END HELP
 
 <details>
 
+**<summary>open: Opens the specified site :white_check_mark: </summary>**
+Usage: pl open [OPTION] ... [SOURCE]
+This script will open the specified site.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+
+Examples:
+pl open loc
+
+</details>
+
+<details>
+
 **<summary>proddown: Overwrite a specified local site with production :white_check_mark: </summary>**
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
-site.  The external site details are also set in pl.yml under prod: Note: once
+site. If no site specified, localprod will be used. The external site details are also set in pl.yml under prod: Note: once
 the local site has been locally backedup, then it can just be restored from there
 if need be.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
-  -s --step=[1-2]         Select step to proceed (For DEBUG purposes?)
+  -s --step=[1-2]         Select step to proceed (If it stalls on a step)
+  -d --debug              Provide messages to help with debugging this function
+
 
 Examples:
 pl proddown stg
 pl proddown stg -s=2
+pl proddown
 END HELP
 
 </details>
 
 <details>
 
-**<summary>prodowgit: Overwrite production with site specified :white_check_mark: </summary>**
+**<summary>prodowgit: Overwrite production with site specified :question: </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -584,7 +600,7 @@ END HELP
 
 <details>
 
-**<summary>prodowtar: Overwrite production with site specified :white_check_mark: </summary>**
+**<summary>prodowtar: Overwrite production with site specified :question: </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -632,27 +648,7 @@ END HELP
 
 <details>
 
-**<summary>replace: Overwrite localprod with production :white_check_mark: </summary>**
-Usage: pl replace [OPTION] ... [FROM] [TO]
-This script will copy the .git and .gitignore from TO to .prodgit and .prodgitignore
-in FROM. It will delete TO. It will copy FROM to TO. It will then move the .git
-to .devgit and .gitignore to .devgitignore. It will move .prodgit to .git and
-.prodgitignore to .gitignore. Fix up the site settings and file permissions.
-
-Mandatory arguments to long options are mandatory for short options too.
-  -h --help               Display help (Currently displayed)
-
-Examples:
-pl replace loc stg
-END HELP
-
-</details>
-
-<details>
-
-**<summary>restore: args:  --help -- :heavy_check_mark: </summary>**
---**BROKEN DOCUMENTATION**--
-Restore a particular site's files and database from backup
+**<summary>restore: Restore a particular site's files and database from backup :heavy_check_mark: </summary>**
 Usage: pl restore [FROM] [TO] [OPTION]
 You just need to state the sitename, eg dev.
 You can alternatively restore the site into a different site which is the second argument.
@@ -670,7 +666,21 @@ pl restore loc stg -fy
 pl restore -h
 pl restore loc -d
 pl restore prod stg
---**BROKEN DOCUMENTATION**--
+
+</details>
+
+<details>
+
+**<summary>runup: This script will run any updates on the stg site or the site specified. :white_check_mark: </summary>**
+Usage: pl runupdates [OPTION] ... [SOURCE]
+This script presumes the files including composer.json have been updated in some way and will now run those updates.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+
+Examples:
+pl runup loc
+pl runup test # This will run the updates on the external test server.
 
 </details>
 
@@ -680,6 +690,26 @@ pl restore prod stg
 --**BROKEN DOCUMENTATION**--
 
 --**BROKEN DOCUMENTATION**--
+
+</details>
+
+<details>
+
+**<summary>updateprod: Update Production (or test) server with stg or specified site. :white_check_mark: </summary>**
+Usage: pl updateprod [OPTION] ... [SITE] [MESSAGE]
+This will copy stg or site specified to the production (or test) server and run
+the updates on that server. It will also backup the server. It presumes the server
+has git which will be used to restore the server if there was a problem.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
+  -t --test               Update the test server not production.
+
+Examples:
+pl updateprod # This will use the site specified in pl.yml by sites: stg:
+pl updateprod d8 # This will update production with the d8 site.
+pl updateprod d8 -t # This will update the test site specified in pl.yml with the d8 site.
 
 </details>
 
@@ -699,49 +729,7 @@ Examples:
 
 <details>
 
-**<summary>_inc:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>open:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>reset:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
 **<summary>restoredb:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>stg2prodoverwrite2:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>stg2prodoverwrite:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>stg2prod:  :question: </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 
 </details>
@@ -755,28 +743,7 @@ Examples:
 
 <details>
 
-**<summary>testi:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
 **<summary>test:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>teststg:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>teststgupdb:  :question: </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 
 </details>

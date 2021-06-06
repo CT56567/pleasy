@@ -1,19 +1,32 @@
 #!/bin/bash
 ################################################################################
-#                           Main For Pleasy Library
+#                 Run updates For Pleasy Library
 #
+#  This is when you want to update. This will update composer, config and db.
+#
+#  https://events.drupal.org/vienna2017/sessions/
+#  advanced-configuration-management-config-split-et-al
+#  at 29:36
+#  That is a combination of (always presume sharing and do a backup first):
+#
+#  The safe sequence for updating
+#  Update code: composer update
+#  Run updates: drush updb
+#  Export updated config: drush cex
+#  Commit git add && git commit
+#  Push: git push
 #
 #  Change History
-#  2019 - 2020  Robert Zaar   Original code creation and testing,
+#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
 #                                   prelim commenting
-#  2020 James Lim  Getopt parsing implementation, script documentation
+#  29/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
 #
 ################################################################################
 ################################################################################
 #
-#  Core Maintainer:  Rob Zar
+#  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
 ################################################################################
@@ -24,7 +37,7 @@
 ################################################################################
 
 # Set script name for general file use
-scriptname='pleasy-main'
+scriptname='runup'
 
 # Help menu
 ################################################################################
@@ -32,18 +45,16 @@ scriptname='pleasy-main'
 ################################################################################
 print_help() {
   echo \
-    "Turn maintenance mode on or off
-Usage: pl main [OPTION] ... [SITE] [MODULES]
-This script will turn maintenance mode on or off. You will need to specify the
-site first than on or off, eg pl main loc on
+"This script will run any updates on the stg site or the site specified.
+Usage: pl runupdates [OPTION] ... [SOURCE]
+This script presumes the files including composer.json have been updated in some way and will now run those updates.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
 Examples:
-pl main loc on
-pl main dev off
-END HELP"
+pl runup loc
+pl runup test # This will run the updates on the external test server."
 
 }
 
@@ -58,15 +69,15 @@ SECONDS=0
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -o h -l help --name "$scriptname" -- "$@")
+args=$(getopt -o hdf -l help,debug,force-config_import --name "$scriptname" -- "$@")
 # echo "$args"
 
 ################################################################################
 # If getopt outputs error to error variable, quit program displaying error
 ################################################################################
 [ $? -eq 0 ] || {
-  echo "please do 'pl main --help' for more options"
-  exit 1
+    echo "please do '$scriptname --help' for more options"
+    exit 1
 }
 
 ################################################################################
@@ -81,60 +92,46 @@ eval set -- "$args"
 while true; do
   case "$1" in
   -h | --help)
-    print_help
+    print_help;
     exit 2 # works
     ;;
+  -d | --debug)
+  verbose="debug"
+  shift; ;;
+  -f | --force-config-import)
+  force_config_import="true"
+  shift; ;;
   --)
-    shift
-    break
-    ;;
+  shift; break; ;;
   *)
-    "Programming error, this should not show up!"
-    exit 1
-    ;;
+  "Programming error, this should not show up!"
+  exit 1; ;;
   esac
 done
 
-if [ $1 == "main" ] && [ -z "$2" ]; then
-  echo "You need to specify the site and on/off in that order"
-  print_help
-fi
-if [ -z "$2" ]; then
-  echo "You have only given one argument. You need to specify the site and the module in that order"
-  print_help
-else
-  sitename_var=$1
-  main=$2
-fi
+################################################################################
 
-echo "This will turn $main maintenance mode on the $sitename_var site."
-# Don't need to parse site since all we need is in the command, though we presume site name is correct.
-#parse_pl_yml
-#import_site_config $sitename_var
+parse_pl_yml
 
-for i in "$main"; do
-  case $i in
-  on)
-    echo "Turning maintenance mode on"
-    drush @$1 state:set system.maintenance_mode 1 --input-format=integer
-    drush @$1 cache:rebuild
-    shift # past argument=value
-    ;;
-  off)
-    echo "Turning maintenance mode off"
-    drush @$1 state:set system.maintenance_mode 0 --input-format=integer
-    drush @$1 cache:rebuild
-    shift # past argument=value
-    ;;
-  *)
-    echo "You need to state on or off."
-    shift # past argument=value
-    ;;
-  esac
-done
+if [ $1 == "runup" ] && [ -z "$2" ]
+  then
+sitename_var="$sites_stg"
+elif [ -z "$2" ]
+  then
+    sitename_var="$1"
+fi
+import_site_config $sitename_var
+runupdates
+
+# Not needed since patched.
+#remove any extra options. Since each reinstall may add an extra one.
+#cd
+#cd opencat/opencourse
+#echo -e "\e[34mpatch .htaccess\e[39m"
+#sed -i 's/Options +FollowSymLinks/Options +FollowSymLinks/g' .htaccess
 
 # End timer
 ################################################################################
 # Finish script, display time taken
 ################################################################################
-echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
+echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

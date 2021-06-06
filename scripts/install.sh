@@ -51,7 +51,8 @@ Mandatory arguments to long options are mandatory for short options too.
   -s --step=[INT]         Restart at the step specified.
   -b --build-step=[INT]   Restart the build at step specified (step=6)
   -d --debug              Provide debug information when running this script.
-  -t --test            This option is only for test environments like Travis, eg there is no mysql root password.
+  -t --test               This option is only for test environments like Travis, eg there is no mysql root password.
+  -e --extras             Install extra features like yarn and bower
 
 Examples:
 pl install d8
@@ -72,7 +73,7 @@ SECONDS=0
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -o hyfdb:s:t -l help,yes,files,debug,build-step:,step:,test --name "$scriptname" -- "$@")
+args=$(getopt -o hyfdb:s:te -l help,yes,files,debug,build-step:,step:,test,extras --name "$scriptname" -- "$@")
 
 ################################################################################
 # If getopt outputs error to error variable, quit program displaying error
@@ -124,6 +125,9 @@ while true; do
     shift; ;;
    -t | --test)
     pltest="y"
+    shift; ;;
+   -e | --extras)
+    extras="y"
     shift; ;;
   --)
   shift
@@ -180,6 +184,7 @@ if [[ $recipes != *"$sitename_var"* ]]; then
 fi
 
 import_site_config $sitename_var
+
 
 #db_defaults
 
@@ -299,7 +304,30 @@ fi
 fi
 
 if [ $step -lt 5 ]; then
-  echo -e "$Cyan step 4: Setting up folder/file permissions $Color_Off"
+  if [[ "$lando" == "y" ]] ; then
+    echo -e "$Cyan step 4: Lando install to $site_path/$sitename_var/ $Color_Off"
+    # Check there is a lando file
+    if [ -f "$site_path/$sitename_var/.lando.yml" ]; then
+     # proceed with install
+     # replace 'varbase' with site name in lando file
+     sed -i "s/varbase/$sitename_var/" "$site_path/$sitename_var/.lando.yml"
+     sed -i "s/mysite/$sitename_var/" "$site_path/$sitename_var/.lando.yml"
+     fix_site_settings
+     lando start
+
+#     drush uli --uri=$uri
+     exit 0
+
+    else
+      echo "Lando file not present so aborting intstall of $sitename_var."
+    fi
+
+  fi
+fi
+
+
+if [ $step -lt 6 ]; then
+  echo -e "$Cyan step 5: Setting up folder/file permissions $Color_Off"
 
   fix_site_settings
 
@@ -317,8 +345,8 @@ if [ $step -lt 5 ]; then
   chmod 770 "$site_path/$sitename_var/cmi"
 fi
 
-if [ $step -lt 6 ]; then
-  echo -e "$Cyan step 5: setting up drush aliases and site permissions $Color_Off"
+if [ $step -lt 7 ]; then
+  echo -e "$Cyan step 6: setting up drush aliases and site permissions $Color_Off"
   plcomposer require drush/drush
   ocmsg "set site permissions" debug
   set_site_permissions
@@ -330,8 +358,8 @@ if [ $step -lt 6 ]; then
 
 fi
 
-if [ $step -lt 7 ]; then
-  echo -e "$Cyan step 6: Now building site. $sitename_var $Color_Off"
+if [ $step -lt 8 ]; then
+  echo -e "$Cyan step 7: Now building site. $sitename_var $Color_Off"
   if [ $flag_files ]; then
     echo "Not installing site since only files required"
     else
@@ -339,28 +367,42 @@ if [ $step -lt 7 ]; then
   fi
 fi
 
-if [ $step -lt 8 ]; then
-  echo -e "$Cyan step 7: Set up uri $uri. This will require sudo $Color_Off"
+if [ $step -lt 9 ]; then
+  echo -e "$Cyan step 8: Set up uri $uri. This will require sudo $Color_Off"
   pl sudoeuri $sitename_var
 fi
 
-if [ $step -lt 9 ]; then
-  echo -e "$Cyan Step 8: setup npm for gulp support $uri $Color_Off"
+if [ $step -lt 10 ]; then
+  echo -e "$Cyan Step 9: setup npm for gulp support $uri $Color_Off"
   echo "theme path: $site_path/$sitename_var/$webroot/themes/contrib/$theme"
   source ~/.bashrc # make sure npm will work.
   if [ -d "$site_path/$sitename_var/$webroot/themes/custom/$theme" ]; then
     cd "$site_path/$sitename_var/$webroot/themes/custom/$theme"
     npm install
+    if [ "$extras" ]; then
+    # https://www.drupal.org/docs/contributed-themes/olivero/development-setup
+    yarn install
+    #This might need more work.
+    # May help: https://github.com/bower/bower/issues/1849
+    bower init -y
+    bower install
+    fi
   elif [ -d "$site_path/$sitename_var/$webroot/themes/contrib/$theme" ]; then
     cd "$site_path/$sitename_var/$webroot/themes/contrib/$theme"
     npm install
+    if [ "$extras" ]; then
+      yarn install
+          #This might need more work.
+      bower init -y
+      bower
+    fi
   else
     echo "There is a problem: The theme $theme has not been installed."
   fi
 fi
 
-if [ $step -lt 10 ]; then
-  echo -e "$Cyan Step 9: Trying to go to URL $uri $Color_Off"
+if [ $step -lt 11 ]; then
+  echo -e "$Cyan Step 10: Trying to go to URL $uri $Color_Off"
   if [ $flag_files ]; then
     echo "Note: No database, so you will need to set that up."
   fi

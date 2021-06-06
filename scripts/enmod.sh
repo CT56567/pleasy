@@ -50,7 +50,6 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
 Examples:"
-exit 0
 }
 
 # Use of Getopt
@@ -82,7 +81,7 @@ while true; do
   case "$1" in
   -h | --help)
     print_help
-    exit 0
+    exit 2 # works
     ;;
   --)
     shift

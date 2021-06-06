@@ -131,12 +131,30 @@ drush @$sitename_var pm-uninstall -y $dev_modules
 
 cd $site_path/$sitename_var
 echo "Composer install with no dev modules."
-
+if [[ -f $site_path/$sitename_var/composer.lock ]]; then
+rm $site_path/$sitename_var/composer.lock
+fi
 if [[ "$verbose" == "debug" ]] ; then
 plcomposer install --no-dev
 else
 plcomposer install --no-dev --quiet
 fi
+
+# don't know why --no-dev uninstalls config_update, so add it.
+plcomposer require drupal/config_update
+# remove old cmi and re-export
+if [[ -d $site_path/$sitename_var/cmi ]]; then
+  echo "remove cmi contents"
+  ls $site_path/$sitename_var/cmi
+if find "$site_path/$sitename_var/cmi" -mindepth 1 -print -quit 2>/dev/null | grep -q .; then
+    rm $site_path/$sitename_var/cmi/* -rf
+fi
+
+else
+  mkdir $site_path/$sitename_var/cmi
+fi
+ocmsg "Export config" debug
+drush @$sitename_var cex -y
 
 # rebuild permissions
 echo "Rebuild permissions, might require sudo."
