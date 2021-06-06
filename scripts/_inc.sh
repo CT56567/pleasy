@@ -634,7 +634,7 @@ else
   'namespace' => 'Drupal\Core\Database\Driver\mysql',
   'driver' => 'mysql',
 );
-\$config_directories[CONFIG_SYNC_DIRECTORY] = '../cmi';
+\$settings["config_sync_directory"] = '../cmi';
 EOL
 fi
   if [ "$dev" == "y" ]; then
@@ -1233,14 +1233,26 @@ restore_db() {
 drush @$sitename_var cr 2>/dev/null | grep -v '+' | cut -d' ' -f2
 if [[ "${PIPESTATUS[0]}" == "1" ]]; then
   # If there is an error, it is most likely due to a drush issue so reinstall drush.
+  echo "There is a problem with drush. Reinstalling drush."
   rm "$site_path/$sitename_var/vendor/drush" -rf
+
+  # Make sure example.gitignore is present.
+  if [[ ! -f "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/example.gitignore" ]]; then
+    wget https://raw.githubusercontent.com/drupal/drupal/9.2.x/example.gitignore -P "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/"
+  fi
+
   cd "$site_path/$sitename_var/"
   composer install --no-dev
   sudo chown :www-data vendor/drush -R
+  echo "Drush reinstalled."
   fi
-
+  echo "Turn off maintenance mode."
   drush @$sitename_var sset system.maintenance_mode FALSE
+  echo "Turn off read only mode if present"
+  result_rom=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
+  if [[ ! "$result_rom" == "" ]] ; then
   drush @$sitename_var cset readonlymode.settings enabled 0 -y
+  fi
 }
 
 #
@@ -1493,7 +1505,7 @@ runupdates() {
 
 if [[ "$sitename_var" == "prod" || "$sitename_var" == "test" ]]; then
     eval $(ssh-agent -s)
-    echo "Adding $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
+    echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
     ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
   # presume you don't need toProduction site fix site settings for production sites.
   if [[ "$sitename_var" == "test" ]]; then
@@ -1521,7 +1533,7 @@ fi
   set_site_permissions
   fix_site_settings
 fi
-
+cd
 echo -e "\e[34m update database for $sitename_var\e[39m"
 drush @$sitename_var updb -y
 #echo -e "\e[34m fra\e[39m"

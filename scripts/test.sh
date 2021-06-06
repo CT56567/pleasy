@@ -1,4 +1,27 @@
 #!/bin/bash
+
+cd /var/www/oc/loc/docroot
+
+  result_rom=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
+  echo "$result_rom"
+  if [[ ! "$result_rom" == "" ]]; then
+  echo "OK"
+  fi
+exit 0
+parse_pl_yml
+ echo "Adding: $(dirname $(dirname $script_root))/.ssh/key"
+
+exit 0
+
+result=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
+echo "result: $result"
+  if [ ! "$result" == "" ]; then
+  drush @$sitename_var cset readonlymode.settings enabled 0 -y
+  else
+    echo "no readonly"
+  fi
+
+  exit 0
 parse_pl_yml
 sitename_var="bak"
 import_site_config $sitename_var

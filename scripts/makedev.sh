@@ -158,4 +158,6 @@ drupal site:mode dev
 echo "Clear cache"
 drush @$sitename_var cr
 
+//todo make sure the git is the dev git not the prod git.
+
 echo 'H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))
