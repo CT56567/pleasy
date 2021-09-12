@@ -173,9 +173,9 @@ ocmsg "Name of sql backup: $Name "
  # Move sql backup to proddb and push
  echo "Using scp method to push db and files to production"
 Name2=${Name::-4}".tar.gz"
- scp $folderpath/sitebackups/$sitename_var/$Name prod_alias:/proddb/prod.sql
- scp $folderpath/sitebackups/$sitename_var/$Name2 prod_alias:prod.tar.gz
-
+ scp $folderpath/sitebackups/$sitename_var/$Name prod_alias:$prod_uri/prod.sql
+ scp $folderpath/sitebackups/$sitename_var/$Name2 prod_alias:$prod_uri/prod.tar.gz
+echo "Files and db transfered."
 
 fi
 
@@ -188,9 +188,9 @@ prod_root=$(dirname $prod_docroot)
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
 
 echo -e "\e[34mrestoring files\e[39m"
-    echo "prodkey: $prod_gitkey"
+
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-    ssh $prod_alias "./createsite.sh $prod_docroot"
+    ssh $prod_alias "./createsites.sh $prod_docroot $prod_profile"
 fi
 
 if [ $step -lt 6 ] ; then

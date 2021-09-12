@@ -449,12 +449,14 @@ fi
 echo " open this link to add the xdebug extension for the browser you want to use"
 echo "https://www.jetbrains.com/help/phpstorm/2019.3/browser-debugging-extensions.html?utm_campaign=PS&utm_medium=link&utm_source=product&utm_content=2019.3 "
 
+cd
+mkdir proddb
 
 echo "All done!"
 
 exit 0
 
 
-echo "Site created."
+echo "Server initiated."
 
 echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))

@@ -50,7 +50,7 @@ sudo cp $prod $test -rf
 sudo chown $user:www-data $test -R
 
 #copy in the test settings from backup
-sudo cp ~/ocbackup/teststore/settings.php $test_docroot/sites/default/settings.php
+sudo cp ~/$test_uri/settings.php $test_docroot/sites/default/settings.php
 
 sudo chown $user:www-data $test_docroot/sites/default/settings.php
 cd
