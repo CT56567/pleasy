@@ -721,7 +721,7 @@ set_site_permissions() {
   fi
 
   ocmsg "Fixing permissions: --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp" debug
-  sudo d8fp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
+  sudo dfp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
 }
 
 # This will delete current site database and rebuild it
@@ -778,7 +778,7 @@ rebuild_site() {
 
   if [ $bstep -lt 4 ]; then
     echo -e "$Purple build step 3: set site permissions $Color_Off"
-    #sudo bash ./d8fp.sh --drupal_path=$folder/$webroot --drupal_user=$user #shouldn't need this, since files don't need to be changed.
+    #sudo bash ./dfp.sh --drupal_path=$folder/$webroot --drupal_user=$user #shouldn't need this, since files don't need to be changed.
     #chmod g+w -R $folder/$webroot/modules/custom
     set_site_permissions
   fi

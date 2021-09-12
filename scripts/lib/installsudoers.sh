@@ -1,5 +1,5 @@
 #!/bin/bash
-# This will install d8fp.sh and debug so the password is not required.
+# This will install dfp.sh and debug so the password is not required.
 # pass the file location as absolute path then the username,
 # This is for security reasons. Once setup (needing password) it can't be changed without a password.
 
@@ -14,7 +14,7 @@ fi
 cp "$1/d8fp.sh" /usr/local/bin
 cp "$1/debug" /usr/local/bin
 cp "$1/sudoeuri.sh" /usr/local/bin
-sudo chown root:root /usr/local/bin/d8fp.sh
+sudo chown root:root /usr/local/bin/dfp.sh
 sudo chown root:root /usr/local/bin/debug
 sudo chown root:root /usr/local/bin/sudoeuri.sh
 sudo echo "$2 ALL = (root) NOPASSWD: /usr/local/bin/d8fp.sh" > /etc/sudoers.d/pl

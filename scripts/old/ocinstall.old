@@ -524,7 +524,7 @@ echo "install drupal site"
  drush -y site-install $profile  --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$folder"
 #don''t need --db-url=mysql://$dir:$dir@localhost:3306/$dir in drush because the settings.local.php has it.
 
-#sudo bash ./d8fp.sh --drupal_path=$folder/$sfolder --drupal_user=$user #shouldn't need this, since files don't need to be changed.
+#sudo bash ./dfp.sh --drupal_path=$folder/$sfolder --drupal_user=$user #shouldn't need this, since files don't need to be changed.
 #chmod g+w -R $folder/$sfolder/modules/custom
 
 if [ "$oc" = "y" ]

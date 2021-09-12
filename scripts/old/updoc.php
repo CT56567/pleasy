@@ -87,4 +87,4 @@ Foreach ($nids as $nid) {
 #    echo "No"
 #fi
 
-# ../scripts/d8fp.sh  --drupal_path=docroot --drupal_user=rob
+# ../scripts/dfp.sh  --drupal_path=docroot --drupal_user=rob
