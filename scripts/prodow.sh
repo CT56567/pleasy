@@ -128,21 +128,16 @@ parse_pl_yml
 
 import_site_config $sitename_var
 
-if [[ ! "$prod_method"  == "git" ]] ; then
-  echo "Production method git is not set in pl.yml. Aborting"
-exit 1
-fi
-
 if [ $step -gt 1 ] ; then
   echo -e "Starting from step $step"
 fi
 prod_root=$(dirname $prod_docroot)
 #First backup the current dev site if it exists
-if [ $step -lt 2 ] ; then
-#echo -e "$Pcolor step 1: backup current sitename_var $sitename_var $Color_off"
-#pl backup $sitename_var "presync"
-
-fi
+#if [ $step -lt 2 ] ; then
+##echo -e "$Pcolor step 1: backup current sitename_var $sitename_var $Color_off"
+##pl backup $sitename_var "presync"
+#
+#fi
 #pull db and all files from prod
 ### going to need to fix security. settings.local.php only have hash. all other cred in settings so not shared.
 #echo "pre rsync"
@@ -173,8 +168,11 @@ ocmsg "Name of sql backup: $Name "
  # Move sql backup to proddb and push
  echo "Using scp method to push db and files to production"
 Name2=${Name::-4}".tar.gz"
- scp $folderpath/sitebackups/$sitename_var/$Name prod_alias:$prod_uri/prod.sql
- scp $folderpath/sitebackups/$sitename_var/$Name2 prod_alias:$prod_uri/prod.tar.gz
+echo "scp: $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql"
+ssh $prod_alias "mkdir $prod_uri"
+ssh $prod_alias "mkdir test.$prod_uri"
+ scp $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql
+ scp $folderpath/sitebackups/$sitename_var/$Name2 $prod_alias:$prod_uri/prod.tar.gz
 echo "Files and db transfered."
 
 fi
@@ -187,10 +185,10 @@ prod_root=$(dirname $prod_docroot)
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
 
-echo -e "\e[34mrestoring files\e[39m"
+echo -e "\e[34m creating sites $prod_docroot $prod_user  $prod_profile\e[39m"
 
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-    ssh $prod_alias "./createsites.sh $prod_docroot $prod_profile"
+    ssh $prod_alias "./createsites.sh $prod_docroot $prod_user $prod_profile"
 fi
 
 if [ $step -lt 6 ] ; then

@@ -13,7 +13,7 @@ if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."
 exit 0
 else
-  uri=$1
+  prod_docroot=$1
 fi
 
 if [ -z "$2" ] ; then
@@ -30,15 +30,16 @@ else
 profile=$3
 fi
 
-prod_docroot=$1
+
 webroot=$(basename $1)
 prod=$(dirname $1)
+uri=$(basename $prod)
 test_uri="test.$uri"
 test_docroot="$(dirname $prod)/$test_uri/$webroot"
 test="$(dirname $prod)/$test_uri"
 
 
-echo "Update Production"
+echo "Creating Sites"
 echo "Prod site: $prod"
 echo "Prod docroot: $prod_docroot"
 echo "Prod uri: $uri"

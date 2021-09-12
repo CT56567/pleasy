@@ -4,17 +4,93 @@ SECONDS=0
 
 # Update the prod site.
 # It is presumed the site files have been uploaded.
-# $1 is the site address including docroot.
-# $2 is the user
 
+# Step Variable
+################################################################################
+# Variable step is defined for debug purposes. If the init fails, we can,
+# using step, start at the point of the script which had failed
+################################################################################
+step=${step:-1}
 
+# Use of Getopt
+################################################################################
+# Getopt to parse script and allow arg combinations ie. -yh instead of -h
+# -y. Current accepted args are --yes --help --step
+################################################################################
+args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
+# echo "$args"
 
-if [ -z "$1" ]; then
-echo "No prod site info provided. Exiting."
-exit 0
+################################################################################
+# If getopt outputs error to error variable, quit program displaying error
+################################################################################
+[ $? -eq 0 ] || {
+  echo "please do './pl init --help' for more options"
+  exit 1
+}
+
+# Set getopt parse backup into $@
+################################################################################
+# Arguments are parsed by getopt, are then set back into $@
+################################################################################
+eval set -- "$args"
+
+################################################################################
+# Case through each argument passed into script
+# if no argument passed, default is -- and break loop
+################################################################################
+while true; do
+  case "$1" in
+  -s | --step)
+    shift
+    step="$(echo "$1" | sed 's/^=//g')"
+    #echo "$step"
+    # If step is in an invalid range, display invalid and exit program
+    if [[ $step -gt 15 || $step -lt 1 ]]; then
+      {
+        echo "Invalid step value "$step" - valid range [1,15]"
+        exit 1
+      }
+    fi
+    ;;
+  -y | --yes)
+    yes="y"
+    ;;
+  -d | --debug)
+    verbose="debug"
+    ;;
+  -n | --nopassword)
+    nopassword="y"
+    ;;
+  -t | --test)
+    pltest="y"
+    ;;
+  -h | --help)
+    print_help
+    exit 3 # pass
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *)
+    # *) should not occur with getopt, if it does, there is a bug
+    echo "Programming error! Parse argument should not be passed"
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+if [[ "$1" == "initserver" ]] && [[ -z "$2" ]]; then
+ echo "No site specified."
+elif [[ "$1" == "initserver" ]] ; then
+  prod_docroot=$2
+elif [[ -z "$1" ]]; then
+ echo "No site specified."
 else
-  uri=$1
+  prod_docroot=$1
 fi
+
 
 if [ -z "$2" ] ; then
 echo "No user given."
@@ -49,7 +125,7 @@ echo "Reinstall Modules: $reinstall_modules"
 ################################################################################
 # Attempt to install gawk
 ################################################################################
-if [ $step -lt 2 ]; then
+if [[ "$step" -lt 2 ]]; then
   echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
   # This is needed to avoid the awk: line 43: functionWill
   # need to install gawk - sudo required asorti never
@@ -67,7 +143,7 @@ if [ $step -lt 2 ]; then
 
 #  if [[ "$nopassword" == "y" ]]; then
 #    # set up user with sudo
-#    echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo EDITOR="tee -a" visudo
+    echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo EDITOR="tee -a" visudo
 #
 #  # This could be improved with creating specific scripts that would complete any sudo tasks and each of these be given
 #  # nopasswd permission. This would reduce the security risk of the above command.
@@ -92,7 +168,7 @@ if [ $step -lt 2 ]; then
 #    sudo apt install gawk=1:5.0.1+dfsg-1
 #  # It installs 5.0.1, but when you run gawk -Wv it says it 4.2.1. Anyway it works. I don't know another way of doing it.
 #  fi
-#fi
+fi
 #
 ## Step 2
 #################################################################################
@@ -450,7 +526,7 @@ echo " open this link to add the xdebug extension for the browser you want to us
 echo "https://www.jetbrains.com/help/phpstorm/2019.3/browser-debugging-extensions.html?utm_campaign=PS&utm_medium=link&utm_source=product&utm_content=2019.3 "
 
 cd
-mkdir proddb
+
 
 echo "All done!"
 
