@@ -139,8 +139,8 @@ fi
 prod_root=$(dirname $prod_docroot)
 #First backup the current dev site if it exists
 if [ $step -lt 2 ] ; then
-echo -e "$Pcolor step 1: backup current sitename_var $sitename_var $Color_off"
-pl backup $sitename_var "presync"
+#echo -e "$Pcolor step 1: backup current sitename_var $sitename_var $Color_off"
+#pl backup $sitename_var "presync"
 
 fi
 #pull db and all files from prod
