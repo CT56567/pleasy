@@ -280,6 +280,20 @@ Examples:
 
 <details>
 
+**<summary>doctest: Add github credentials :white_check_mark: </summary>**
+Usage: pl addc [OPTION]
+  This script is used to add github credentials
+
+  Mandatory arguments to long options are mandatory for short options too.
+    -h --help               Display help (Currently displayed)
+
+  Examples:
+  pl addc 
+
+</details>
+
+<details>
+
 **<summary>enmod: Usage: pl enmod [OPTION] ... [SITE] [MODULE] :white_check_mark: </summary>**
 --**BROKEN DOCUMENTATION**--
 This script will install a module first using composer, then fix the file/dir

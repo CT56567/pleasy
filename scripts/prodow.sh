@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-#                          prodowgit For Pleasy Library
+#                          prodow For Pleasy Library
 #
 #  This script will overwrite production with the site chosen It will first
 #  backup prod The external site details are also set in pl.yml under prod:
@@ -114,7 +114,7 @@ done
 Pcolor=$Cyan
 
 
-if [ $1 = "prodowgit" ] && [ -z "$2" ]; then
+if [ $1 = "prodow" ] && [ -z "$2" ]; then
   echo "No site specified"
   print_help
   exit 0
@@ -122,7 +122,7 @@ fi
 
 sitename_var=$1
 
-echo "overwriting production server with $sitename_var site using git method"
+echo "overwriting production server with $sitename_var site using rsync method"
 
 parse_pl_yml
 
@@ -148,19 +148,19 @@ fi
 #echo "pre rsync"
 #drush -y rsync @prod @$sitename_var -- --omit-dir-times --delete
 
-if [ $step -lt 3 ] ; then
-echo -e "$Pcolor step 2: backup production $Color_off"
-## Make sure ssh identity is added
-#eval `ssh-agent -s`
-#ssh-add ~/.ssh/$prod_alias
-
-to=$sitename_var
-backup_prod
-# sql file: $Namesql
-# all files: $folderpath/sitebackups/prod/$Name.tar.gz
-sitename_var=$to
-import_site_config $sitename_var
-fi
+#if [ $step -lt 3 ] ; then
+#echo -e "$Pcolor step 2: backup production $Color_off"
+### Make sure ssh identity is added
+##eval `ssh-agent -s`
+##ssh-add ~/.ssh/$prod_alias
+#
+#to=$sitename_var
+#backup_prod
+## sql file: $Namesql
+## all files: $folderpath/sitebackups/prod/$Name.tar.gz
+#sitename_var=$to
+#import_site_config $sitename_var
+#fi
 
 if [ $step -lt 4 ] ; then
 echo -e "$Pcolor step 3: replace production files with $sitename_var $Color_Off"
@@ -171,43 +171,11 @@ options=( $(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t ) )
 Name=${options[0]:2}
 ocmsg "Name of sql backup: $Name "
  # Move sql backup to proddb and push
- echo "Using git method to push db and files to production"
-# push database
-if [[ ! -d "$folderpath/sitebackups/proddb" ]] ; then mkdir "$folderpath/sitebackups/proddb" ; fi
- cd "$folderpath/sitebackups/proddb"
+ echo "Using scp method to push db and files to production"
+Name2=${Name::-4}".tar.gz"
+ scp $folderpath/sitebackups/$sitename_var/$Name prod_alias:/proddb/prod.sql
+ scp $folderpath/sitebackups/$sitename_var/$Name2 prod_alias:prod.tar.gz
 
-ocmsg "Making sure we have the latest git"
-
-ocmsg "Copying the databse from $sitename_var to git backup"
- cp ../$sitename_var/$Name prod.sql
- Bname=$(date +%d%b%g%l:%M:%S%p)
-ocmsg "git add ."
-if [[ ! $(git diff --exit-code) == "" ]] ; then
-git add .
-ocmsg "git commit"
-git commit -m "pushup$Bname"
-fi
-git fetch
-git merge -s ours master
-git push
-
-ocmsg "Now push the files"
-cd "$site_path/$sitename_var"
- # Presume branch dev already created. otherwise run git checkout -b dev
-
-# For some reason if there are no changes git commit will stop bash. I think it might be giving an error code?
-# So check first and if no changes, don't commit.
-
-
-if [[ ! $(git diff --exit-code) == "" ]] ; then
-ocmsg "Need to commit files"
-git add .
-ocmsg "git commit"
-git commit -m "pushup$Bname"
-fi
-git fetch
-git merge -s ours origin -m "Overwriting with local"
-git push origin
 
 fi
 
@@ -222,7 +190,7 @@ prod_root=$(dirname $prod_docroot)
 echo -e "\e[34mrestoring files\e[39m"
     echo "prodkey: $prod_gitkey"
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-    ssh $prod_alias "./overwrite.sh $prod_docroot"
+    ssh $prod_alias "./createsite.sh $prod_docroot"
 fi
 
 if [ $step -lt 6 ] ; then

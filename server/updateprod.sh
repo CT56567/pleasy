@@ -122,11 +122,11 @@ sudo mv $test_uri $prod_uri
 echo "Move old to test."
 sudo mv old.$prod_uri $test_uri
 echo "Move settings from teststore to back/settings"
-sudo mv ~/ocbackup/teststore/settings.php ~/ocbackup/settings.php
+sudo mv ~/$test_uri/settings.php ~/settings.php
 echo "Move settings from prodstore to teststore."
-sudo mv ~/ocbackup/prodstore/settings.php ~/ocbackup/teststore/settings.php
+sudo mv ~/$prod_uri/settings.php ~/$test_uri/settings.php
 echo "Move back/settings to prodstore."
-do mv ~/ocbackup/settings.php ~/ocbackup/prodstore/settings.php
+do mv ~/settings.php ~/$prod_uri/settings.php
 
 
 

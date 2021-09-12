@@ -179,11 +179,14 @@ cd $site_path/$sitename_var
 fi
 
 add_git_credentials
-ocmsg "Export config: drush cex"
-# presume permissions are correct.
-#sudo chown $user:www-data $site_path/$sitename_var -R
-#chmod g+w $site_path/$sitename_var/cmi -R
+
+if [[ "$gcombackup" == "backup" ]] && [[ "$sitename_var" != "pleasy" ]] ; then
+  ocmsg "Export config: drush cex"
+  # presume permissions are correct.
+  #sudo chown $user:www-data $site_path/$sitename_var -R
+  #chmod g+w $site_path/$sitename_var/cmi -R
 drush @$sitename_var cex --destination=../cmi -y
+fi
 
 ocmsg "Commit git add && git commit with msg \"$msg\"" debug
 git add .

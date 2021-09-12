@@ -13,6 +13,7 @@ STEPS
 1) set up ssh keys
 2) rsync the scripts
 3) run initserver.sh
-4) push up the site
+4) push up the site files to correct location. db to /proddb/prod.sql
+5) Create the site to set up the database
 
 Use Lando locally as test site for scripts.
