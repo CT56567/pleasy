@@ -185,10 +185,12 @@ prod_root=$(dirname $prod_docroot)
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
 
+
+
 echo -e "\e[34m creating sites $prod_docroot $prod_user  $prod_profile\e[39m"
 
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-    ssh $prod_alias "./createsites.sh $prod_docroot $prod_user $prod_profile"
+    ssh $prod_alias "./createsites.sh $prod_docroot $prod_user"
 fi
 
 if [ $step -lt 6 ] ; then

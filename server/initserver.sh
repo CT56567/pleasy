@@ -103,7 +103,7 @@ fi
 prod_docroot=$1
 webroot=$(basename $1)
 prod=$(dirname $1)
-#test_uri="test.$uri"
+#test_uri="test.$url"
 #test_docroot="$(dirname $prod)/$test_uri/$webroot"
 #test="$(dirname $prod)/$test_uri"
 
@@ -113,7 +113,7 @@ echo "Update Production"
 #echo "Test docroot: $test_docroot"
 echo "Prod site: $prod"
 echo "Prod docroot: $prod_docroot"
-echo "Prod uri: $uri"
+echo "Prod uri: $url"
 #echo "Test uri: $test_uri"
 echo "User: $user"
 
@@ -130,7 +130,8 @@ usermod -aG sudo $user
 ufw allow OpenSSH
 ufw enable -y
 ufw status
-
+ufw allow 'Nginx HTTP'
+ufw allow https
 echo "$user ALL=(ALL:ALL) NOPASSWD: ALL" | EDITOR="tee -a" visudo
 
 echo """send private key to server.
@@ -185,10 +186,100 @@ sudo systemctl enable php7.4-fpm
 
 sudo apt install certbot -y
 sudo systemctl stop nginx
-certbot certonly --rsa-key-size 2048 --standalone --agree-tos --no-eff-email --email $email -d $uri
+sudo certbot certonly --rsa-key-size 2048 --standalone --agree-tos --no-eff-email --email $email -d $url
+# see https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/
+sudo cat >/etc/nginx/sites-available/$url <<EOL
+server {
+    server_name $url;
+    root /var/www/$url;
 
+    listen 80;
+    listen [::]:80;
+    listen 443 default ssl;
 
+    ssl_certificate      /etc/letsencrypt/live/$url/fullchain.pem;
+    ssl_certificate_key  /etc/letsencrypt/live/$url/privkey.pem;
 
+    # Redirect HTTP to HTTPS
+    if ($scheme = http) {
+        return 301 https://$server_name$request_uri;
+    }
+
+    location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+    }
+
+    location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+    }
+
+    # Very rarely should these ever be accessed outside of your lan
+    location ~* \.(txt|log)$ {
+        allow 192.168.0.0/16;
+        deny all;
+    }
+
+    location ~ \..*/.*\.php$ {
+        return 403;
+    }
+
+    location ~ ^/sites/.*/private/ {
+        return 403;
+    }
+
+    # Block access to "hidden" files and directories whose names begin with a
+    # period. This includes directories used by version control systems such
+    # as Subversion or Git to store control files.
+    location ~ (^|/)\. {
+        return 403;
+    }
+
+    location / {
+        # try_files $uri @rewrite; # For Drupal <= 6
+        try_files $uri /index.php?$query_string; # For Drupal >= 7
+    }
+
+    location @rewrite {
+        rewrite ^/(.*)$ /index.php?q=$1;
+    }
+
+    # In Drupal 8, we must also match new paths where the '.php' appears in the middle,
+    # such as update.php/selection. The rule we use is strict, and only allows this pattern
+    # with the update.php front controller.  This allows legacy path aliases in the form of
+    # blog/index.php/legacy-path to continue to route to Drupal nodes. If you do not have
+    # any paths like that, then you might prefer to use a laxer rule, such as:
+    #   location ~ \.php(/|$) {
+    # The laxer rule will continue to work if Drupal uses this new URL pattern with front
+    # controllers other than update.php in a future release.
+    location ~ '\.php$|^/update.php' {
+        fastcgi_split_path_info ^(.+?\.php)(|/.*)$;
+        #NOTE: You should have "cgi.fix_pathinfo = 0;" in php.ini
+        include fastcgi_params;
+        include snippets/fastcgi-php.conf;
+        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_intercept_errors on;
+        fastcgi_pass unix:/run/php/php7.3-fpm.sock;
+    }
+
+    # Fighting with Styles? This little gem is amazing.
+    # location ~ ^/sites/.*/files/imagecache/ { # For Drupal <= 6
+    location ~ ^/sites/.*/files/styles/ { # For Drpal >= 7
+        try_files $uri @rewrite;
+    }
+
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+        expires max;
+        log_not_found off;
+    }
+}
+EOL
+
+sudo ln -s /etc/nginx/sites-available/$url /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
 # Transfer the files first.
 # Create the settings file.
 

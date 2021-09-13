@@ -13,17 +13,10 @@ prod_docroot=$1
 fi
 
 if [ -z "$2" ] ; then
-echo "No site install profile given."
-exit 0
-else
-profile=$2
-fi
-
-if [ -z "$3" ] ; then
 echo "No user given"
 exit 0
 else
-user=$3
+user=$2
 fi
 
 prod_docroot=$1
@@ -35,7 +28,7 @@ echo "Update Production"
 echo "Site: $prod"
 echo "Docroot: $prod_docroot"
 echo "Uri: $uri"
-echo "Profile: profile"
+
 
 dbname=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
 dbuser=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
@@ -75,7 +68,6 @@ dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
 \$settings['entity_update_backup'] = TRUE;
 \$settings['migrate_node_migrate_type_classic'] = FALSE;
 
-\$settings['install_profile'] = '$profile';
 \$settings['file_private_path'] =  '../private';
 \$databases['default']['default'] = array (
   'database' => '$dbname',
@@ -89,7 +81,15 @@ dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
 );
 \$settings["config_sync_directory"] = '../cmi';
 \$config['config_split.config_split.config_dev']['status'] = FALSE;
-\$config['system.site']['name'] = \"$uri\";
+\$config['system.site']['name'] = "$uri";
+\$settings['trusted_host_patterns'] = [
+  '^www\test.$uri\.org$',
+  '^test.$uri\.org$',
+  '^www\$uri\.org$',
+  '^$uri\.org$',
+
+];
+
 EOL
 
   echo "Added settings.php to $sitename_var"
