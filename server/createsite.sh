@@ -9,7 +9,7 @@ if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."
 exit 0
 else
-uri=$1
+prod_docroot=$1
 fi
 
 if [ -z "$2" ] ; then
@@ -19,9 +19,17 @@ else
 profile=$2
 fi
 
+if [ -z "$3" ] ; then
+echo "No user given"
+exit 0
+else
+user=$3
+fi
+
 prod_docroot=$1
 webroot=$(basename $1)
 prod=$(dirname $1)
+uri=$(basename $prod)
 
 echo "Update Production"
 echo "Site: $prod"
@@ -29,10 +37,10 @@ echo "Docroot: $prod_docroot"
 echo "Uri: $uri"
 echo "Profile: profile"
 
-dbname=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
-dbuser=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
-dbpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
-
+dbname=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
+dbuser=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
+dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
+#echo "database: $dbname $dbuser $dbpass"
 # Check that settings.php has reference to local.settings.php
   echo "Fixing settings at $prod_docroot"
   echo "Making sure settings.php exists"
@@ -56,16 +64,16 @@ dbpass=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;)
 
   cat >$prod_docroot/sites/default/settings.php <<EOL
 <?php
-$databases = [];
-$settings['update_free_access'] = FALSE;
-$settings['container_yamls'][] = $app_root . '/' . $site_path . '/services.yml';
-$settings['file_scan_ignore_directories'] = [
+\$databases = [];
+\$settings['update_free_access'] = FALSE;
+\$settings['container_yamls'][] = \$app_root . '/' . \$site_path . '/services.yml';
+\$settings['file_scan_ignore_directories'] = [
   'node_modules',
   'bower_components',
 ];
-$settings['entity_update_batch_size'] = 50;
-$settings['entity_update_backup'] = TRUE;
-$settings['migrate_node_migrate_type_classic'] = FALSE;
+\$settings['entity_update_batch_size'] = 50;
+\$settings['entity_update_backup'] = TRUE;
+\$settings['migrate_node_migrate_type_classic'] = FALSE;
 
 \$settings['install_profile'] = '$profile';
 \$settings['file_private_path'] =  '../private';

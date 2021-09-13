@@ -52,19 +52,21 @@ echo "Profile: $profile"
 # prod files at prod.tar.gz
 # prod db at ~/proddb/prod.sql
 #  Presumes the files are transfered.
-mv /home/$user/$uri/prod.tar.gz $(dirname $prod)
-tar -zxf $(dirname $prod)/prod.tar.gx $uri
-
-mv /home/$user/$uri/prod.tar.gz $(dirname $prod)
-tar -zxf $(dirname $prod)/prod.tar.gx $test_uri
+#sudo rm $prod -rf
+#sudo mkdir $prod
+#sudo rm $test -rf
+#sudo mkdir $test
+#
+#sudo tar -zxf /home/$user/$uri/prod.tar.gz -C $prod --strip-components 1
+#sudo tar -zxf /home/$user/$uri/prod.tar.gz -C $test --strip-components 1
 
 cd
-sudo ./dfp.sh --drupal_user=$user --drupal_path=$prod_docroot
-sudo ./dfp.sh --drupal_user=$user --drupal_path=$test_docroot
+#sudo ./dfp.sh --drupal_user=$user --drupal_path=$prod_docroot
+#sudo ./dfp.sh --drupal_user=$user --drupal_path=$test_docroot
 # Create the settings file.
 
-./createsite.sh $uri $profile
-./createsite.sh $test_uri $profile
+./createsite.sh $prod_docroot $profile $user
+./createsite.sh $test_docroot $profile $user
 
 #dbname=$(sudo grep "'database' =>" $1/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
 

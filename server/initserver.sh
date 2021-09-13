@@ -116,7 +116,78 @@ echo "Prod docroot: $prod_docroot"
 echo "Prod uri: $uri"
 #echo "Test uri: $test_uri"
 echo "User: $user"
-echo "Reinstall Modules: $reinstall_modules"
+
+#!/bin/bash
+./secrets.sh
+
+apt update && apt upgrade -y
+# apt-get -o Dpkg::Options::="--force-confnew --force-confdef" --force-yes -y upgrade
+# adduser $user
+sudo adduser $user --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+echo "$user:$pword" | sudo chpasswd
+
+usermod -aG sudo $user
+ufw allow OpenSSH
+ufw enable -y
+ufw status
+
+echo "$user ALL=(ALL:ALL) NOPASSWD: ALL" | EDITOR="tee -a" visudo
+
+echo """send private key to server.
+ssh-keygen
+ssh-copy-id -i $key $user@$ip"
+read  -n 1 -p "Is ssh keys set up?" mainmenuinput
+
+#Stop password authentication
+sudo sed 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+sudo sed -i "s/\($TARGET_KEY *= *\).*/\1$REPLACEMENT_VALUE/" $CONFIG_FILE
+sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/' /etc/ssh/sshd_config
+sudo systemctl restart ssh -y
+
+
+exit 0
+
+sudo apt install mariadb-server -y
+sudo mysql_secure_installation
+sudo systemctl status mysql
+
+mysql -u root -p
+
+#need to use
+# sudo mysql
+# use mysql;
+# ALTER USER 'root'@'localhost' IDENTIFIED BY 'PASSWORD_HERE';
+# now the password will be set. mysql_secure_installation does not set the password!!!!
+
+
+
+
+sudo apt install nginx -y
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo apt install php php-fpm php-gd php-common php-mysql php-apcu php-gmp php-curl php-intl php-mbstring php-xmlrpc php-gd php-xml php-cli php-zip -y
+
+#date.timezone = Australia/Melbourne
+#memory_limit = 256M
+#upload_max_filesize = 64M
+#max_execution_time = 600
+#cgi.fix_pathinfo = 0
+sudo sed -i "s/\(date.timezone *= *\).*/\1 Australia\/Melbourne/" /etc/php/7.4/fpm/php.ini
+sudo sed -i '/date.timezone *=* Australia\/Melbourne/s/^;//' /etc/php/7.4/fpm/php.ini
+sudo sed -i "s/\(memory_limit *= *\).*/\1 256M/" /etc/php/7.4/fpm/php.ini
+sudo sed -i "s/\(upload_max_filesize *= *\).*/\1 64M/" /etc/php/7.4/fpm/php.ini
+sudo sed -i "s/\(max_execution_time *= *\).*/\1 600/" /etc/php/7.4/fpm/php.ini
+sudo sed -i "s/\(cgi.fix_pathinfo *= *\).*/\1 0/" /etc/php/7.4/fpm/php.ini
+sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/7.4/fpm/php.ini
+
+sudo systemctl restart php7.4-fpm
+sudo systemctl enable php7.4-fpm
+
+sudo apt install certbot -y
+sudo systemctl stop nginx
+certbot certonly --rsa-key-size 2048 --standalone --agree-tos --no-eff-email --email $email -d $uri
+
+
 
 # Transfer the files first.
 # Create the settings file.

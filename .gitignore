@@ -53,6 +53,8 @@ pl_var.sh
 !/sitebackups
 /sitebackups/*
 !/server
+/server/secrets.sh
+
 
 
 
