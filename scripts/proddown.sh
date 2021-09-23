@@ -166,7 +166,11 @@ fi
 
 if [ $step -lt 3 ] ; then
   echo -e "$Cyan step 2: restore production to $sitename_var $Color_Off"
+  if [[ "$verbose"=="debug" ]]; then
+  pl restore prod $sitename_var -yfd
+  else
   pl restore prod $sitename_var -yf
+  fi
 fi
 #
 #if [ $step -lt 5 ] ; then

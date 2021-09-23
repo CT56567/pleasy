@@ -130,4 +130,17 @@ mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";
 mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < prod.sql
 
+echo "set up cron"
+# This is not tested yet!!! see https://docs.drush.org/en/8.x/cron/
+#echo "10 * * * * /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin COLUMNS=72 /usr/local/bin/drush --root=$prod_docroot --uri=$uri --quiet cron" >> sudo crontab -u $user -e
+# using https://stackoverflow.com/questions/878600/how-to-create-a-cron-job-using-bash-automatically-without-the-interactive-editor
+cd
+#write out current crontab
+sudo crontab -l > mycron
+#echo new cron into cron file
+echo "10 * * * * /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin COLUMNS=72 /usr/local/bin/drush --root=$prod_docroot --uri=$uri --quiet cron" >> mycron
+#install new cron file
+sudo crontab mycron
+rm mycron
+
 echo "Site setup finished."

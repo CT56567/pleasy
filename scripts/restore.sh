@@ -60,6 +60,7 @@ If the [FROM] site is prod, and the production method is git, git will be used t
 OPTIONS
   -h --help               Display help (Currently displayed)
   -d --debug              Provide debug information when running this script.
+  -s --step=[INT]         Restart at the step specified.
   -f --first              Use the latest backup
   -y --yes                Auto delete current content
 
@@ -77,7 +78,7 @@ HELP
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -a -o hdfyo -l help,debug,first,yes,open --name "$scriptname" -- "$@")
+args=$(getopt -a -o hds:fyo -l help,debug,first,yes,open --name "$scriptname" -- "$@")
 # echo "$args"
 
 # Check number of arguments
@@ -102,8 +103,14 @@ while true; do
     ;;
   -d | --debug)
     verbose="debug"
+    echo "debug mode"
     shift
     ;;
+  -s | --step)
+    flag_step=1
+    shift
+    step=${1:1}
+    shift; ;;
   -f | --first)
     flag_first=1
     shift
@@ -129,7 +136,7 @@ done
 
 parse_pl_yml
 
-if [ $1 == "restore" ] && [ -z "$2" ]; then
+if [[ $1 == "restore" ]] && [ -z "$2" ]; then
   echo "No site specified"
   print_help
   exit 1
@@ -142,13 +149,17 @@ else
 fi
 
 echo "Restoring site $bk to $sitename_var"
-
+if [[ "$step" -gt 1 ]]; then
+  echo "Starting from step $step"
+fi
 if [[ "$bk" == prod ]] && [[ ! "$prod_method" == "git" ]]; then
   echo "Sorry not able to handle restoring prod unless it is method git."
   exit 0
 fi
 
 import_site_config $sitename_var
+
+if [[ "$step" -lt 2 ]]; then
 
 # Prompt to choose which database to backup, 1 will be the latest.
 # Could be a better way to go: https://stackoverflow.com/questions/42789273/bash-choose-default-from-case-when-enter-is-pressed-in-a-select-prompt
@@ -186,7 +197,10 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
     fi
     echo "Cloning $prod_gitdb into $folderpath/sitebackups/proddb"
     git clone $prod_gitdb "$folderpath/sitebackups/proddb"
+    echo "Git clone complete."
   fi
+
+  echo "Now get the site files."
 
   if [[ -d "$site_path/$sitename_var" ]]; then
     # Check that if the site exists, that it has the prod repo. Then only need to pull it!
@@ -209,12 +223,14 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
   else
     # clone the repo
     ocmsg "Cloning the files into $sitename_var" debug
+    echo "Cloning the files into $sitename_var"
     cd $site_path
     git clone $prod_gitrepo $sitename_var
   fi
 
   # now tar it so it is backed up for future use while we are at it.
   #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+  echo "Fix site settings"
   fix_site_settings
 
   echo "Set site permissions"
@@ -230,7 +246,7 @@ else
 
   ocmsg "flag_first is $flag_first" debug
   options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
-  if [ $flag_first ]; then
+  if [[ $flag_first ]]; then
     echo -e "\e[34mrestoring $1 to $2 with latest backup\e[39m"
     Name=${options[0]:2}
     echo "Restoring with $Name"
@@ -250,10 +266,14 @@ else
     done
   fi
 fi
+fi
+
+if [[ "$step" -lt 3 ]]; then
+
 echo " site_path: $site_path/$sitename_var"
 # Check to see if folder already exits.
-if [ -d "$site_path/$sitename_var" ]; then
-  if [ ! "$flag_yes" == "1" ]; then
+if [[ -d "$site_path/$sitename_var" ]]; then
+  if [[ ! "$flag_yes" == "1" ]]; then
     read -p "$sitename_var exists. If you proceed, $sitename_var will first be deleted. Do you want to proceed?(Y/n)" question
     case $question in
     n | c | no | cancel)
@@ -265,7 +285,8 @@ if [ -d "$site_path/$sitename_var" ]; then
   rm -rf "$site_path/$sitename_var"
 
 fi
-
+fi
+if [[ "$step" -lt 4 ]]; then
 echo -e "\e[34mrestoring files\e[39m"
 # Will need to first move the source folder ($bk) if it exists, so we can create the new folder $sitename_var
 echo "path $site_path/$sitename_var folderpath $folderpath"
@@ -275,7 +296,7 @@ echo "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz into $site_path/$sitename_v
 # Check to see if the backup includes the root folder or not.
 Dir_name=$(tar -tzf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" | head -1 | cut -f1 -d"/")
 #echo "Dir_name = >$Dir_name<"
-if [ $Dir_name == "." ]; then
+if [[ $Dir_name == "." ]]; then
   tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var"
 else
   tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var" --strip-components=1
@@ -284,27 +305,38 @@ fi
 # Move settings.php and settings.local.php out the way before they are overwritten just in case you might need them.
 #echo "Moving settings.php and settings.local.php"
 #setpath="$site_path/$sitename_var/$webroot/sites/default"
-#if [ -f "$setpath/settings.php" ] ; then mv "$setpath/settings.php" "$setpath/settings.php.old" ; fi
-#if [ -f "$setpath//settings.local.php" ] ; then mv "$setpath//settings.local.php" "$setpath/settings.local.php.old" ; fi
-#if [ -f "$setpath//default.settings.php" ] ; then mv "$setpath//default.settings.php" "$setpath//settings.php" ; fi
+#if [[ -f "$setpath/settings.php" ]] ; then mv "$setpath/settings.php" "$setpath/settings.php.old" ; fi
+#if [[ -f "$setpath//settings.local.php" ]] ; then mv "$setpath//settings.local.php" "$setpath/settings.local.php.old" ; fi
+#if [[ -f "$setpath//default.settings.php" ]] ; then mv "$setpath//default.settings.php" "$setpath//settings.php" ; fi
 
 ### do I need to deal with services.yml?
+fi
+
+if [[ "$step" -lt 5 ]]; then
+
 
 fix_site_settings
+fi
 
+
+if [[ "$step" -lt 6 ]]; then
 echo "Set site permissions"
 set_site_permissions $sitename_var
+fi
 
+if [[ "$step" -lt 7 ]]; then
 #restore db
 db_defaults
 echo -e "$Cyan Restore the database $Color_Off"
 restore_db
 echo -e "$Cyan Files and database have been restored $Color_Off"
+fi
 
+if [[ "$step" -lt 8 ]]; then
 if [[ $flag_open ]]; then
   drush @$sitename_var uli &
 fi
-
+fi
 #drush @sitename_var cr
 # End timer
 ################################################################################

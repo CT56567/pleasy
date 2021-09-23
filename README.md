@@ -688,6 +688,7 @@ If the [FROM] site is prod, and the production method is git, git will be used t
 OPTIONS
   -h --help               Display help (Currently displayed)
   -d --debug              Provide debug information when running this script.
+  -s --step=[INT]         Restart at the step specified.
   -f --first              Use the latest backup
   -y --yes                Auto delete current content
 

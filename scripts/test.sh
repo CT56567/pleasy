@@ -1,5 +1,12 @@
 #!/bin/bash
 
+sitename_var=$1
+
+parse_pl_yml
+import_site_config $sitename_var
+site_info
+
+exit 0
 cd /var/www/oc/loc/docroot
 
   result_rom=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })

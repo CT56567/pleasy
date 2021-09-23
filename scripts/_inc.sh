@@ -370,6 +370,76 @@ import_site_config() {
     private="$www_path/$sitename_var/private"
     site_path="$www_path"
   fi
+echo "add prod"
+  if [[ "recipes_${sitename_var}_prod_user" != "" ]]; then
+    echo "adding prod"
+    #make all the prod variables based on the site variables
+    # this is a quick workaround.
+    rp="recipes_${sitename_var}_prod_alias"
+    rpv=${!rp}
+    echo "$rp $rpv"
+    if [ "$rpv" != "" ]; then
+      prod_alias=${!rp}
+    fi
+    rp="recipes_${sitename_var}_prod_docroot"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_docroot=${!rp}
+    fi
+    rp="recipes_${sitename_var}_prod_gitdb"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_gitdb=${!rp}
+    fi
+    rp="recipes_${sitename_var}_prod_gitkey"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_gitkey=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_gitrepo"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_gitrepo=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_method"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_method=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_reinstall_modules"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_reinstall_modules=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_test_docroot"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_test_docroot=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_test_uri"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_test_uri=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_uri"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_uri=${!rp}
+    fi
+
+    rp="recipes_${sitename_var}_prod_user"
+    rpv=${!rp}
+    if [ "$rpv" != "" ]; then
+      prod_user=${!rp}
+    fi
+  fi
+
 }
 
 # Called all the time
@@ -721,7 +791,7 @@ set_site_permissions() {
   fi
 
   ocmsg "Fixing permissions: --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp" debug
-  sudo dfp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
+  sudo ~/dfp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
 }
 
 # This will delete current site database and rebuild it
@@ -1308,6 +1378,17 @@ site_info() {
   echo "admin theme = $theme_admin"
   echo "install_modules = $install_modules"
   echo "dev_modules = $dev_modules"
+  echo "prod_user" = $prod_user
+  echo "prod_alias" = $prod_alias
+  echo "prod_docroot" = $prod_docroot
+  echo "prod_method" = $prod_method
+  echo "prod_uri" = $prod_uri
+  echo "prod_gitdb" = $prod_gitdb
+  echo "prod_gitkey" = $prod_gitkey
+  echo "prod_gitrepo" = $prod_gitrepo
+  echo "prod_test_uri" = $prod_test_uri
+  echo "prod_test_docroot" = $prod_test_docroot
+  echo "prod_reinstall_modules" = $prod_reinstall_modules
 }
 
 #
