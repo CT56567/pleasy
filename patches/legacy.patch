@@ -1,0 +1,14 @@
+diff --git a/src/Utils/DrupalApi.php b/src/Utils/DrupalApi.php
+index 57a97d1a..f39308be 100644
+--- a/src/Utils/DrupalApi.php
++++ b/src/Utils/DrupalApi.php
+@@ -263,7 +263,8 @@ class DrupalApi
+         $kernel->invalidateContainer();
+ 
+         // Prepare a NULL request.
+-        $kernel->prepareLegacyRequest($request);
++        $kernel->boot();
++        $kernel->preHandle($request);
+ 
+         foreach (Cache::getBins() as $bin) {
+             $bin->deleteAll();

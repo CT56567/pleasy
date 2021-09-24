@@ -46,6 +46,7 @@ pl_var.sh
 !/docs
 !/bin
 !/scripts
+!/patches
 !.gitignore
 !example.pl.yml
 !LICENSE
