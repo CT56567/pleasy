@@ -108,7 +108,7 @@ while true; do
   -s | --step)
     flag_step=1
     shift
-    step="$1"
+    step=${1:1}
     shift; ;;
   -d | --debug)
     verbose="debug"
@@ -126,20 +126,22 @@ while true; do
 done
 
 parse_pl_yml
+sitename_var=$1
+if [ $1 = "proddown" ] && [ -z "$2" ]; then
+  echo "No site specified, exiting"
+fi
+import_site_config $sitename_var
 
 # Make sure @prod is setup.
 update_all_configs
-sitename_var=$1
-if [ $1 = "proddown" ] && [ -z "$2" ]; then
-  echo "No site specified, using localprod"
-  sitename_var="localprod"
-fi
 
-echo "Importing production site into $sitename_var"
+echo "step $step"
 
-import_site_config $sitename_var
+echo "Importing $sitename_var production site into localprod"
 
-if [ $step -gt 1 ] ; then
+
+
+if [[ "$step" -gt 1 ]] ; then
   echo "Starting from step $step"
 fi
 
@@ -154,7 +156,7 @@ fi
 #echo "pre rsync"
 #drush -y rsync @prod @$sitename_var -- --omit-dir-times --delete
 
-if [ $step -lt 2 ] ; then
+if [[ "$step" -lt 2 ]] ; then
   echo -e "$Cyan step 1: backup production $Color_Off"
 
   to=$sitename_var
@@ -164,7 +166,7 @@ if [ $step -lt 2 ] ; then
   sitename_var=$to
 fi
 
-if [ $step -lt 3 ] ; then
+if [[ "$step" -lt 3 ]] ; then
   echo -e "$Cyan step 2: restore production to $sitename_var $Color_Off"
   if [[ "$verbose"=="debug" ]]; then
   pl restore prod $sitename_var -yfd

@@ -147,17 +147,18 @@ else
   sitename_var=$2
   bk=$1
 fi
+import_site_config $sitename_var
 
 echo "Restoring site $bk to $sitename_var"
 if [[ "$step" -gt 1 ]]; then
   echo "Starting from step $step"
 fi
-if [[ "$bk" == prod ]] && [[ ! "$prod_method" == "git" ]]; then
-  echo "Sorry not able to handle restoring prod unless it is method git."
-  exit 0
-fi
+#if [[ "$bk" == prod ]] && [[ ! "$prod_method" == "git" ]]; then
+#  echo "Sorry not able to handle restoring prod unless it is method git."
+#  exit 0
+#fi
 
-import_site_config $sitename_var
+
 
 if [[ "$step" -lt 2 ]]; then
 
@@ -242,6 +243,44 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
   restore_db
   echo -e "$Cyan Files and database have been restored $Color_Off"
   exit
+elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "tar" ]]; then
+  echo "Restoring production site to site: $sitename_var using tar method"
+
+  echo "Now get the site files."
+
+  if [[ -d "$site_path/$sitename_var" ]]; then
+    rm "$site_path/$sitename_var" -rf
+    mkdir "$site_path/$sitename_var"
+    else
+      mkdir "$site_path/$sitename_var"
+  fi
+ if [[ "$Namef" = "" ]]; then
+   #get the latest file
+   cd $folderpath/sitebackups/$sitename_var/prod/
+   options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
+   Name=${options[0]:2}
+   tar -zxf "$folderpath/sitebackups/$sitename_var/prod/${Name::-4}.tar.gz" -C  "$site_path/$sitename_var"
+   else
+ tar -zxf "$folderpath/sitebackups/$sitename_var/prod/$Namef" -C  "$site_path/$sitename_var"
+fi
+  # now tar it so it is backed up for future use while we are at it.
+  #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+  echo "Fix site settings"
+  fix_site_settings
+
+  echo "Set site permissions"
+  set_site_permissions $sitename_var
+
+  #restore db
+  db_defaults
+  echo -e "$Cyan Restore the database $Color_Off"
+  restore_db
+  echo -e "$Cyan Files and database have been restored $Color_Off"
+  drush @$sitename_var uli &
+  echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
+
+  exit 0
+
 else
 
   ocmsg "flag_first is $flag_first" debug

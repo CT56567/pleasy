@@ -5,7 +5,8 @@ sitename_var=$1
 parse_pl_yml
 import_site_config $sitename_var
 site_info
-
+Namef="fred.tar.gz"
+ssh $prod_alias "tar -zcf \"$Namef\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.local.php\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.php\" \"$prod_docroot/..\""
 exit 0
 cd /var/www/oc/loc/docroot
 

@@ -370,9 +370,22 @@ import_site_config() {
     private="$www_path/$sitename_var/private"
     site_path="$www_path"
   fi
-echo "add prod"
-  if [[ "recipes_${sitename_var}_prod_user" != "" ]]; then
-    echo "adding prod"
+# Clear all prod variables
+  prod_alias=""
+  prod_docroot=""      
+  prod_gitdb=""      
+  prod_gitkey=""     
+  prod_gitrepo=""       
+  prod_method=""       
+  prod_reinstall_modules=""       
+  prod_test_docroot=""      
+  prod_test_uri=""  
+  prod_uri=""       
+  prod_user=""       
+           
+rp="recipes_${sitename_var}_prod_user"
+  rpv=${!rp}
+  if [[ "$rpv" != "" ]]; then
     #make all the prod variables based on the site variables
     # this is a quick workaround.
     rp="recipes_${sitename_var}_prod_alias"
@@ -791,7 +804,7 @@ set_site_permissions() {
   fi
 
   ocmsg "Fixing permissions: --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp" debug
-  sudo ~/dfp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
+  sudo dfp.sh --drupal_path="$site_path/$sitename_var/$webroot" --drupal_user=$user --httpd_group=www-data $devp
 }
 
 # This will delete current site database and rebuild it
@@ -1054,22 +1067,27 @@ gitprodpush() {
 backup_prod() {
 
   # Make sure ssh identity is added
-  add_git_credentials
+
   #backup db.
   #use git:
   #https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/set-up-a-local-development-drupal-0-7
-  sitename_var="prod"
+
   msg=${1// /_}
   cd
   # Check if site backup folder exists
+
   if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
     mkdir "$folderpath/sitebackups/$sitename_var"
   fi
-
+  if [ ! -d "$folderpath/sitebackups/$sitename_var/prod" ]; then
+    mkdir "$folderpath/sitebackups/$sitename_var/prod"
+  fi
   #cd "$webroot"
-  echo "proddb $prod_gitdb"
+
 
   if [[ ! "$prod_gitdb" == "" ]]; then
+      echo "proddb $prod_gitdb"
+      add_git_credentials
     gitprodpush
     #Now move the db and files down to local
 #    scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
@@ -1083,21 +1101,23 @@ backup_prod() {
 #    tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
 
   else
-    exit 0
+    import_site_config $sitename_var
+    #site_info
     #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
     Name="prod$(date +%Y%m%d\T%H%M%S-)$msg"
-    Namesql="$folderpath/sitebackups/prod/$Name.sql"
+    Namesql="$folderpath/sitebackups/$sitename_var/prod/$Name.sql"
     echo -e "\e[34mbackup db $Name.sql\e[39m"
     echo "Trying $Namesql "
     #drush @prod sql-dump   > "$Namesql"
+    echo "Dumping to /home/$prod_user/$Name.sql"
     drush @prod sql-dump --result-file="/home/$prod_user/$Name.sql"
-    scp "$prod_alias:$Name.sql" "$folderpath/sitebackups/prod/$Name.sql"
+    scp "$prod_alias:$Name.sql" "$Namesql"
     Namef=$Name.tar.gz
     echo -e "\e[34mbackup files $Namef\e[39m"
     # drush ard doesn't work in drush 9 onwards. so use tar instead
     #drush @prod ard --destination="$prod_docroot/../../../$Name"
-    ssh $prod_alias "tar --exclude='$prod_docroot/sites/default/settings.local.php' --exclude='$prod_docroot/sites/default/settings.php' -zcf \"$Namef\" \"$prod_docroot/..\""
-    scp "$prod_alias:$Namef" "$folderpath/sitebackups/prod/$Namef"
+    ssh $prod_alias "tar -zcf \"$Namef\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.local.php\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.php\" \"$prod_docroot/..\""
+    scp "$prod_alias:$Namef" "$folderpath/sitebackups/$sitename_var/prod/$Namef"
     #tar -czf  $folderpath/sitebackups/prod/$Name.tar.gz $folderpath/sitebackups/prod/$Name.tar
     #rm $folderpath/sitebackups/prod/$Name.tar
 
@@ -1285,6 +1305,13 @@ restore_db() {
       mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$folderpath/sitebackups/proddb/prod.sql" 2>/dev/null | grep -v '+' | cut -d' ' -f2
       echo ": ${PIPESTATUS[0]}"
     )
+
+  elif [[ "$bk" == prod ]] && [[ "$prod_method" == "tar" ]]; then
+  result=$(
+        mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$Name" 2>/dev/null | grep -v '+' | cut -d' ' -f2
+        echo ": ${PIPESTATUS[0]}"
+      )
+
   else
     echo -e "\e[34mrestore $db database using $folderpath/sitebackups/$bk/$Name\e[39m"
     result=$(

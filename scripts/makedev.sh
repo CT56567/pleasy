@@ -147,6 +147,8 @@ set_site_permissions
 
 #install dev modules
 echo "install dev modules"
+# Check if each dev module is present
+
 drush @$sitename_var en -y $dev_modules
 
 #turn on dev settings
