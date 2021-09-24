@@ -39,8 +39,7 @@
 SECONDS=0
 verbose="none"
 
-# Set script name for general file use
-scriptname='pleasy-gcom'
+# scriptname is set in pl.
 
 # Help menu
 ################################################################################

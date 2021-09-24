@@ -30,8 +30,7 @@
 ################################################################################
 ################################################################################
 
-# Set script name for general file use
-scriptname='pleasy-update'
+# scriptname is set in pl.
 verbose="none"
 
 # Help menu

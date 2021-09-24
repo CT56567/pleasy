@@ -44,8 +44,7 @@ SECONDS=0
 # $sitename_var is the site to import into
 # $bk is the backed up site.
 
-# Set script name for general file use
-scriptname='restore'
+# scriptname is set in pl.
 verbose="none"
 
 # Help menu

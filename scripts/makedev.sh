@@ -24,8 +24,7 @@
 ################################################################################
 ################################################################################
 
-# Set script name for general file use
-scriptname='pleasy-makedev'
+# scriptname is set in pl.
 verbose="none"
 # Help menu
 ################################################################################
@@ -34,7 +33,7 @@ verbose="none"
 print_help() {
 echo \
 "Turn dev mode on for a site
-Usage: pl makedev [OPTION] ... [SITE]
+Usage: pl $scriptname [OPTION] ... [SITE]
 This script is used to turn on dev mode and enable dev modules.
 You just need to state the sitename, eg stg.
 
@@ -59,13 +58,13 @@ SECONDS=0
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -o hd -l help,debug --name "$scriptname" -- "$@")
+args=$(getopt -o hds: -l help,debug,step: --name "$scriptname" -- "$@")
 
 ################################################################################
 # If getopt outputs error to error variable, quit program displaying error
 ################################################################################
 [ $? -eq 0 ] || {
-    echo "please do 'pl makedb --help' for more options"
+    echo "please do 'pl makedev --help' for more options"
     exit 1
 }
 
@@ -78,6 +77,8 @@ eval set -- "$args"
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
 ################################################################################
+# step is for the install steps
+step=1
 while true; do
   case "$1" in
   -h | --help)
@@ -86,6 +87,11 @@ while true; do
     ;;
   -d | --debug)
     verbose="debug"
+    shift; ;;
+  -s | --step)
+    flag_step=1
+    shift
+    step=${1:1}
     shift; ;;
   --)
   shift
@@ -117,9 +123,12 @@ sitename_var=$1
 #webroot="docroot"
 parse_pl_yml
 import_site_config $sitename_var
-
+if [ $step -gt 1 ]; then
+  echo "Starting from step $step"
+fi
 # turn on dev modules (composer)
-
+if [ $step -lt 2 ]; then
+  echo -e "$Cyan step 1: turn on dev modules (composer) $Color_Off"
 cd $site_path/$sitename_var
 echo "Composer install at $site_path/$sitename_var"
 #Make sure all dev modules are installed
@@ -144,10 +153,11 @@ fi
 echo "Rebuild permissions, might require sudo."
 #( speaker-test -t sine -f 1000 )& pid=$! ; sleep 0.1s ; kill -9 $pid
 set_site_permissions
+fi
 
+if [ $step -lt 3 ]; then
+  echo -e "$Cyan step 2: install dev modules $Color_Off"
 #install dev modules
-echo "install dev modules"
-# Check if each dev module is present
 
 drush @$sitename_var en -y $dev_modules
 
@@ -160,6 +170,7 @@ drupal site:mode dev
 echo "Clear cache"
 drush @$sitename_var cr
 
+fi
 //todo make sure the git is the dev git not the prod git.
 
 echo 'H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

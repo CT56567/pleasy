@@ -363,7 +363,7 @@ pl gcom pl "Improved gcom."
 <details>
 
 **<summary>gcomvup: Git commit and update to latest varbase stable :question: </summary>**
-Usage: pl gcomvup [OPTION] ... [SITE] [MESSAGE]
+Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 Varbase update, git commit changes and backup. This script follows the
 correct path to git commit changes You just need to state the
 sitename, eg dev.
@@ -372,9 +372,9 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
 Examples:
-pl gcomvup -h
-pl gcomvup dev (relative dev folder)
-pl gcomvup tim 'First tim backup'
+pl  -h
+pl  dev (relative dev folder)
+pl  tim 'First tim backup'
 END HELP
 
 </details>
@@ -382,7 +382,7 @@ END HELP
 <details>
 
 **<summary>gulp: Turn on gulp :white_check_mark: </summary>**
-Usage: pl gulp [OPTION] ... [SITE] [URL]
+Usage: pl  [OPTION] ... [SITE] [URL]
 This script is used to set up gulp browser sync for a particular page. You
 just need to state the sitename and optionally a particular page
 , eg loc and http://pleasy.loc/sar
@@ -391,8 +391,8 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
 Examples:
-pl gulp loc
-pl gulp loc http://pleasy.loc/sar
+pl  loc
+pl  loc http://pleasy.loc/sar
 
 END HELP
 
@@ -526,7 +526,7 @@ END HELP
 <details>
 
 **<summary>makedev: Turn dev mode on for a site :heavy_check_mark: </summary>**
-Usage: pl makedev [OPTION] ... [SITE]
+Usage: pl  [OPTION] ... [SITE]
 This script is used to turn on dev mode and enable dev modules.
 You just need to state the sitename, eg stg.
 
@@ -728,7 +728,7 @@ pl runup test # This will run the updates on the external test server.
 <details>
 
 **<summary>updateprod: Update Production (or test) server with stg or specified site. :white_check_mark: </summary>**
-Usage: pl updateprod [OPTION] ... [SITE] [MESSAGE]
+Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 This will copy stg or site specified to the production (or test) server and run
 the updates on that server. It will also backup the server. It presumes the server
 has git which will be used to restore the server if there was a problem.
@@ -739,9 +739,9 @@ Mandatory arguments to long options are mandatory for short options too.
   -t --test               Update the test server not production.
 
 Examples:
-pl updateprod # This will use the site specified in pl.yml by sites: stg:
-pl updateprod d8 # This will update production with the d8 site.
-pl updateprod d8 -t # This will update the test site specified in pl.yml with the d8 site.
+pl  # This will use the site specified in pl.yml by sites: stg:
+pl  d8 # This will update production with the d8 site.
+pl  d8 -t # This will update the test site specified in pl.yml with the d8 site.
 
 </details>
 

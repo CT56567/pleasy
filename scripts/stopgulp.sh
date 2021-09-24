@@ -24,8 +24,7 @@
 ################################################################################
 ################################################################################
 
-# Set script name for general file use
-scriptname='stopgulp'
+# scriptname is set in pl.
 
 # Help menu
 print_help() {

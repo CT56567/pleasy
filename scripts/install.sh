@@ -26,8 +26,7 @@
 #
 ################################################################################
 
-# Set script name for general file use
-scriptname='pl-install'
+# scriptname is set in pl.
 verbose="none"
 
 # Help menu

@@ -93,5 +93,5 @@ task=$1
 #. $script_root/scripts/_inc.sh;
 
 #drop_config_init $config_path
-
+scriptname=$1
 pl_run_task "$1" "${@:2}"

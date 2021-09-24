@@ -28,8 +28,7 @@
 #
 ################################################################################
 
-# Set script name for general file use
-scriptname='init'
+# scriptname is set in pl.
 # Change this to debug to debug this script
 verbose="none"
 plcstatus="pass"
