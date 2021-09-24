@@ -171,6 +171,6 @@ echo "Clear cache"
 drush @$sitename_var cr
 
 fi
-//todo make sure the git is the dev git not the prod git.
+#todo make sure the git is the dev git not the prod git.
 
 echo 'H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))
