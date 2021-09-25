@@ -32,11 +32,12 @@ echo "Uri: $uri"
 
 # Now store the files
 echo "storing the settings file"
-sudo cp  ~/$uri/settings.php "$prod_docroot/sites/default/settings.php"
+sudo cp  /home/$user/$uri/settings.php "$prod_docroot/sites/default/settings.php"
+sudo chown $user:www-data "$prod_docroot/sites/default/settings.php"
 
 echo "drop and restore the database."
 cd ~/$uri
-dbname=$(sudo grep "'database' =>" "~/$uri/settings.php"  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
+dbname=$(sudo grep "'database' =>" "/home/$user/$uri/settings.php"  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
 
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";

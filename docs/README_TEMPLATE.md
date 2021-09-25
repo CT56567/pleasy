@@ -26,6 +26,18 @@ OR if you want to install the varbase distribution
 ```
 pl install var
 ```
+You can then move around between sites using plcd
+```angular2html
+plcd loc #Takes you to the root of the site
+plcd loc d #Takes you to the webroot fo the site
+```
+
+Drush also works. Each sitename becomes the alias. This can be accessed from anywhere.
+```angular2html
+drush @loc status #runs the status command on the loc site.
+drush @prod_loc status #runs the status commend on the production version of the loc site.
+```
+Drupal console aliases are also setup.
 
 # Config: pl.yml
 

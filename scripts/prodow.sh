@@ -182,23 +182,23 @@ prod_root=$(dirname $prod_docroot)
 #ssh $prod_alias "rm -rf $prod_root"
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
-   ssh  $prod_alias "if [ -d /var/www/$uri ]; then exists="1"; fi"
+
     ssh $prod_alias "./createsites.sh $prod_docroot $prod_user"
 fi
 
 if [ $step -lt 6 ] ; then
 echo -e "$Pcolor step 5: creating sites $prod_docroot $prod_user  $prod_profile$Color_off"
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-
-
-    if [ "$exists" = "1" ]; then
+ocmsg "Prod alias $prod_alias uri $prod_uri" debug
+exists="$(ssh  $prod_alias "if [ -d /var/www/$prod_uri ]; then echo \"exists\"; fi")"
+    if [ "$exists" = "exists" ]; then
       echo "Site $prod_docroot exists so just updating it."
-      ./updatesite.sh $prod_docroot $user
-      ./updatesite.sh $test_docroot $user
+      ssh $prod_alias "./updatesite.sh $prod_docroot $prod_user"
+      ssh $prod_alias "./updatesite.sh $test_docroot $prod_user"
     else
         echo "Creating site $prod_docroot."
-    ./createsite.sh $prod_docroot $user
-    ./createsite.sh $test_docroot $user
+    ssh $prod_alias "./createsite.sh $prod_docroot $prod_user"
+    ssh $prod_alias "./createsite.sh $test_docroot $prod_user"
     fi
 
 fi
