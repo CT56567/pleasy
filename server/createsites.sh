@@ -72,9 +72,11 @@ sudo chown $prod_user:www-data /var/www/test.$uri -R
 
 
 if [ "$exists" = "1" ]; then
+  echo "Site $prod_docroot exists so just updating it."
   ./updatesite.sh $prod_docroot $user
   ./updatesite.sh $test_docroot $user
 else
+    echo "Creating site $prod_docroot."
 ./createsite.sh $prod_docroot $user
 ./createsite.sh $test_docroot $user
 fi

@@ -24,8 +24,7 @@ webroot=$(basename $1)
 prod=$(dirname $1)
 uri=$(basename $prod)
 
-echo "Update Production"
-echo "Site: $prod"
+echo "Update Site $prod"
 echo "Docroot: $prod_docroot"
 echo "Uri: $uri"
 
