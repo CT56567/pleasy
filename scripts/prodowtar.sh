@@ -233,7 +233,7 @@ if [ $step -lt 7 ] ; then
 echo -e "$Pcolor step 6: install production database $Color_off"
 if [ 1 == 0 ]
 then
-drush sql:sync @$sitename_var @prod
+drush sql:sync @$sitename_var @prod_${sitename_var}
 else
 # old method
 echo "The restoring the database requires sudo on the external server."
@@ -250,7 +250,7 @@ fi
 
 if [ $step -lt 8 ] ; then
 echo -e "$Pcolor step 7: prod in production mode $Color_off"
-drush @prod sset system.maintenance_mode FALSE
+drush @prod_${sitename_var} sset system.maintenance_mode FALSE
 
 echo "clearing cache"
 ssh $prod_alias "cd $prod_docroot && drush cr"
@@ -260,7 +260,7 @@ fi
 
 if [ $step -lt 9 ] ; then
 echo -e "$Pcolor step 8: open production site $Color_off"
-drush @prod uli
+drush @prod_${sitename_var} uli
 fi
 
 # End timer
@@ -281,23 +281,23 @@ exit 0
 
 
 echo "docroot"
-drush -y rsync @$sitename_var @prod -- -O  --delete
+drush -y rsync @$sitename_var @prod_${sitename_var} -- -O  --delete
 echo "cmi"
-drush -y rsync @$sitename_var:../cmi @prod:../cmi -- -O  --delete
+drush -y rsync @$sitename_var:../cmi @prod_${sitename_var}:../cmi -- -O  --delete
 echo "vendor"
-drush -y rsync @$sitename_var:../vendor @prod:../vendor -- -O  --delete
+drush -y rsync @$sitename_var:../vendor @prod_${sitename_var}:../vendor -- -O  --delete
 echo "bin"
-drush -y rsync @$sitename_var:../bin @prod:../bin -- -O  --delete
+drush -y rsync @$sitename_var:../bin @prod_${sitename_var}:../bin -- -O  --delete
 echo "composer.json"
-drush -y rsync @$sitename_var:../composer.json @prod:../composer.json -- -O  --delete
+drush -y rsync @$sitename_var:../composer.json @prod_${sitename_var}:../composer.json -- -O  --delete
 echo "composer.lock"
-drush -y rsync @$sitename_var:../composer.lock @prod:../composer.lock -- -O  --delete
+drush -y rsync @$sitename_var:../composer.lock @prod_${sitename_var}:../composer.lock -- -O  --delete
 
 # Now sync the database
-drush sql:sync @$sitename_var @prod
+drush sql:sync @$sitename_var @prod_${sitename_var}
 
-drush @prod cr
-drush @prod sset system.maintenance_mode FALSE
+drush @prod_${sitename_var} cr
+drush @prod_${sitename_var} sset system.maintenance_mode FALSE
 
 # End timer
 ################################################################################

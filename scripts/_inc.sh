@@ -558,26 +558,7 @@ update_all_configs() {
   fi
 
   ocmsg "Create drush aliases" debug
-  cat >$user_home/.drush/$folder.aliases.drushrc.php <<EOL
-<?php
-/**
-* This file has been created by $site_folder/scripts/_inc.sh
-*
-*/
-\$aliases['prod'] = array (
-'uri' => '$prod_uri',
-'root' => '$prod_docroot',
-'remote-user' => '$prod_user',
-'remote-host' => '$prod_uri',
-);
-\$aliases['test'] = array (
-'uri' => '$prod_test_uri',
-'root' => '$prod_test_docroot',
-'remote-user' => '$prod_user',
-'remote-host' => '$prod_uri',
-);
 
-EOL
 
   ocmsg "Delete old credentials folder if it exists" debug
   if [ -d $folderpath/credentials ]; then rm $folderpath/credentials -rf; fi
@@ -587,6 +568,15 @@ EOL
   Field_Separator=$IFS
   # set comma as internal field separator for the string list
   IFS=,
+
+  cat >$user_home/.drush/$folder.aliases.drushrc.php <<EOL
+  <?php
+  /**
+  * This file has been created by $site_folder/scripts/_inc.sh
+  *
+  */
+EOL
+
   for site in $recipes; do
     # Database defaults
     rp="recipes_${site}_db"
@@ -624,7 +614,25 @@ EOL
   ),
 );
 EOL
-
+salias="recipes_${site}_prod_alias"
+hasalias=${!salias}
+echo "salias $salias hasalias $hasalias"
+if [[ ! "$hasalias" = "" ]]; then
+  cat >>$user_home/.drush/$folder.aliases.drushrc.php <<EOL
+\$aliases['prod_$site'] = array (
+'uri' => '$prod_uri',
+'root' => '$prod_docroot',
+'remote-user' => '$prod_user',
+'remote-host' => '$prod_uri',
+);
+\$aliases['test_$site'] = array (
+'uri' => '$prod_test_uri',
+'root' => '$prod_test_docroot',
+'remote-user' => '$prod_user',
+'remote-host' => '$prod_uri',
+);
+EOL
+fi
     #Now add drupal console aliases.
     cat >>$user_home/.console/sites/$folder.yml <<EOL
 $sitename_var:
@@ -1110,7 +1118,7 @@ backup_prod() {
     echo "Trying $Namesql "
     #drush @prod sql-dump   > "$Namesql"
     echo "Dumping to /home/$prod_user/$Name.sql"
-    drush @prod sql-dump --result-file="/home/$prod_user/$Name.sql"
+    drush @prod_${sitename_var} sql-dump --result-file="/home/$prod_user/$Name.sql"
     scp "$prod_alias:$Name.sql" "$Namesql"
     Namef=$Name.tar.gz
     echo -e "\e[34mbackup files $Namef\e[39m"

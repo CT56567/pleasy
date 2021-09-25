@@ -226,7 +226,7 @@ fi
 
 if [ $step -lt 6 ] ; then
 echo -e "$Pcolor step 5: open production site $Color_off"
-drush @prod uli &
+drush "@prod_${sitename_var}" uli &
 fi
 
 # If it works, the production site needs to be swapped to prod branch from dev branch and hard rest to dev, is use 'ours'.

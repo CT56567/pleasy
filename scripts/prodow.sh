@@ -182,18 +182,30 @@ prod_root=$(dirname $prod_docroot)
 #ssh $prod_alias "rm -rf $prod_root"
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
-
-
-
-echo -e "\e[34m creating sites $prod_docroot $prod_user  $prod_profile\e[39m"
-
-    # For now the script should work, but needs various improvments such as, being able to restore on error.
+   ssh  $prod_alias "if [ -d /var/www/$uri ]; then exists="1"; fi"
     ssh $prod_alias "./createsites.sh $prod_docroot $prod_user"
 fi
 
 if [ $step -lt 6 ] ; then
-echo -e "$Pcolor step 5: open production site $Color_off"
-drush @prod uli &
+echo -e "$Pcolor step 5: creating sites $prod_docroot $prod_user  $prod_profile$Color_off"
+    # For now the script should work, but needs various improvments such as, being able to restore on error.
+
+
+    if [ "$exists" = "1" ]; then
+      echo "Site $prod_docroot exists so just updating it."
+      ./updatesite.sh $prod_docroot $user
+      ./updatesite.sh $test_docroot $user
+    else
+        echo "Creating site $prod_docroot."
+    ./createsite.sh $prod_docroot $user
+    ./createsite.sh $test_docroot $user
+    fi
+
+fi
+
+if [ $step -lt 7 ] ; then
+echo -e "$Pcolor step 6: open production site $Color_off"
+drush @prod_${sitename_var} uli &
 fi
 
 # If it works, the production site needs to be swapped to prod branch from dev branch and hard rest to dev, is use 'ours'.

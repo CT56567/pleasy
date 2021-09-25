@@ -58,8 +58,7 @@ cd
 # Create the settings file.
 echo -e "\e[34mrestoring files\e[39m"
 echo "Create prod directories"
-if [ -d /var/www/$uri ]; then exists="1"; fi
-sudo rm -rf /var/www/$uri && sudo mkdir /var/www/$uri 
+sudo rm -rf /var/www/$uri && sudo mkdir /var/www/$uri
 sudo rm -rf /var/www/test.$uri && sudo mkdir /var/www/test.$uri 
 
 echo "Unpack site to prod and test locations"
@@ -70,20 +69,6 @@ echo "fix file permissions, requires sudo on external server and Restoring corre
 sudo chown $prod_user:www-data /var/www/$uri -R
 sudo chown $prod_user:www-data /var/www/test.$uri -R
 
-
-if [ "$exists" = "1" ]; then
-  echo "Site $prod_docroot exists so just updating it."
-  ./updatesite.sh $prod_docroot $user
-  ./updatesite.sh $test_docroot $user
-else
-    echo "Creating site $prod_docroot."
-./createsite.sh $prod_docroot $user
-./createsite.sh $test_docroot $user
-fi
-#dbname=$(sudo grep "'database' =>" $1/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
-
-
-
-echo "Sites created."
+echo "Files installed"
 
 echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
