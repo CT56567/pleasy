@@ -1,22 +1,9 @@
 #!/bin/bash
 ################################################################################
-#                Git Push and Merge Production For Pleasy Library
+#                Update Prod Production For Pleasy Library
 #
-#  This will pgit share changes, ie merge with master. Used for when improving the
+#  This will update the production server with code from the local site.
 #  current code
-#  This follows the suggested sequence by bircher in
-#  https://events.drupal.org/vienna2017/sessions/advanced-configuration-management-config-split-et-al
-#  at 29:36
-#  That is a combination of (always presume sharing and do a backup first):
-#  PSEUDOCODE
-#  The safe sequence for sharing
-#  Export configuration: drush cex
-#  Commit: git add && git commit
-#  Merge: git pull
-#  Update dependencies: composer install
-#  Run updates: drush updb
-#  Import configuration: drush cim
-#  Push: git push
 #
 #  Change History
 #  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
@@ -231,7 +218,21 @@ ocmsg "Copy production site to test site." debug
 copy_prod_test
 
 # STEP 4 Copy files from local site to prod_site
+if [ "$site_path" = "" ] || ["$sitename_var" = "" ] || [ "$prod_site" == "" ]; then
+  #It's really really bad if rsync is run with empty values! It can wipe your home directory!
+  echo "One of site_path >$site_path< sitename_var >$sitename_var< or prod_site >$prod_site< is empty aborting."
+  exit 1
+fi
 ocmsg "Production site $prod_site localsite $site_path/$sitename_var" debug
+
+if [ "$verbose" = "debug" ]; then
+  #Double check!
+  read proc
+  if [ "$proc" != "y" ]; then
+    exit
+  fi
+fi
+
 #drush rsync @$sitename_var @test --no-ansi  -y --exclude-paths=private:.git -- --exclude=.gitignore --delete
 # was -rav
 # -rzcEPul
