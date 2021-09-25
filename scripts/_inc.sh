@@ -1131,7 +1131,7 @@ backup_prod() {
 ################################################################################
 copy_prod_test() {
 echo "Copying the production site to the test site."
-ssh $prod_alias -t "./copy_prod_test.sh $prod_test_docroot $prod_docroot"
+ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot $prod_user"
 }
 #
 ################################################################################

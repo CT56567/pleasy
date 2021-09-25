@@ -4,4 +4,4 @@ pword='secret - shh - password'
 key="rsa"
 ip="777.777.777.777"
 url="mysite.org"
-email="admin@$uri"
+email="admin@$url"

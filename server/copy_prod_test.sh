@@ -85,6 +85,11 @@ else
 alreadyon="y"
 echo "Already in maintenance or readonly mode"
 fi
+if [ ! -d ~/proddb ]; then
+  echo "Making directory proddb"
+  mkdir ~/proddb
+fi
+
 drush sql-dump > ~/proddb/prod.sql
 # if it was already in maintenance mode, then leave it in maintenance mode
 if [[ ! "$alreadyon" == "y" ]]; then

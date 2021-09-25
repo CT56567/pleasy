@@ -87,7 +87,6 @@ dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
   '^test.$uri\.org$',
   '^www\$uri\.org$',
   '^$uri\.org$',
-
 ];
 
 EOL

@@ -11,9 +11,10 @@ https://www.howtoforge.com/tutorial/debian-nginx-drupal/
 STEPS
 
 1) set up ssh keys
-2) scp the scripts
-3) run initserver.sh
-4) run prodow (which calls createsites)
+2) pl updateserver [site] # this pushes the scripts up.
+3) change example.secrets.sh to secrets.sh and edit it.
+4) run initserver.sh
+5) run prodow (which calls createsites.sh)
 
 
 Use Lando locally as test site for scripts.

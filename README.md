@@ -747,6 +747,20 @@ pl  d8 -t # This will update the test site specified in pl.yml with the d8 site.
 
 <details>
 
+**<summary>updateserver: Update Production Server Scripts. :white_check_mark: </summary>**
+Usage: pl  [OPTION] ... [SITE] [MESSAGE]
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
+
+Examples:
+pl  d8 # This will update production with the d8 site.
+
+</details>
+
+<details>
+
 **<summary>update: Update all site configs :heavy_check_mark: </summary>**
 Usage: pl update [OPTION]
 This script will update the configs for all sites

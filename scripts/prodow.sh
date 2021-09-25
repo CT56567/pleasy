@@ -167,8 +167,8 @@ ocmsg "Name of sql backup: $Name "
  echo "Using scp method to push db and files to production"
 Name2=${Name::-4}".tar.gz"
 echo "scp: $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql"
-ssh $prod_alias "mkdir $prod_uri"
-ssh $prod_alias "mkdir test.$prod_uri"
+ssh $prod_alias "if [ ! -d $prod_uri ]; then mkdir $prod_uri; fi"
+ssh $prod_alias "if [ ! -d test.$prod_uri ]; then mkdir test.$prod_uri; fi"
  scp $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql
  scp $folderpath/sitebackups/$sitename_var/$Name2 $prod_alias:$prod_uri/prod.tar.gz
 echo "Files and db transfered."
