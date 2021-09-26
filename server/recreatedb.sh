@@ -65,7 +65,7 @@ result=$(
       echo "Could not grant user $dbuser permissions on $dbname"
     fi
   fi
-}
+
 
 
   result=$(

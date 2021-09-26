@@ -691,6 +691,21 @@ END HELP
 
 <details>
 
+**<summary>recreateserverdb: Recreate the server Database :question: </summary>**
+Usage: pl createserverdb [OPTION] ... [SITE]
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -y --yes                Auto Yes to all options
+
+Examples:
+pl recreateserverdb loc
+END HELP
+
+</details>
+
+<details>
+
 **<summary>restore: Restore a particular site's files and database from backup :heavy_check_mark: </summary>**
 Usage: pl restore [FROM] [TO] [OPTION]
 You just need to state the sitename, eg dev.
