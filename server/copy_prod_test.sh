@@ -85,12 +85,12 @@ else
 alreadyon="y"
 echo "Already in maintenance or readonly mode"
 fi
-if [ ! -d ~/proddb ]; then
-  echo "Making directory proddb"
-  mkdir ~/proddb
+if [ ! -d /home/$user/$uri ]; then
+  echo "Making directory /home/$user/$uri/"
+  mkdir /home/$user/$uri/
 fi
 
-drush sql-dump > ~/proddb/prod.sql
+drush sql-dump > /home/$user/$uri/prod.sql
 # if it was already in maintenance mode, then leave it in maintenance mode
 if [[ ! "$alreadyon" == "y" ]]; then
 if [ ! "$readonly_en" == "" ]; then
@@ -103,8 +103,8 @@ drush cr
 fi
 #restore the prod db to testdb
 # Get the database details from settings.php
-dbname=$(sudo grep "'database' =>" $1/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
-cd ~/proddb/
+dbname=$(sudo grep "'database' =>" $prod_docroot/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
+cd /home/$user/$uri/
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";
 mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < prod.sql

@@ -54,6 +54,8 @@ dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
 
 # Don't use settings.local.php so it's not copied!
 
+
+
   cat >$prod_docroot/sites/default/settings.php <<EOL
 <?php
 \$databases = [];
@@ -82,9 +84,9 @@ dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
 \$config['config_split.config_split.config_dev']['status'] = FALSE;
 \$config['system.site']['name'] = "$uri";
 \$settings['trusted_host_patterns'] = [
-  '^www\test.$uri\.org$',
-  '^test.$uri\.org$',
-  '^www\$uri\.org$',
+  '^www\.test\.$uri\.org$',
+  '^test\.$uri\.org$',
+  '^www\.$uri\.org$',
   '^$uri\.org$',
 ];
 
