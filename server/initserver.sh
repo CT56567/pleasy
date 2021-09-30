@@ -121,6 +121,20 @@ echo "User: $user"
 ./secrets.sh
 
 apt update && apt upgrade -y
+
+# see line 320 in init.sh.
+  #setup unattended upgrades
+  sudo apt install unattended-upgrades
+  #todo setup the config for this
+  # https://linoxide.com/enable-automatic-updates-on-ubuntu-20-04/
+  # https://www.cyberciti.biz/faq/set-up-automatic-unattended-updates-for-ubuntu-20-04/
+
+#From: https://haydenjames.io/how-to-enable-unattended-upgrades-on-ubuntu-debian/
+#APT::Periodic::Update-Package-Lists "1";
+#APT::Periodic::Unattended-Upgrade "1";
+#APT::Periodic::Download-Upgradeable-Packages "1";
+#APT::Periodic::AutocleanInterval "1";
+
 # apt-get -o Dpkg::Options::="--force-confnew --force-confdef" --force-yes -y upgrade
 # adduser $user
 sudo adduser $user --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password

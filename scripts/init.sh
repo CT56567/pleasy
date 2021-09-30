@@ -317,6 +317,17 @@ if [ $step -lt 6 ]; then
   # Update packages and Upgrade system
   sudo apt-get -qqy update && sudo apt-get -qqy upgrade
 
+  #setup unattended upgrades
+  sudo apt install unattended-upgrades
+  #todo setup the config for this
+  # https://linoxide.com/enable-automatic-updates-on-ubuntu-20-04/
+  # https://www.cyberciti.biz/faq/set-up-automatic-unattended-updates-for-ubuntu-20-04/
+
+#From: https://haydenjames.io/how-to-enable-unattended-upgrades-on-ubuntu-debian/
+#APT::Periodic::Update-Package-Lists "1";
+#APT::Periodic::Unattended-Upgrade "1";
+#APT::Periodic::Download-Upgradeable-Packages "1";
+#APT::Periodic::AutocleanInterval "1";
   # Setup php 7.3
   sudo apt-get -y install software-properties-common
   sudo add-apt-repository -y ppa:ondrej/php

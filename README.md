@@ -243,7 +243,7 @@ Examples:
 <details>
 
 **<summary>copypt: Copy the production site to the test site. :white_check_mark: </summary>**
-Usage: pl copypt [OPTION]
+Usage: pl copypt [SITE] [OPTION]
   This script is used to copy the production site to the test site. The site
   details are in pl.yml.
 
@@ -251,7 +251,7 @@ Usage: pl copypt [OPTION]
     -h --help               Display help (Currently displayed)
 
   Examples:
-  pl copypt 
+  pl copypt loc
 
 </details>
 

@@ -50,13 +50,14 @@ sudo cp $prod $test -rf
 sudo chown $user:www-data $test -R
 
 #copy in the test settings from backup
-sudo cp ~/$test_uri/settings.php $test_docroot/sites/default/settings.php
+sudo cp /home/$user/$test_uri/settings.php $test_docroot/sites/default/settings.php
 
 sudo chown $user:www-data $test_docroot/sites/default/settings.php
 cd
 sudo ./dfp.sh --drupal_user=$user --drupal_path=$test_docroot
 
-#dump the database
+#dump the prod database
+echo "Going to $prod_docroot to dump database."
 cd $prod_docroot
 
 # If not in maintenance mode, then put it in maintenance mode
@@ -94,16 +95,17 @@ drush sql-dump > /home/$user/$uri/prod.sql
 # if it was already in maintenance mode, then leave it in maintenance mode
 if [[ ! "$alreadyon" == "y" ]]; then
 if [ ! "$readonly_en" == "" ]; then
+  #take out of readonly mode.
 drush cset readonlymode.settings enabled 0   -y 
 else
-      # otherwise put into maintenance mode
+      # otherwise take out of maintenance mode
     drush sset maintenance_mode 0
 fi
 drush cr
 fi
 #restore the prod db to testdb
 # Get the database details from settings.php
-dbname=$(sudo grep "'database' =>" $prod_docroot/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
+dbname=$(sudo grep "'database' =>" /home/$user/$test_uri/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
 cd /home/$user/$uri/
 echo "Dropping and recreating the database"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"

@@ -40,7 +40,7 @@
 print_help() {
 echo \
 "Copy the production site to the test site.
-Usage: pl copypt [OPTION]
+Usage: pl copypt [SITE] [OPTION]
   This script is used to copy the production site to the test site. The site
   details are in pl.yml.
 
@@ -48,7 +48,7 @@ Usage: pl copypt [OPTION]
     -h --help               Display help (Currently displayed)
 
   Examples:
-  pl copypt "
+  pl copypt loc"
 
 }
 
@@ -98,8 +98,15 @@ while true; do
   ;;
   esac
 done
+if [ $1 = "copypt" ] && [ -z "$2" ]; then
+  echo "No site specified"
+  print_help
+  exit 0
+fi
 
+sitename_var=$1
 parse_pl_yml
+import_site_config $sitename_var
 
 copy_prod_test
 
