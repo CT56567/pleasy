@@ -390,7 +390,7 @@ rp="recipes_${sitename_var}_prod_user"
     # this is a quick workaround.
     rp="recipes_${sitename_var}_prod_alias"
     rpv=${!rp}
-    echo "$rp $rpv"
+    ocmsg "$rp $rpv" debug
     if [ "$rpv" != "" ]; then
       prod_alias=${!rp}
     fi

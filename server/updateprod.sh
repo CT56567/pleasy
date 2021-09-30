@@ -113,22 +113,20 @@ fi
 drush cr
 
 # swap the sites
-sudo mv $prod_uri old.$prod_uri
 echo "Swap test and prod sites."
 cd /var/www
-echo "Move prod to old"su
+echo "Move prod to old"
+sudo mv $prod_uri old.$prod_uri
 echo "Move test to prod."
 sudo mv $test_uri $prod_uri
 echo "Move old to test."
 sudo mv old.$prod_uri $test_uri
 echo "Move settings from teststore to back/settings"
-sudo mv ~/$test_uri/settings.php ~/settings.php
+sudo mv /home/$user/$test_uri/settings.php /home/$user/settings.php
 echo "Move settings from prodstore to teststore."
-sudo mv ~/$prod_uri/settings.php ~/$test_uri/settings.php
+sudo mv /home/$user/$prod_uri/settings.php /home/$user/$test_uri/settings.php
 echo "Move back/settings to prodstore."
-do mv ~/settings.php ~/$prod_uri/settings.php
-
-
+sudo mv /home/$user/settings.php /home/$user/$prod_uri/settings.php
 
 # put the old prod out of read only mode or maintenance mode
 echo "Put old prod {test.opencat.org} out of readonly mode or maintenance mode."
