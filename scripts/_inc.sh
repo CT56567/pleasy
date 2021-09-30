@@ -1617,21 +1617,21 @@ plcomposer() {
 ################################################################################
 runupdates() {
 
+echo "Runupdates  on $prod_alias on site $sitename_var"
 
-
-if [[ "$sitename_var" == "prod" || "$sitename_var" == "test" ]]; then
+if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
     eval $(ssh-agent -s)
     echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
     ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
   # presume you don't need toProduction site fix site settings for production sites.
-  if [[ "$sitename_var" == "test" ]]; then
+  if [[ "${sitename_var:0:4}" == "test" ]]; then
     # This script just runs the composer install --no-dev and fixes site permissions.
-    ssh -t $prod_alias "./updatetest.sh $prod_test_docroot"
+    echo "Running updatetest.sh"
+    ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_user"
   else
-
-
 #Now run the rest of the update process.
-    ssh -t $prod_alias "./updateprod.sh $prod_test_docroot $prod_docroot $prod_reinstall_modules"
+echo "Running updateprod.sh"
+    ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_user $prod_reinstall_modules"
     # The updateprod script does it all.
     exit 0
   fi
@@ -1639,7 +1639,7 @@ else
   ocmsg "Path: $site_path/$sitename_var" debug
   cd $site_path/$sitename_var
   # composer install
-echo -e "\e[34mcomposer install\e[39m"
+echo -e "\e[34m composer install \e[39m"
 # Looks like it is best to remove composer.lock so getting the latest according to composer.json
   if [[ -f $site_path/$sitename_var/composer.lock ]]; then
 rm $site_path/$sitename_var/composer.lock
@@ -1670,25 +1670,29 @@ if [[ "$force" == "true" ]] ; then
   #if error then delete the erroneous config files.
   #Still needs to be written #####
 
+
   else
+    echo "Run CMI import"
     # see for the reason for this structure: https://www.bounteous.com/insights/2020/03/11/automate-drupal-deployments/
     drush @$sitename_var cim -y || drush @$sitename_var cim -y #--source=../cmi
     drush @$sitename_var cim -y
   fi
 
 if [[ "$reinstall_modules" != "" ]] ; then
+  echo "reinstalling modules"
 #  drush @$sitename_var pm-uninstall $reinstall_modules -y
   drush @$sitename_var en $reinstall_modules -y
 fi
 # deal with bad config.
-
-if [[ "$sitename_var" == "prod" || "$sitename_var" == "test" ]]; then
+echo "fixing site permissions"
+if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
    if [[ "$sitename_var" == "test" ]]; then
-      ssh -t $prod_alias "sudo ./fix-p.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
+      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
    else
-    ssh -t $prod_alias "sudo ./fix-p.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
+    ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
   fi
   # Take out of maintenance or readonly mode
+  echo "Checking for readonly mode"
   readonly_en=$(ssh -t cathnet "cd $prod_test_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }" )
 if [ ! "$readonly_en" == "" ]; then
     ssh -t cathnet "cd $prod_test_docroot && drush cset readonlymode.settings enabled 0 -y"
@@ -1705,6 +1709,7 @@ drush @$sitename_var cset readonlymode.settings enabled 0 -y
 
 
 fi
+echo "Running drush Cr"
 drush @$sitename_var cr
 }
 

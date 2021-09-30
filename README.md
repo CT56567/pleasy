@@ -36,6 +36,7 @@ Drush also works. Each sitename becomes the alias. This can be accessed from any
 ```angular2html
 drush @loc status #runs the status command on the loc site.
 drush @prod_loc status #runs the status commend on the production version of the loc site.
+drush @test_loc status #runs the status commend on the test version of the loc site which is on the production server.
 ```
 Drupal console aliases are also setup.
 

@@ -69,7 +69,7 @@ SECONDS=0
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
 ################################################################################
-args=$(getopt -o hdt -l help,debug,test --name "$scriptname" -- "$@")
+args=$(getopt -o hs:dt -l help,step:,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
 ################################################################################
@@ -95,6 +95,11 @@ while true; do
     print_help;
     exit 2; # works
     ;;
+  -s | --step)
+    flag_step=1
+    shift
+    step=${1:1}
+    shift; ;;
   -d | --debug)
   verbose="debug"
   shift; ;;
@@ -137,6 +142,10 @@ parse_pl_yml
 import_site_config $sitename_var
 
 prod_reinstall_modules=$reinstall_modules
+
+if [[ "$step" -gt 1 ]] ; then
+  echo -e "Starting from step $step"
+fi
 #echo "Add credentials."
 #add_git_credentials
 ## backup latest on prod
@@ -181,7 +190,8 @@ prod_reinstall_modules=$reinstall_modules
 # swap test with prod
 # Put old prod out of main mode
 
-
+if [[ "$step" -lt 2 ]] ; then
+echo -e "$Pcolor step 1: Put into readonlymode and maintenance mode $Color_Off"
 # STEP 1
 # Always use the test server.
 # rsync the files to the server
@@ -193,7 +203,7 @@ echo "Prod_site: $prod_site"
 #prod_site="$prod_alias:$(dirname $prod_docroot)" # > rsyncerrlog.txt
 #fi
 
-# STEP 2
+
 # Don't need to put prod into maintenance mode if only running on test.
 if [[ ! "$test" ]] ; then
 # Check to see if production has the readonly module enabled.
@@ -211,14 +221,19 @@ fi
 ssh -t $prod_alias "cd $prod_docroot && drush cr"
 fi
 
+fi
+if [[ "$step" -lt 3 ]] ; then
+echo -e "$Pcolor step 2: Copy production site to test site. $Color_Off"
 
-# STEP 3
-ocmsg "Copy production site to test site." debug
+
 #copy production to test.
 copy_prod_test
+fi
+if [[ "$step" -lt 4 ]] ; then
+echo -e "$Pcolor step 3: Copy files from local site to prod_site $Color_Off"
 
-# STEP 4 Copy files from local site to prod_site
-if [ "$site_path" = "" ] || ["$sitename_var" = "" ] || [ "$prod_site" == "" ]; then
+#  Copy files from local site to prod_site
+if [ "$site_path" = "" ] || [ "$sitename_var" = "" ] || [ "$prod_site" == "" ]; then
   #It's really really bad if rsync is run with empty values! It can wipe your home directory!
   echo "One of site_path >$site_path< sitename_var >$sitename_var< or prod_site >$prod_site< is empty aborting."
   exit 1
@@ -227,6 +242,7 @@ ocmsg "Production site $prod_site localsite $site_path/$sitename_var" debug
 
 if [ "$verbose" = "debug" ]; then
   #Double check!
+  echo "Do you want to proceed - type y"
   read proc
   if [ "$proc" != "y" ]; then
     exit
@@ -253,18 +269,22 @@ fi
             --exclude 'dev/' \
             "$site_path/$sitename_var/"  "$prod_site" # > rsyncerrlog.txt
 
-# STEP 5 Runupdates on the test/prod site.
+fi
+if [[ "$step" -lt 5 ]] ; then
+echo -e "$Pcolor step 4: Runupdates on the test/prod site. $Color_Off"
+
+# Runupdates on the test/prod site.
 # runup on the server
 if [[ "$test" ]] ; then
-sitename_var="test"
+sitename_var="test_$sitename_var"
 else
-sitename_var="prod"
+sitename_var="prod_$sitename_var"
 fi
 
 #import_site_config $sitename_var
 echo "This will run any updates on the $sitename_var site."
 runupdates
-
+fi
 #Check changes
 
 # End timer

@@ -105,6 +105,7 @@ fi
 # Get the database details from settings.php
 dbname=$(sudo grep "'database' =>" $prod_docroot/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
 cd /home/$user/$uri/
+echo "Dropping and recreating the database"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";
 mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < prod.sql

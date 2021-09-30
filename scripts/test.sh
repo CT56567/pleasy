@@ -1,4 +1,42 @@
 #!/bin/bash
+cd
+uri="hello.org"
+  cat >test.me <<EOL
+<?php
+\$databases = [];
+\$settings['update_free_access'] = FALSE;
+\$settings['container_yamls'][] = \$app_root . '/' . \$site_path . '/services.yml';
+\$settings['file_scan_ignore_directories'] = [
+  'node_modules',
+  'bower_components',
+];
+\$settings['entity_update_batch_size'] = 50;
+\$settings['entity_update_backup'] = TRUE;
+\$settings['migrate_node_migrate_type_classic'] = FALSE;
+
+\$settings['file_private_path'] =  '../private';
+\$databases['default']['default'] = array (
+  'database' => '$dbname',
+  'username' => '$dbuser',
+  'password' => '$dbpass',
+  'prefix' => '',
+  'host' => 'localhost',
+  'port' => '3306',
+  'namespace' => 'Drupal\Core\Database\Driver\mysql',
+  'driver' => 'mysql',
+);
+\$settings["config_sync_directory"] = '../cmi';
+\$config['config_split.config_split.config_dev']['status'] = FALSE;
+\$config['system.site']['name'] = "$uri";
+\$settings['trusted_host_patterns'] = [
+  '^www\.test\.$uri\.org$',
+  '^test\.$uri\.org$',
+  '^www\.$uri\.org$',
+  '^$uri\.org$',
+];
+
+EOL
+exit 0
 
 sting="covid.org"
 nstring=${sting/.//}
