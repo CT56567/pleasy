@@ -1,22 +1,16 @@
 #!/bin/bash
 cd
+  cd
+  cd pleasy
 
-sitename_var="stg_vadc"
-
-
-  echo "sitename_var $sitename_var"
-parse_pl_yml
-
-import_site_config $sitename_var
-echo "Project $project"
-echo "sitename $sitename_var"
-echo "dev $dev"
-echo "stage $stage"
-exit
-
-sting="covid.org"
-nstring=${sting/.//}
-echo $nstring
+  cp README.md README_TEMP.md
+  # Strip out old functions
+  fline=$(grep -n '# FUNCTION LIST' README_TEMP.md)
+  echo "fline ${fline:0:3}"
+  fline=${fline:0:3}
+  fline=$((fline + 1));
+  echo "fline $fline"
+  sed -i "$fline,1000d" ./README_TEMP.md
 exit 0
 cd /var/www/oc/loc/docroot
 

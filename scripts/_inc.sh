@@ -1782,6 +1782,19 @@ makereadme() {
 
   cd
   cd pleasy
+    if [ ! -f README.md ]; then
+      echo "Need a README.md to start with!"
+      exit 1
+    fi
+
+    cp README.md README_TEMP.md
+    # Strip out old functions
+    fline=$(grep -n '# FUNCTION LIST' README_TEMP.md)
+    ocmsg "fline ${fline:0:3}" debug
+    fline=${fline:0:3}
+    fline=$((fline + 1));
+    ocmsg "fline $fline" debug
+    sed -i "$fline,1000d" ./README_TEMP.md
 
   if [ -d $script_root ]; then
     cd "$script_root"
@@ -1789,13 +1802,9 @@ makereadme() {
     echo 'ERROR: Either pleasy $script_root variable does not exist, or the value is set incorrectly.'
     exit 1
   fi
-  if [ ! -f ../docs/README_TEMPLATE.md ]; then
-    echo "Need a template file README_TEMPLATE.md in pleasy docs folder!"
-    exit 1
-  fi
 
 
-  cp ../docs/README_TEMPLATE.md ../README_TEMPLATE.md
+
 
   (
     documented_scripts=$(grep -l --directories=skip --exclude={_inc,makereadme*}.sh '^args=$(getopt' *.sh)
@@ -1853,13 +1862,13 @@ HEREDOC
 
 HEREDOC
     done
-  ) >>../README_TEMPLATE.md ||
+  ) >>../README_TEMP.md ||
     {
       echo "Failed to write to copied template file! aborting"
-      rm ../README_TEMPLATE.md
+      rm ../README_TEMP.md
       exit 1
     }
 
-  mv ../README_TEMPLATE.md ../README.md
+  mv ../README_TEMP.md ../README.md
   echo "Functions and definitions have been generated"
 }

@@ -163,10 +163,6 @@ todo: Has not been looked at yet :question:
 
 
 # FUNCTION LIST
-
-(Click on the arrow to expand the function help.)
-
-
 <details>
 
 **<summary>addc: Add github credentials :white_check_mark: </summary>**
