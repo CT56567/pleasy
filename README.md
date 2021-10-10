@@ -35,6 +35,7 @@ plcd loc d #Takes you to the webroot fo the site
 Drush also works. Each sitename becomes the alias. This can be accessed from anywhere.
 ```angular2html
 drush @loc status #runs the status command on the loc site.
+drush @stg_loc status #runs the status command on the local stage site.
 drush @prod_loc status #runs the status commend on the production version of the loc site.
 drush @test_loc status #runs the status commend on the test version of the loc site which is on the production server.
 ```
@@ -106,7 +107,7 @@ pl runup stg #run updates on stage and check site.
 You can repeat these steps to set up the live test site on the production server
 
 ```
-pl updateprod stg -td
+pl updateprod stg_loc -td
 ```
 And/or you can run them on the live production server.
 ```

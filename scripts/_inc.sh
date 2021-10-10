@@ -1794,7 +1794,7 @@ makereadme() {
     fline=${fline:0:3}
     fline=$((fline + 1));
     ocmsg "fline $fline" debug
-    sed -i "$fline,1000d" ./README_TEMP.md
+    sed -i "$fline,2000d" ./README_TEMP.md
 
   if [ -d $script_root ]; then
     cd "$script_root"
