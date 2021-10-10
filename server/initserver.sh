@@ -108,7 +108,7 @@ prod=$(dirname $1)
 #test="$(dirname $prod)/$test_uri"
 
 
-echo "Update Production"
+echo "setup Production"
 #echo "Test site: $test"
 #echo "Test docroot: $test_docroot"
 echo "Prod site: $prod"
