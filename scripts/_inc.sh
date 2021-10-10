@@ -662,6 +662,45 @@ $sitename_var:
   root: $site_path/$sitename_var
   type: local
 EOL
+############################################
+### repeat for the stage site ####
+############################################
+site="stg_$site"
+    # Database defaults
+sdb="stg_$sitename_var$folder"
+sdbuser=$sdb
+sdbpass=$sdb
+
+    cat >$(dirname $script_root)/credentials/$site.mysql <<EOL
+[client]
+user = $sdbuser
+password = $sdbpass
+host = localhost
+EOL
+
+    #Now go through and create a Drush Alias for each site
+    import_site_config $site
+
+    cat >>$user_home/.drush/$folder.aliases.drushrc.php <<EOL
+\$aliases['$site'] = array (
+  'root' => '$site_path/$site/$webroot',
+  'uri' => 'http://$folder.$site',
+  'path-aliases' =>
+  array (
+    '%drush' => '$drushloc',
+    '%site' => 'sites/default/',
+  ),
+);
+EOL
+    #Now add drupal console aliases.
+    cat >>$user_home/.console/sites/$folder.yml <<EOL
+$sitename_var:
+  root: $site_path/$sitename_var
+  type: local
+EOL
+############################################
+### END repeat for the stage site ####
+############################################
   done
   IFS=$Field_Separator
 
