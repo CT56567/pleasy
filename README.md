@@ -703,6 +703,25 @@ END HELP
 
 <details>
 
+**<summary>restoredb: Restore a particular site's files and database. :white_check_mark: </summary>**
+--**BROKEN DOCUMENTATION**--
+You just need to state the sitename, eg dev.
+You can alternatively restore the site into a different site which is the second argument.
+
+Usage: pl  [OPTION] ... [SITE] [MESSAGE]
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
+
+Examples:
+pl  d8 # This will restore the db on the d8 site.
+--**BROKEN DOCUMENTATION**--
+
+</details>
+
+<details>
+
 **<summary>restore: Restore a particular site's files and database from backup :heavy_check_mark: </summary>**
 Usage: pl restore [FROM] [TO] [OPTION]
 You just need to state the sitename, eg dev.
@@ -812,13 +831,6 @@ Mandatory arguments to long options are mandatory for short options too.
   -d --debug              Provide debug information when running this script.
 
 Examples:
-
-</details>
-
-<details>
-
-**<summary>restoredb:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
 
 </details>
 
