@@ -75,6 +75,12 @@ Warn='\033[0;33m'  # Yellow
 import_site_config() {
   # setup basic defaults
   sitename_var=$1
+  stage=""
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+    # set up stg
+  sitename_var=${sitename_var:4}
+  stage="stg_"
+  fi
 
   # First load the defaults
   rp="recipes_default_source"
@@ -229,7 +235,7 @@ import_site_config() {
   rp="recipes_${sitename_var}_source"
   rpv=${!rp}
   if [ "$rpv" != "" ]; then
-    project=${!rp}
+    project="${!rp}"
   fi
   rp="recipes_${sitename_var}_dev"
   rpv=${!rp}
@@ -239,7 +245,7 @@ import_site_config() {
   rp="recipes_${sitename_var}_webroot"
   rpv=${!rp}
   if [ "$rpv" != "" ]; then
-    webroot=${!rp}
+    webroot="${!rp}"
   fi
   rp="recipes_${sitename_var}_sitename"
   rpv=${!rp}
@@ -347,6 +353,19 @@ import_site_config() {
     lando=${!rp}
   fi
 
+if [ "$stage" = "stg_" ]; then
+  db=""
+  dbuser=""
+  dbpass=""
+  dev="n"
+  uri="pleasy.$stage$sitename_var"
+  # Not sure about gitupstream
+  #now set the sitename
+  sitename_var="stg_$sitename_var"
+fi
+
+
+
   if [ "$db" = "" ]; then
     db="$sitename_var$folder"
   fi
@@ -370,6 +389,10 @@ import_site_config() {
     private="$www_path/$sitename_var/private"
     site_path="$www_path"
   fi
+
+# Create stg site
+
+
 # Clear all prod variables
   prod_alias=""
   prod_docroot=""      
