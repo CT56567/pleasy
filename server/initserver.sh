@@ -81,28 +81,11 @@ while true; do
   shift
 done
 
-if [[ "$1" == "initserver" ]] && [[ -z "$2" ]]; then
- echo "No site specified."
-elif [[ "$1" == "initserver" ]] ; then
-  prod_docroot=$2
-elif [[ -z "$1" ]]; then
- echo "No site specified."
-else
-  prod_docroot=$1
-fi
-
-
-if [ -z "$2" ] ; then
-echo "No user given."
-exit 0
-else
-user=$2
-fi
-
-
-prod_docroot=$1
-webroot=$(basename $1)
-prod=$(dirname $1)
+#!/bin/bash
+./secrets.sh
+ip=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
+webroot=$(basename prod_docroot)
+prod=$(dirname prod_docroot)
 #test_uri="test.$url"
 #test_docroot="$(dirname $prod)/$test_uri/$webroot"
 #test="$(dirname $prod)/$test_uri"
@@ -117,8 +100,7 @@ echo "Prod uri: $url"
 #echo "Test uri: $test_uri"
 echo "User: $user"
 
-#!/bin/bash
-./secrets.sh
+
 
 apt update && apt upgrade -y
 

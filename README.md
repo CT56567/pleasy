@@ -771,6 +771,24 @@ pl runup test # This will run the updates on the external test server.
 
 <details>
 
+**<summary>testserver: Test the production server initialisation :question: </summary>**
+Usage: pl testserver [OPTION] ... [SITE]
+This script will overwrite production with the site chosen It will first backup
+prod The external site details are also set in pl.yml under prod:
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -y --yes                Auto Yes to all options
+  -s --step=[INT]         Restart at the step specified.
+
+Examples:
+pl testserver stg
+END HELP
+
+</details>
+
+<details>
+
 **<summary>testsite: Overwrite production with site specified :question: </summary>**
 Usage: pl testsite [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
