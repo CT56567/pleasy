@@ -141,6 +141,10 @@ parse_pl_yml
 
 import_site_config $sitename_var
 
+if [[   "$verbose" = "debug" ]]; then
+  site_info
+fi
+
 prod_reinstall_modules=$reinstall_modules
 
 if [[ "$step" -gt 1 ]] ; then

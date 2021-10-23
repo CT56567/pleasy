@@ -405,7 +405,15 @@ fi
   prod_test_uri=""  
   prod_uri=""       
   prod_user=""       
-           
+
+# Allow for getting prod information for stg site.
+if [ "$stage" = "stg_" ]; then
+store_sitename=$sitename_var
+sitename_var=${sitename_var:4}
+fi
+
+ocmsg "Working out prod creds sitename is $sitename_var" debug
+
 rp="recipes_${sitename_var}_prod_user"
   rpv=${!rp}
   if [[ "$rpv" != "" ]]; then
@@ -476,6 +484,10 @@ rp="recipes_${sitename_var}_prod_user"
     fi
   fi
 
+# swap name back
+if [ "$stage" = "stg_" ]; then
+sitename_var=$store_sitename
+fi
 }
 
 # Called all the time
