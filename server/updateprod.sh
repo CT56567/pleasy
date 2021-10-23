@@ -44,6 +44,32 @@ echo "Test uri: $test_uri"
 echo "User: $user"
 echo "Reinstall Modules: $reinstall_modules"
 
+#Check if variables are empty
+if [[ "$test" = "" ]]; then
+  echo "test site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$test_docroot" = "" ]]; then
+  echo "test site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod" = "" ]]; then
+  echo "prod site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod_docroot" = "" ]]; then
+  echo "prod site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$uri" = "" ]]; then
+  echo "uri variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$user" = "" ]]; then
+  echo "user variable is empty. Aborting."
+  exit 1
+fi
+
 
 ### These next couple of steps are done from the local site since they need to be done before rsync which is local.
 

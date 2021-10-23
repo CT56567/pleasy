@@ -40,6 +40,31 @@ echo "Test docroot: $test_docroot"
 echo "Test uri: $test_uri"
 echo "User: $user"
 
+#Check if variables are empty
+if [[ "$test" = "" ]]; then
+  echo "test site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$test_docroot" = "" ]]; then
+  echo "test site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod" = "" ]]; then
+  echo "prod site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod_docroot" = "" ]]; then
+  echo "prod site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$uri" = "" ]]; then
+  echo "uri variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$user" = "" ]]; then
+  echo "user variable is empty. Aborting."
+  exit 1
+fi
 
 # prod files at prod.tar.gz
 # prod db at ~/proddb/prod.sql
@@ -66,8 +91,8 @@ sudo tar -zxf $uri/prod.tar.gz --directory /var/www/$uri --strip-components=1
 sudo tar -zxf $uri/prod.tar.gz --directory /var/www/test.$uri --strip-components=1
 
 echo "fix file permissions, requires sudo on external server and Restoring correct settings.php"
-sudo chown $prod_user:www-data /var/www/$uri -R
-sudo chown $prod_user:www-data /var/www/test.$uri -R
+sudo chown $user:www-data /var/www/$uri -R
+sudo chown $user:www-data /var/www/test.$uri -R
 
 echo "Files installed"
 

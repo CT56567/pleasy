@@ -205,7 +205,13 @@ fi
 
 if [ $step -lt 7 ] ; then
 echo -e "$Pcolor step 6: open production site $Color_off"
-drush @prod_${sitename_var} uli &
+
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+    drush @prod_${sitename_var:4} uli &
+  else
+    drush @prod_${sitename_var} uli &
+  fi
+
 fi
 
 # If it works, the production site needs to be swapped to prod branch from dev branch and hard rest to dev, is use 'ours'.

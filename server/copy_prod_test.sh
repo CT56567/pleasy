@@ -39,6 +39,35 @@ echo "Prod uri: $uri"
 echo "Test uri: $test_uri"
 echo "User: $user"
 
+#Check if variables are empty
+if [[ "$test" = "" ]]; then
+  echo "test site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$test_docroot" = "" ]]; then
+  echo "test site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod" = "" ]]; then
+  echo "prod site variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$prod_docroot" = "" ]]; then
+  echo "prod site docroot variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$uri" = "" ]]; then
+  echo "uri variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$test_uri" = "" ]]; then
+  echo "test uri variable is empty. Aborting."
+  exit 1
+fi
+if [[ "$user" = "" ]]; then
+  echo "user variable is empty. Aborting."
+  exit 1
+fi
 
 #remove test site if it exists
 sudo rm $test -rf
