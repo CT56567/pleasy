@@ -129,6 +129,7 @@ sitename_var=$1
 if [ $1 = "proddown" ] && [ -z "$2" ]; then
   echo "No site specified, exiting"
 fi
+
 import_site_config $sitename_var
 
 # Make sure @prod is setup.
@@ -136,8 +137,8 @@ update_all_configs
 
 echo "step $step"
 
-echo "Importing $sitename_var production site into localprod"
-
+echo "Importing $sitename_var production site into stg_$sitename_var"
+exit
 
 
 if [[ "$step" -gt 1 ]] ; then

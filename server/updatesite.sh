@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Not sure what this is suppose to do....???
+
+
 #  Fix the site settings files.
 # It is presumed the site files have been uploaded.
 # $1 is the site docroot.

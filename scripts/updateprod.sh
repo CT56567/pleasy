@@ -194,52 +194,44 @@ fi
 # swap test with prod
 # Put old prod out of main mode
 
-if [[ "$step" -lt 2 ]] ; then
-echo -e "$Pcolor step 1: Put into readonlymode and maintenance mode $Color_Off"
-# STEP 1
-# Always use the test server.
-# rsync the files to the server
+#  Step 1 is not needed since this is done when the site is copied in step 2.
+
+#if [[ "$step" -lt 2 ]] ; then
+#echo -e "$Pcolor step 1: Put into readonlymode and maintenance mode $Color_Off"
+## STEP 1
+## Always use the test server.
+## rsync the files to the server
 #if [[ "$test" ]] ; then
 #prod_site="$prod_user@$prod_test_uri:$prod_test_docroot" # > rsyncerrlog.txt
-prod_site="$prod_alias:$(dirname $prod_test_docroot)"
-echo "Prod_site: $prod_site"
+
 #else
 #prod_site="$prod_alias:$(dirname $prod_docroot)" # > rsyncerrlog.txt
 #fi
+#
+#
+## Don't need to put prod into maintenance mode if only running on test.
+#if [[ ! "$test" ]] ; then
+#ssh -t $prod_alias "./mainon.sh $prod_docroot"
+#fi
+#
+#fi
 
-
-# Don't need to put prod into maintenance mode if only running on test.
-if [[ ! "$test" ]] ; then
-# Check to see if production has the readonly module enabled.
-ocmsg "Check to see if production has the readonly module enabled." debug
-ssh -t $prod_alias "cd $prod_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }"
-readonly_en=$(ssh -t $prod_alias "cd $prod_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }" )
-
-ocmsg "Readonly: >$readonly_en<"
-if [ ! "$readonly_en" == "" ]; then
-    ssh -t $prod_alias "cd $prod_docroot && drush cset readonlymode.settings enabled 1 -y"
-    else
-      # otherwise put into maintenance mode
-    ssh -t $prod_alias "cd $prod_docroot && drush sset maintenance_mode 1"
-fi
-ssh -t $prod_alias "cd $prod_docroot && drush cr"
-fi
-
-fi
-if [[ "$step" -lt 3 ]] ; then
-echo -e "$Pcolor step 2: Copy production site to test site. $Color_Off"
-
-
-#copy production to test.
+if [[ "$step" -lt 2 ]] ; then
+echo -e "$Pcolor step 1: Copy production site to test site. $Color_Off"
 copy_prod_test
 fi
-if [[ "$step" -lt 4 ]] ; then
-echo -e "$Pcolor step 3: Copy files from local site to prod_site $Color_Off"
 
+if [[ "$step" -lt 3 ]] ; then
+echo -e "$Pcolor step 2: Copy files from local site to prod_site $Color_Off"
+prod_site="$prod_alias:$(dirname $prod_test_docroot)"
+echo "Prod_site: $prod_site"
 #  Copy files from local site to prod_site
 if [ "$site_path" = "" ] || [ "$sitename_var" = "" ] || [ "$prod_site" == "" ]; then
   #It's really really bad if rsync is run with empty values! It can wipe your home directory!
   echo "One of site_path >$site_path< sitename_var >$sitename_var< or prod_site >$prod_site< is empty aborting."
+  # make sure sites are out of maintenance mode.
+  ssh -t $prod_alias "./mainoff.sh $prod_docroot"
+  ssh -t $prod_alias "./mainoff.sh $test_docroot"
   exit 1
 fi
 ocmsg "Production site $prod_site localsite $site_path/$sitename_var" debug
