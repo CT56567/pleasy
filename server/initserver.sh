@@ -1,6 +1,9 @@
 #!/bin/bash
 
+set -eux -o pipefail
+
 SECONDS=0
+scriptname="$(basename $0)"
 
 # Update the prod site.
 # It is presumed the site files have been uploaded.
@@ -82,10 +85,10 @@ while true; do
 done
 
 #!/bin/bash
-./secrets.sh
+source secrets.sh
 ip=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
-webroot=$(basename prod_docroot)
-prod=$(dirname prod_docroot)
+webroot=$(basename $prod_docroot)
+prod=$(dirname $prod_docroot)
 #test_uri="test.$url"
 #test_docroot="$(dirname $prod)/$test_uri/$webroot"
 #test="$(dirname $prod)/$test_uri"
@@ -119,30 +122,42 @@ apt update && apt upgrade -y
 
 # apt-get -o Dpkg::Options::="--force-confnew --force-confdef" --force-yes -y upgrade
 # adduser $user
-sudo adduser $user --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+if ! id -u $user; then
+  sudo adduser $user --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+fi
 echo "$user:$pword" | sudo chpasswd
 
 usermod -aG sudo $user
 ufw allow OpenSSH
-ufw enable -y
+ufw enable
 ufw status
-ufw allow 'Nginx HTTP'
+ufw allow http
 ufw allow https
-echo "$user ALL=(ALL:ALL) NOPASSWD: ALL" | EDITOR="tee -a" visudo
+user_sudo_enable="$user ALL=(ALL:ALL) NOPASSWD: ALL" 
+if ! grep "$user_sudo_enable" /etc/sudoers; then
+  echo "$user_sudo_enable" | EDITOR="tee -a" visudo
+fi
 
-echo """send private key to server.
+echo "send private key to server.
 ssh-keygen
 ssh-copy-id -i $key $user@$ip"
 read  -n 1 -p "Is ssh keys set up?" mainmenuinput
 
 #Stop password authentication
-sudo sed 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
-sudo sed -i "s/\($TARGET_KEY *= *\).*/\1$REPLACEMENT_VALUE/" $CONFIG_FILE
-sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/' /etc/ssh/sshd_config
-sudo systemctl restart ssh -y
+sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/g' /etc/ssh/sshd_config
+sudo systemctl restart ssh
 
+# TODO: WIP
+# $MARIADB_VERSION="$()"
+# export DEBIAN_FRONTEND=noninteractive
+# {
+#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
+#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
+# } | sudo debconf-set-selections;
 
-exit 0
+export DEBIAN_FRONTEND=noninteractive
+sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password password root'
+sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password_again password root'
 
 sudo apt install mariadb-server -y
 sudo mysql_secure_installation
@@ -156,12 +171,8 @@ mysql -u root -p
 # ALTER USER 'root'@'localhost' IDENTIFIED BY 'PASSWORD_HERE';
 # now the password will be set. mysql_secure_installation does not set the password!!!!
 
-
-
-
 sudo apt install nginx -y
-sudo systemctl start nginx
-sudo systemctl enable nginx
+sudo systemctl enable --now nginx
 sudo apt install php php-fpm php-gd php-common php-mysql php-apcu php-gmp php-curl php-intl php-mbstring php-xmlrpc php-gd php-xml php-cli php-zip -y
 
 #date.timezone = Australia/Melbourne
@@ -393,7 +404,7 @@ if [[ "$step" -lt 2 ]]; then
 
 #  if [[ "$nopassword" == "y" ]]; then
 #    # set up user with sudo
-    echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo EDITOR="tee -a" visudo
+    #echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo EDITOR="tee -a" visudo
 #
 #  # This could be improved with creating specific scripts that would complete any sudo tasks and each of these be given
 #  # nopasswd permission. This would reduce the security risk of the above command.
@@ -677,7 +688,10 @@ if [ $step -lt 12 ]; then
   echo "composer home: $(composer config -g home)"
   comphome=$(composer config -g home)
 
-  echo "export PATH=\"\$PATH:$comphome/vendor/bin\"" >>~/.bashrc
+  vendor_bin_source="export PATH=\"\$PATH:$comphome/vendor/bin\"" 
+  if ! grep "$vendor_bin_source" ~/.bashrc; then
+    echo "$vendor_bin_source" >> ~/.bashrc
+  fi
   source ~/.bashrc
   # cat .bashrc
 
@@ -691,7 +705,10 @@ if [ $step -lt 12 ]; then
     fi
     #sudo ln -s ~/.config/composer/vendor/bin/drush .
     cd
-    echo "export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush" >>~/.bashrc
+    drush_source="export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush" 
+    if ! grep "$drush_source" ~/.bashrc; then
+      echo "$drush_source" >> ~/.bashrc
+    fi
   elif [[ -d "/home/$USER/.composer" ]]; then
     if [[ ! -L ~/.composer/vendor/bin/cgr ]]; then
       if [[ ! -L './cgr' ]]; then
@@ -699,7 +716,10 @@ if [ $step -lt 12 ]; then
         sudo ln -s ~/.composer/vendor/bin/cgr .
       fi
       cd
-      echo "export DRUSH_LAUNCHER_FALLBACK=~/.composer/vendor/bin/drush" >>~/.bashrc
+      drush_source="export DRUSH_LAUNCHER_FALLBACK=~/.composer/vendor/bin/drush" 
+      if ! grep "$drush_source" ~/.bashrc; then
+        echo "$drush_source" >> ~/.bashrc
+      fi
     fi
   else
     echo "Don't know where composer is. I thought I installed it.2"
@@ -742,7 +762,10 @@ fi
     #echo "set up source"
     #source "$HOME/.console/console.rc" 2>/dev/null
     echo "put into bashrc"
-    echo "source \"$HOME/.console/console.rc\" 2>/dev/null" >>~/.bashrc
+    console_source="source \"$HOME/.console/console.rc\" 2>/dev/null" 
+    if ! grep "$console_source" ~/.bashrc; then
+      echo "$console_source" >> ~/.bashrc
+    fi
     echo "reset source"
     cd
     source ~/.bashrc
