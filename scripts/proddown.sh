@@ -40,9 +40,7 @@ echo \
 "Overwrite a specified local site with production
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
-site. If no site specified, localprod will be used. The external site details are also set in pl.yml under prod: Note: once
-the local site has been locally backedup, then it can just be restored from there
-if need be.
+site. Note: If the local site will be deleted if it already exists. Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -51,8 +49,8 @@ Mandatory arguments to long options are mandatory for short options too.
 
 
 Examples:
-pl proddown stg
-pl proddown stg -s=2
+pl proddown loc
+pl proddown loc -s=2
 pl proddown
 END HELP"
 
@@ -138,8 +136,6 @@ update_all_configs
 echo "step $step"
 
 echo "Importing $sitename_var production site into stg_$sitename_var"
-exit
-
 
 if [[ "$step" -gt 1 ]] ; then
   echo "Starting from step $step"
@@ -169,9 +165,9 @@ fi
 if [[ "$step" -lt 3 ]] ; then
   echo -e "$Cyan step 2: restore production to $sitename_var $Color_Off"
   if [[ "$verbose"=="debug" ]]; then
-  pl restore prod $sitename_var -yfd
+  pl restore prod "stg_$sitename_var" -yfd
   else
-  pl restore prod $sitename_var -yf
+  pl restore prod "stg_$sitename_var" -yf
   fi
 fi
 #
@@ -218,8 +214,8 @@ fi
 
 # Make sure url is setup and open it!
 #pl sudoeuri localprod
-echo -e "$Cyan Opening $sitename_var $Color_Off"
-pl open $sitename_var
+echo -e "$Cyan Opening stg_$sitename_var $Color_Off"
+pl open "stg_$sitename_var"
 # End timer
 ################################################################################
 # Finish script, display time taken

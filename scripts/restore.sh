@@ -146,9 +146,17 @@ else
   sitename_var=$2
   bk=$1
 fi
+echo "Importing site config for $sitename_var"
 import_site_config $sitename_var
 
-echo "Restoring site $bk to $sitename_var"
+stage=""
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+    # set up stg
+  sitename_var=${sitename_var:4}
+  stage="stg_"
+  fi
+
+echo "Restoring site $bk to $stage$sitename_var"
 if [[ "$step" -gt 1 ]]; then
   echo "Starting from step $step"
 fi
@@ -170,16 +178,21 @@ if [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]] && [[ "$sitename_var" 
   # The script does it all. No need for anything else.
   exit 0
 elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
-  echo "Restoring production site to site: $sitename_var"
+
+  echo "Restoring production site to site: $stage$sitename_var using git"
   # First get the database
   #scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
   #cp "$folderpath/sitebackups/prod/$Bname.sql" "$folderpath/sitebackups/proddb/prod.sql" -rf
+ if [[ ! -d "$folderpath/sitebackups/$sitename_var" ]]; then
+   mkdir "$folderpath/sitebackups/$sitename_var"
+   fi
 
   # Check if database is already present
-  if [[ -f "$folderpath/sitebackups/proddb/prod.sql" ]]; then
+  if [[ -f "$folderpath/sitebackups/$sitename_var/proddb/prod.sql" ]]; then
     if [[ "$(git config --get remote.origin.url)" == "$prod_gitdb" ]]; then
+
       ocmsg "Pull the database down to proddb." debug
-      cd $folderpath/sitebackups/proddb/
+      cd $folderpath/sitebackups/$sitename_var/proddb/
       git fetch --all
       #git checkout -b backup-master
       git reset --hard origin/master
@@ -191,21 +204,21 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
   fi
   if [[ "$removedb" == "yes" ]]; then
     # Check if proddb exits
-    if [[ -d "$folderpath/sitebackups/proddb/" ]]; then
+    if [[ -d "$folderpath/sitebackups/$sitename_var/proddb/" ]]; then
       echo "removing proddb"
       rm "$folderpath/sitebackups/proddb" -rf
     fi
-    echo "Cloning $prod_gitdb into $folderpath/sitebackups/proddb"
-    git clone $prod_gitdb "$folderpath/sitebackups/proddb"
+    echo "Cloning $prod_gitdb into $folderpath/sitebackups/$sitename_var/proddb/"
+    git clone $prod_gitdb "$folderpath/sitebackups/$sitename_var/proddb/"
     echo "Git clone complete."
   fi
 
   echo "Now get the site files."
 
-  if [[ -d "$site_path/$sitename_var" ]]; then
+  if [[ -d "$site_path/$stage$sitename_var" ]]; then
     # Check that if the site exists, that it has the prod repo. Then only need to pull it!
-    ocmsg "The site: $sitename_var already exits. Now check if it is has the prod repo." debug
-    cd "$site_path/$sitename_var"
+    ocmsg "The site: $stage$sitename_var already exits. Now check if it is has the prod repo." debug
+    cd "$site_path/$stage$sitename_var"
     ocmsg "Local: $(git config --get remote.origin.url) Remote: $prod_gitrepo"
     if [[ "$(git config --get remote.origin.url)" == "$prod_gitrepo" ]]; then
       # Nice and simple!
@@ -216,22 +229,26 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
     else
       ocmsg "Removing old $sitename_var site and cloning the files into $sitename_var" debug
       # Set up the prod repo in the desired site location after deleting what is already there.
-      rm -rf "$site_path/$sitename_var"
+      rm -rf "$site_path/$stage$sitename_var"
       cd $site_path
-      git clone $prod_gitrepo $sitename_var
+      git clone $prod_gitrepo $stage$sitename_var
     fi
   else
     # clone the repo
-    ocmsg "Cloning the files into $sitename_var" debug
-    echo "Cloning the files into $sitename_var"
+    ocmsg "Cloning the files into $stage$sitename_var" debug
+    echo "Cloning the files into $stage$sitename_var"
     cd $site_path
-    git clone $prod_gitrepo $sitename_var
+    git clone $prod_gitrepo $stage$sitename_var
   fi
 
   # now tar it so it is backed up for future use while we are at it.
   #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
   echo "Fix site settings"
+  # messy
+  store_sitename_var=$sitename_var
+  sitename_var="$stage$sitename_var"
   fix_site_settings
+
 
   echo "Set site permissions"
   set_site_permissions $sitename_var
@@ -241,29 +258,35 @@ elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
   echo -e "$Cyan Restore the database $Color_Off"
   restore_db
   echo -e "$Cyan Files and database have been restored $Color_Off"
+
+  # messy but put the value back.
+  sitename_var=$store_sitename_var
   exit
 elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "tar" ]]; then
-  echo "Restoring production site to site: $sitename_var using tar method"
+  echo "Restoring production site to site: $stage$sitename_var using tar method"
 
   echo "Now get the site files."
 
-  if [[ -d "$site_path/$sitename_var" ]]; then
-    rm "$site_path/$sitename_var" -rf
-    mkdir "$site_path/$sitename_var"
+  if [[ -d "$site_path/$stage$sitename_var" ]]; then
+    rm "$site_path/$stage$sitename_var" -rf
+    mkdir "$site_path/$stage$sitename_var"
     else
-      mkdir "$site_path/$sitename_var"
+      mkdir "$site_path/$stage$sitename_var"
   fi
  if [[ "$Namef" = "" ]]; then
    #get the latest file
    cd $folderpath/sitebackups/$sitename_var/prod/
    options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
    Name=${options[0]:2}
-   tar -zxf "$folderpath/sitebackups/$sitename_var/prod/${Name::-4}.tar.gz" -C  "$site_path/$sitename_var"
+   tar -zxf "$folderpath/sitebackups/$sitename_var/prod/${Name::-4}.tar.gz" -C  "$site_path/$stage$sitename_var"
    else
- tar -zxf "$folderpath/sitebackups/$sitename_var/prod/$Namef" -C  "$site_path/$sitename_var"
+ tar -zxf "$folderpath/sitebackups/$sitename_var/prod/$Namef" -C  "$site_path/$stage$sitename_var"
 fi
   # now tar it so it is backed up for future use while we are at it.
   #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+   store_sitename_var=$sitename_var
+   sitename_var="$stage$sitename_var"
+
   echo "Fix site settings"
   fix_site_settings
 
@@ -275,12 +298,15 @@ fi
   echo -e "$Cyan Restore the database $Color_Off"
   restore_db
   echo -e "$Cyan Files and database have been restored $Color_Off"
+  sitename_var=$store_sitename_var
   drush @$sitename_var uli &
   echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
 
   exit 0
 
 else
+  echo "Restoring $bk site to site: $stage$sitename_var "
+sitename_var="$stage$sitename_var"
 
   ocmsg "flag_first is $flag_first" debug
   options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))

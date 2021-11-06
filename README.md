@@ -585,9 +585,7 @@ pl open loc
 **<summary>proddown: Overwrite a specified local site with production :white_check_mark: </summary>**
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
-site. If no site specified, localprod will be used. The external site details are also set in pl.yml under prod: Note: once
-the local site has been locally backedup, then it can just be restored from there
-if need be.
+site. Note: If the local site will be deleted if it already exists. Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -596,8 +594,8 @@ Mandatory arguments to long options are mandatory for short options too.
 
 
 Examples:
-pl proddown stg
-pl proddown stg -s=2
+pl proddown loc
+pl proddown loc -s=2
 pl proddown
 END HELP
 

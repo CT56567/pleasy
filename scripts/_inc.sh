@@ -1167,10 +1167,14 @@ backup_prod() {
   #cd "$webroot"
 
 
-  if [[ ! "$prod_gitdb" == "" ]]; then
+  if [[ "$prod_method" == "git" ]]; then
+      if [[ ! "$prod_gitdb" == "" ]]; then
       echo "proddb $prod_gitdb"
       add_git_credentials
     gitprodpush
+    else
+      echo "Git method for prod backup chosen, but no gitdb set. Exiting"
+      exit 1
     #Now move the db and files down to local
 #    scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
 #    wget https://github.com/rjzaar/ocorg/archive/master.tar.gz -O "$folderpath/sitebackups/prod/$Bname.tar.gz"
@@ -1181,7 +1185,7 @@ backup_prod() {
 #      git clone $prod_gitrepo $sitename_var
 #    # now tar it.
 #    tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
-
+    fi
   else
     import_site_config $sitename_var
     #site_info
@@ -1384,7 +1388,7 @@ restore_db() {
   if [[ "$bk" == prod ]] && [[ "$prod_method" == "git" ]]; then
     echo -e "\e[34mrestore $db database using git production\e[39m"
     result=$(
-      mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$folderpath/sitebackups/proddb/prod.sql" 2>/dev/null | grep -v '+' | cut -d' ' -f2
+      mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$folderpath/sitebackups/$sitename_var/prod/proddb/prod.sql" 2>/dev/null | grep -v '+' | cut -d' ' -f2
       echo ": ${PIPESTATUS[0]}"
     )
 
