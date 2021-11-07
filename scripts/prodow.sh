@@ -110,7 +110,7 @@ import_site_config $sitename_var
 if [ $step -gt 1 ] ; then
   echo -e "Starting from step $step"
 fi
-prod_root=$(dirname $prod_docroot)
+echo "prod_docroot $prod_docroot"
 #First backup the current dev site if it exists
 #if [ $step -lt 2 ] ; then
 ##echo -e "$Pcolor step 1: backup current sitename_var $sitename_var $Color_off"
@@ -136,8 +136,8 @@ prod_root=$(dirname $prod_docroot)
 #import_site_config $sitename_var
 #fi
 
-if [ $step -lt 4 ] ; then
-echo -e "$Pcolor step 3: replace production files with $sitename_var $Color_Off"
+if [ $step -lt 2 ] ; then
+echo -e "$Pcolor step 1: replace production files with $sitename_var $Color_Off"
 
 cd
 cd "$folderpath/sitebackups/$sitename_var"
@@ -156,37 +156,48 @@ echo "Files and db transfered."
 
 fi
 
-if [ $step -lt 5 ] ; then
-echo -e "$Pcolor step 4: install production files $Color_off"
+if [ $step -lt 3 ] ; then
+echo -e "$Pcolor step 2: install production files $Color_off"
 prod_root=$(dirname $prod_docroot)
+webroot=$(basename $prod_docroot)
+prod=$(dirname $prod_docroot)
+uri=$(basename $prod)
+test_docroot=$(dirname $prod)/test.$uri/$webroot
+echo "prod_docroot $prod_docroot"
+echo "webroot $webroot"
+echo "prod $prod"
+echo "uri $uri"
+echo "test_docroot: $test_docroot"
 #ssh $prod_alias "cp -rf $prod_root $prod_root.old"
 #ssh $prod_alias "rm -rf $prod_root"
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
-
-    ssh $prod_alias "./createsites.sh $prod_docroot $prod_user"
+ssh $prod_alias "./createsites.sh $prod_docroot"
 fi
 
-if [ $step -lt 6 ] ; then
-echo -e "$Pcolor step 5: creating sites $prod_docroot $prod_user  $prod_profile$Color_off"
+if [ $step -lt 4 ] ; then
+echo -e "$Pcolor step 3: creating sites $prod_docroot $prod_profile$Color_off"
     # For now the script should work, but needs various improvments such as, being able to restore on error.
-ocmsg "Prod alias $prod_alias uri $prod_uri" debug
-exists="$(ssh  $prod_alias "if [ -d /var/www/$prod_uri ]; then echo \"exists\"; fi")"
+ocmsg "Prod alias $prod_alias uri $uri" debug
+exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
     if [ "$exists" = "exists" ]; then
       echo "Site $prod_docroot exists so just updating it."
-      ssh $prod_alias "./updatesite.sh $prod_docroot $prod_user"
-      ssh $prod_alias "./updatesite.sh $test_docroot $prod_user"
+      ssh $prod_alias "./updatesite.sh $prod_docroot"
+      ssh $prod_alias "./updatesite.sh $test_docroot"
     else
         echo "Creating site $prod_docroot."
-    ssh $prod_alias "./createsite.sh $prod_docroot $prod_user"
-    ssh $prod_alias "./createsite.sh $test_docroot $prod_user"
+    ssh $prod_alias "./createsite.sh $prod_docroot"
+    ssh $prod_alias "./createsite.sh $test_docroot"
     fi
 
 fi
 
-if [ $step -lt 7 ] ; then
-echo -e "$Pcolor step 6: open production site $Color_off"
-
+if [ $step -lt 5 ] ; then
+echo -e "$Pcolor step 4: open production site $Color_off"
+# if stg site remove the stg
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+      sitename_var=${sitename_var:4}
+  fi
   if [ "${sitename_var:0:3}" = "stg" ]; then
     drush @prod_${sitename_var:4} uli &
   else

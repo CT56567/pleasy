@@ -220,6 +220,9 @@ if [ "$verbose" = "debug" ]; then
   fi
 fi
 
+# Make sure config is exported
+drush @$sitename_var cex --destination=../../cmi -y
+
 #drush rsync @$sitename_var @test --no-ansi  -y --exclude-paths=private:.git -- --exclude=.gitignore --delete
 # was -rav
 # -rzcEPul
@@ -242,7 +245,12 @@ fi
 
 fi
 if [[ "$step" -lt 5 ]] ; then
-echo -e "$Pcolor step 4: Runupdates on the test/prod site. $Color_Off"updateprod.sh
+echo -e "$Pcolor step 4: Runupdates on the test/prod site. $Color_Off"
+
+# if stg site remove the stg
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+      sitename_var=${sitename_var:4}
+  fi
 
 # Runupdates on the test/prod site.
 # runup on the server

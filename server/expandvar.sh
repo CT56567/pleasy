@@ -26,6 +26,7 @@ echo "Prod site: $prod"
 echo "Prod docroot: $prod_docroot"
 echo "Prod uri: $uri"
 echo "Test uri: $test_uri"
+echo "user: $user"
 
 #Check if variables are empty
 if [[ "$test" = "" ]]; then

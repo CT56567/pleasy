@@ -16,12 +16,7 @@ else
   prod_docroot=$1
 fi
 
-if [ -z "$2" ] ; then
-echo "No user given."
-exit 0
-else
-user=$2
-fi
+user=$USER
 
 webroot=$(basename $1)
 prod=$(dirname $1)

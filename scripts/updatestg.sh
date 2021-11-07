@@ -1,5 +1,5 @@
 #!/bin/bash
-################################################################################
+
 #                Update Stage For Pleasy Library
 #
 #  This will update the stg site with code from the local site.
@@ -11,34 +11,22 @@
 #  15/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 #                             Commenting with model
 #
 # NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-################################################################################
 # Description - Each bar is 80 #, in vim do 80i#esc
-################################################################################
 #
-################################################################################
-################################################################################
 
 # scriptname is set in pl.
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Update stg or specified site.
@@ -56,36 +44,27 @@ pl $scriptname d8 stg_t3 # This is update the stg_t3 site with the code in d8."
 }
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hs:dt -l help,step:,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
+
 [ $? -eq 0 ] || {
     echo "please do 'pl $scriptname --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 while true; do
   case "$1" in
   -h | --help)
@@ -124,14 +103,11 @@ else
 fi
 
 # Check number of arguments
-################################################################################
 # If no arguments given, prompt user for arguments
-################################################################################
 if [ "$#" = 0 ]; then
   print_help
   exit 2
 fi
-
 
 parse_pl_yml
 
@@ -148,7 +124,11 @@ if [[ "$step" -gt 1 ]] ; then
 fi
 
 if [[ "$step" -lt 2 ]] ; then
-echo -e "$Pcolor step 1: Copy dev site $from to stg site $sitename_var. $Color_Off"
+echo -e "$Pcolor step 1: Copy dev site $from updated files to stg site $sitename_var. $Color_Off"
+
+ocmsg "export config from $from" debug
+drush @$from cex --destination=../../cmi -y
+
 #  Copy files from local site to prod_site
 if [ "$site_path" = "" ] || [ "$sitename_var" = "" ] || [ "$from" == "" ]; then
   #It's really really bad if rsync is run with empty values! It can wipe your home directory!
@@ -159,6 +139,7 @@ fi
 #drush rsync @$sitename_var @test --no-ansi  -y --exclude-paths=private:.git -- --exclude=.gitignore --delete
 # was -rav
 # -rzcEPul
+echo "rsync from $site_path/$from to $site_path/$sitename_var/"
   rsync -raz --delete --exclude 'docroot/sites/default/settings.*' \
             --exclude 'docroot/sites/default/services.yml' \
             --exclude 'docroot/sites/default/files/' \
@@ -174,18 +155,19 @@ fi
             --exclude '*/node_modules/' \
             --exclude 'node_modules/' \
             --exclude 'dev/' \
-           "$site_path/$from"  "$site_path/$sitename_var/"  # > rsyncerrlog.txt
+           "$site_path/$from/"  "$site_path/$sitename_var/"  # > rsyncerrlog.txt
 fi
 
+
+
 if [[ "$step" -lt 3 ]] ; then
-echo -e "$Pcolor step 2: Runupdates on the stage site $sitename_var. $Color_Off"updateprod.sh
+echo -e "$Pcolor step 2: Runupdates on the stage site $sitename_var. $Color_Off"
+
 runupdates
 
 fi
 #Check changes
 
 # End timer
-################################################################################
 # Finish script, display time taken
-################################################################################
 echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

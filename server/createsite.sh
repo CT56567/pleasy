@@ -12,12 +12,7 @@ else
 prod_docroot=$1
 fi
 
-if [ -z "$2" ] ; then
-echo "No user given"
-exit 0
-else
-user=$2
-fi
+user=$USER
 
 prod_docroot=$1
 webroot=$(basename $1)
@@ -120,10 +115,10 @@ EOL
 
 # Now store the files
 echo "storing the settings file"
-sudo cp "$prod_docroot/sites/default/settings.php" ~/$uri/settings.php
+sudo cp "$prod_docroot/sites/default/settings.php" /home/$user/$uri/settings.php
 
 echo "Creating the database."
-cd ~/$uri
+cd /home/$user/$uri
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE USER $dbuser@localhost IDENTIFIED BY '"$dbpass"';"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON $dbname.* TO '$dbuser'@'localhost' IDENTIFIED BY '"$dbpass"';"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
@@ -136,6 +131,8 @@ echo "set up cron"
 # using https://stackoverflow.com/questions/878600/how-to-create-a-cron-job-using-bash-automatically-without-the-interactive-editor
 cd
 #write out current crontab
+# todo remove duplicates
+
 sudo crontab -l > mycron
 #echo new cron into cron file
 echo "10 * * * * /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin COLUMNS=72 /usr/local/bin/drush --root=$prod_docroot --uri=$uri --quiet cron" >> mycron

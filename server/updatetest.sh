@@ -3,8 +3,7 @@
 # Update the test site.
 # $1 is the test site. docroot location
 # $2 is the reinstall_modules
-cd
-./secrets.sh
+user=$USER
 
 if [ -z "$1" ]; then
 echo "No test site info provided. Exiting."
@@ -29,6 +28,7 @@ echo "composer install on test"
 cd $(dirname $test_docroot)
 composer install --no-dev
 cd
+echo "user $user path $test_docroot"
 sudo ./dfp.sh --drupal_user=$user --drupal_path=$test_docroot
 
 cd $test_docroot

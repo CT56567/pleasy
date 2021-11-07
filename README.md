@@ -853,6 +853,23 @@ Examples:
 
 <details>
 
+**<summary>updatestg: Update stg or specified site. :white_check_mark: </summary>**
+Usage: pl  [OPTION] ... [SITE] [MESSAGE]
+This will run the updates on stg or specified site.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -d --debug              Provide debug information when running this script.
+  -t --test               Update the test server not production.
+
+Examples:
+pl  d8 # This will update the d8 stg site with the code in d8.
+pl  d8 stg_t3 # This is update the stg_t3 site with the code in d8.
+
+</details>
+
+<details>
+
 **<summary>testim:  :question: </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 

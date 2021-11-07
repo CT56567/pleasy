@@ -831,6 +831,11 @@ EOL
       echo "Added hash salt"
     fi
   fi
+
+  # Now make sure files have correct permissions - this is a lot faster than fixp
+  sudo chown $user:www-data $site_path/$sitename_var -R
+
+
 }
 
 #
@@ -1178,7 +1183,7 @@ backup_prod() {
 # This will copy the production site to the test site.
 copy_prod_test() {
 echo "Copying the production site to the test site."
-ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot $prod_user"
+ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot"
 }
 #
 #
@@ -1632,25 +1637,27 @@ plcomposer() {
 # Run updates for a drupal site. Can be external.
 runupdates() {
 
-echo "Runupdates  on $prod_alias on site $sitename_var"
-
 if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
-    eval $(ssh-agent -s)
-    echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
-    ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
+  echo "Runupdates  on $prod_alias  on site $sitename_var"
+  # todo work out why these next three lines are needed.
+#    eval $(ssh-agent -s)
+#    echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
+#    ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
   # presume you don't need toProduction site fix site settings for production sites.
   if [[ "${sitename_var:0:4}" == "test" ]]; then
     # This script just runs the composer install --no-dev and fixes site permissions.
     echo "Running updatetest.sh"
-    ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_user"
+    ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_reinstall_modules"
+    exit 0
   else
 #Now run the rest of the update process.
 echo "Running updateprod.sh"
-    ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_user $prod_reinstall_modules"
+    ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_reinstall_modules"
     # The updateprod script does it all.
     exit 0
   fi
 else
+  echo "Runupdates  on site $sitename_var"
   ocmsg "Path: $site_path/$sitename_var" debug
   cd $site_path/$sitename_var
   # composer install
@@ -1724,7 +1731,7 @@ drush @$sitename_var cset readonlymode.settings enabled 0 -y
 
 
 fi
-echo "Running drush Cr"
+echo "Running drush cr"
 drush @$sitename_var cr
 }
 

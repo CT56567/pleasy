@@ -8,7 +8,6 @@ SECONDS=0
 # $3 modules to be reinstalled. Put the modules in quotation marks.
 
 # This presumes the production site has been copied to test.
-cd ./secrets.sh
 
 if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."
@@ -22,14 +21,28 @@ reinstall_modules=$2
 fi
 
 echo "Update Production"
-cd
-./expandvar.sh $1
-echo "User: $user"
-echo "Reinstall Modules: $reinstall_modules"
-if [[ "$user" = "" ]]; then
-  echo "user variable is empty. Aborting."
+if [[ "$1" = "" ]]; then
+  echo "docroot variable is empty. Aborting."
   exit 1
 fi
+user=$USER
+prod_docroot=$1
+webroot=$(basename $1)
+prod=$(dirname $1)
+uri=$(basename $prod)
+test_uri="test.$uri"
+test_docroot="$(dirname $prod)/$test_uri/$webroot"
+test="$(dirname $prod)/$test_uri"
+
+echo "Variables are:"
+echo "Test site: $test"
+echo "Test docroot: $test_docroot"
+echo "Prod site: $prod"
+echo "Prod docroot: $prod_docroot"
+echo "Prod uri: $uri"
+echo "Test uri: $test_uri"
+echo "user: $user"
+echo "Reinstall Modules: $reinstall_modules"
 
 #update test
 echo "Run the updates on test"
