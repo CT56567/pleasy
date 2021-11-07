@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux -o pipefail
+set -eux
 
 SECONDS=0
 scriptname="$(basename $0)"
@@ -122,58 +122,85 @@ if ! grep "$user_sudo_enable" /etc/sudoers; then
   echo "$user_sudo_enable" | EDITOR="tee -a" visudo
 fi
 
-echo "send private key to server.
-ssh-keygen
-ssh-copy-id -i $key $user@$ip"
-read  -n 1 -p "Is ssh keys set up?" mainmenuinput
+# copy over ssh auth in new user
+echo "Copying over SSH auth from $USER to $user"
 
-#Stop password authentication
+sudo mkdir -p /home/$user/.ssh
+sudo cp -p $HOME/.ssh/authorized_keys /home/$user/.ssh/authorized_keys
+sudo chown $user:$user /home/$user/.ssh/authorized_keys
+
+# Stop password authentication
 sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/g' /etc/ssh/sshd_config
 sudo systemctl restart ssh
 
-# TODO: WIP
-# $MARIADB_VERSION="$()"
-# export DEBIAN_FRONTEND=noninteractive
-# {
-#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
-#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
-# } | sudo debconf-set-selections;
-
+MARIADB_VERSION="$(apt-cache madison mariadb-server | head -n 1 | sed -r 's/.*[0-9]+:([0-9]+\.[0-9]+).*/\1/')"
 export DEBIAN_FRONTEND=noninteractive
-sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password password root'
-sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password_again password root'
+{
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
+} | sudo debconf-set-selections;
+
+if dpkg -l mariadb-server > /dev/null; then
+  echo "WARNING: Mariadb is already installed"
+  echo "Script may not be able to setup the DB properly"
+  echo "Continuing anyway"
+fi
 
 sudo apt install mariadb-server -y
-sudo mysql_secure_installation
-sudo systemctl status mysql
 
-mysql -u root -p
+sudo mysql -sfu root <<EOF || true
+-- set root password
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+-- delete anonymous users
+DELETE FROM mysql.user WHERE User='';
+-- delete remote root capabilities
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+-- drop database 'test'
+DROP DATABASE IF EXISTS test;
+-- also make sure there are lingering permissions to it
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+-- make changes immediately
+FLUSH PRIVILEGES;
+EOF
 
-#need to use
-# sudo mysql
-# use mysql;
-# ALTER USER 'root'@'localhost' IDENTIFIED BY 'PASSWORD_HERE';
-# now the password will be set. mysql_secure_installation does not set the password!!!!
+sudo systemctl status mysql --no-pager
 
 sudo apt install nginx -y
 sudo systemctl enable --now nginx
-sudo apt install php php-fpm php-gd php-common php-mysql php-apcu php-gmp php-curl php-intl php-mbstring php-xmlrpc php-gd php-xml php-cli php-zip -y
+sudo apt install -y \
+  php \
+  php-fpm \
+  php-gd \
+  php-common \
+  php-mysql \
+  php-apcu \
+  php-gmp \
+  php-curl \
+  php-intl \
+  php-mbstring \
+  php-xmlrpc \
+  php-gd \
+  php-xml \
+  php-cli \
+  php-zip
 
 #date.timezone = Australia/Melbourne
 #memory_limit = 256M
 #upload_max_filesize = 64M
 #max_execution_time = 600
 #cgi.fix_pathinfo = 0
-sudo sed -i "s/\(date.timezone *= *\).*/\1 Australia\/Melbourne/" /etc/php/7.4/fpm/php.ini
-sudo sed -i '/date.timezone *=* Australia\/Melbourne/s/^;//' /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(memory_limit *= *\).*/\1 256M/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(upload_max_filesize *= *\).*/\1 64M/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(max_execution_time *= *\).*/\1 600/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(cgi.fix_pathinfo *= *\).*/\1 0/" /etc/php/7.4/fpm/php.ini
-sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/7.4/fpm/php.ini
+PHP_VERSION="$(apt-cache madison php | head -n 1 | sed -r 's/.*[0-9]+:([0-9]+\.[0-9]+).*/\1/')"
 
-sudo systemctl restart php7.4-fpm
-sudo systemctl enable php7.4-fpm
+sudo sed -i "s/\(date.timezone *= *\).*/\1 Australia\/Melbourne/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i '/date.timezone *=* Australia\/Melbourne/s/^;//' /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(memory_limit *= *\).*/\1 256M/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(upload_max_filesize *= *\).*/\1 64M/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(max_execution_time *= *\).*/\1 600/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(cgi.fix_pathinfo *= *\).*/\1 0/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/$PHP_VERSION/fpm/php.ini
+
+sudo systemctl restart php${PHP_VERSION}-fpm
+sudo systemctl enable php${PHP_VERSION}-fpm
 
 sudo apt install certbot -y
 sudo systemctl stop nginx
@@ -363,6 +390,7 @@ EOL
 sudo ln -s /etc/nginx/sites-available/test.$url /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
+
 # Transfer the files first.
 # Create the settings file.
 
