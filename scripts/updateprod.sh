@@ -49,9 +49,6 @@ pl $scriptname d8 -t # This will update the test site specified in pl.yml with t
 # Timer to show how long it took to run the script
 SECONDS=0
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o hs:dt -l help,step:,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 

@@ -8,14 +8,8 @@ scriptname="$(basename $0)"
 # Update the prod site.
 # It is presumed the site files have been uploaded.
 
-# Step Variable
-# Variable step is defined for debug purposes. If the init fails, we can,
-# using step, start at the point of the script which had failed
-step=${step:-1}
+# step is defined for script debug purposesstep=${step:-1}
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are --yes --help --step
 args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 

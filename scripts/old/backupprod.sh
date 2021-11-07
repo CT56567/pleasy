@@ -46,9 +46,6 @@ Usage: pl backup [OPTION] ... [MESSAGE]
 
 }
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o h -l help --name "$scriptname" -- "$@")
 #echo "$args"
 

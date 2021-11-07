@@ -38,9 +38,6 @@ Mandatory arguments to long options are mandatory for short options too.
 Examples:"
 }
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o h -l help --name "$scriptname" -- "$@")
 # echo "$args"
 
