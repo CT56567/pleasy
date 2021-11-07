@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                     Included functions For Pleasy Library
 #
 #  @ROB add description to this script and to the print_help function!
@@ -10,27 +9,19 @@
 #  29/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 
 # oc includes
 # Helper functions to get the abolute path for the command
 # Copyright http://stackoverflow.com/a/7400673/257479
 
 #
-################################################################################
 #
-################################################################################
 myreadlink() {
   if [ ! -h "$1" ]; then
     echo "$1"
@@ -69,9 +60,7 @@ Alert='\033[0;31m' # Red
 Warn='\033[0;33m'  # Yellow
 
 #
-################################################################################
 #
-################################################################################
 import_site_config() {
   # setup basic defaults
   sitename_var=$1
@@ -491,9 +480,7 @@ fi
 }
 
 # Called all the time
-################################################################################
 # Import yaml, which provides global variables. presumes $script_root is set
-################################################################################
 # SCRIPT IS BROKEN FOR JAMES
 parse_pl_yml() {
   # $userhome
@@ -515,9 +502,7 @@ parse_pl_yml() {
 }
 
 #
-################################################################################
 #
-################################################################################
 update_all_configs() {
   echo "update configs"
 
@@ -674,9 +659,7 @@ $sitename_var:
   root: $site_path/$sitename_var
   type: local
 EOL
-############################################
 ### repeat for the stage site ####
-############################################
 site="stg_$site"
     # Database defaults
 sdb="stg_$sitename_var$folder"
@@ -710,9 +693,7 @@ $sitename_var:
   root: $site_path/$sitename_var
   type: local
 EOL
-############################################
 ### END repeat for the stage site ####
-############################################
   done
   IFS=$Field_Separator
 
@@ -726,14 +707,12 @@ EOL
 }
 
 # This will fix the site settings
-################################################################################
 # Presumes the following information is set:
 # $user
 # $folder
 # $sitename_var
 # $webroot
 # $site_path
-################################################################################
 fix_site_settings() {
 
   # Check that settings.php has reference to local.settings.php
@@ -855,13 +834,11 @@ EOL
 }
 
 #
-################################################################################
 # ocmsg replaces echo and gives some options. The default is "none" which is set by each script at the start of the
 # command. Options can be passed to the command for ocmsg to provide information
 # normal: To provide information about what is happening.
 # debug: To provide more detailed information such as variables in the script. For debug to work it has to be selected
 # as an option in the command (-d or --debug) and the word debug occurs after the msg, eg ocmsg "var: $var" debug
-################################################################################
 ocmsg() {
   # This is to provide extra messaging if the verbose variable in pl.yml is set to y.
 
@@ -873,13 +850,11 @@ ocmsg() {
 }
 
 # This will set the correct permissions
-################################################################################
 # Presumes the following information is set:
 # $user
 # $folder
 # $sitename_var
 # $webroot
-################################################################################
 set_site_permissions() {
   if [ "$dev" = "y" ] || [ "$verbose" = "debug" ]; then
     devp="--dev"
@@ -890,13 +865,11 @@ set_site_permissions() {
 }
 
 # This will delete current site database and rebuild it
-################################################################################
 # Persumes the following information is set:
 # $user
 # $folder
 # $sitename_var
 # $webroot
-################################################################################
 rebuild_site() {
   #etc
   echo "bstep $bstep"
@@ -1036,9 +1009,7 @@ rebuild_site() {
 }
 
 #
-################################################################################
 #
-################################################################################
 backup_site() {
   #backup db.
   #use git: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/set-up-a-local-development-drupal-0-7
@@ -1080,9 +1051,7 @@ backup_site() {
 }
 
 #
-################################################################################
 # User server script to backup production database so it can be run in parallel
-################################################################################
 gitbackupdb() {
   #    drush @prod sql-dump --result-file="/home/$prod_user/proddb/prod.sql"
   #    ssh $prod_alias "cd proddb && git add . && git commit -m \"$(date +%Y%m%d\T%H%M%S-)\" && git push"
@@ -1108,9 +1077,7 @@ echo -e "$Purple gitbackupdb: $prod_docroot@$prod_alias"
 }
 
 #
-################################################################################
 # User server script to backup production files so it can be run in parallel
-################################################################################
 gitbackupfiles() {
   echo -e "$Cyan gitbackupfiles "
   ssh $prod_alias "./gitbackupfiles.sh $prod_docroot $Bname"
@@ -1119,9 +1086,7 @@ gitbackupfiles() {
 
 
 #
-################################################################################
 # User server script to backup production files so it can be run in parallel
-################################################################################
 gitprodpush() {
   # Make sure ssh identity is added
   add_git_credentials
@@ -1143,9 +1108,7 @@ gitprodpush() {
 }
 
 #
-################################################################################
 #
-################################################################################
 backup_prod() {
 
   # Make sure ssh identity is added
@@ -1212,17 +1175,13 @@ backup_prod() {
 }
 
 #
-################################################################################
 # This will copy the production site to the test site.
-################################################################################
 copy_prod_test() {
 echo "Copying the production site to the test site."
 ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot $prod_user"
 }
 #
-################################################################################
 #
-################################################################################
 backup_db() {
   echo -e "$Green backing up $sitename_var $Color_Off"
 
@@ -1260,11 +1219,9 @@ backup_db() {
 }
 
 #
-################################################################################
 # Make the database for the site
 # pltest is set by the -t option in install to indicate a testing environment such as travis which requires
 # unique mysql permissions for some reason.
-################################################################################
 make_db() {
   echo "Create database $db and user $dbuser if needed. Using $folderpath/mysql.cnf"
 
@@ -1373,13 +1330,11 @@ make_db() {
 }
 
 #
-################################################################################
 # presumes that the correct information is already set:
 # $Name backup sql file
 # $db
 # $dbuser
 # $dbpass
-################################################################################
 restore_db() {
   echo "restore db start"
 
@@ -1439,17 +1394,13 @@ if [[ "${PIPESTATUS[0]}" == "1" ]]; then
 }
 
 #
-################################################################################
 #
-################################################################################
 test_site() {
   echo $sitename_var, $db, $dbuser, $dbpass
 }
 
 #
-################################################################################
 #
-################################################################################
 db_defaults() {
   # Database defaults
   echo "db defaults: db $db dbuser $dbuser dbpass $dbpass"
@@ -1468,9 +1419,7 @@ db_defaults() {
 }
 
 #
-################################################################################
 #
-################################################################################
 site_info() {
 
   #!!!! add code to handle info type.
@@ -1505,9 +1454,7 @@ site_info() {
 }
 
 #
-################################################################################
 #
-################################################################################
 copy_site_files() {
   from=$1
   sitename_var=$2
@@ -1529,9 +1476,7 @@ copy_site_files() {
 }
 
 #
-################################################################################
 #
-################################################################################
 copy_site_folder() {
   from=$1
   sitename_var=$2
@@ -1550,9 +1495,7 @@ copy_site_folder() {
 }
 
 #
-################################################################################
 #
-################################################################################
 update_locations() {
   # This will update the key directory locations set by the environment and pl.yml
   # It presumes that _inc.sh has already been run and parse_pl_yml has been run.
@@ -1653,9 +1596,7 @@ EOL
 }
 
 #
-################################################################################
 # Add git credentials
-################################################################################
 add_git_credentials() {
   ocmsg "Add git credentials $user_home/.ssh/$github_key"
   eval $(ssh-agent -s)
@@ -1669,9 +1610,7 @@ add_git_credentials() {
 }
 
 #
-################################################################################
 # Run composer command for particular site. Since composer.json could be in different locations, this command is needed.
-################################################################################
 plcomposer() {
   cd $site_path/$sitename_var
   # Need to check if composer is installed.
@@ -1690,9 +1629,7 @@ plcomposer() {
 
 }
 
-################################################################################
 # Run updates for a drupal site. Can be external.
-################################################################################
 runupdates() {
 
 echo "Runupdates  on $prod_alias on site $sitename_var"
@@ -1791,9 +1728,7 @@ echo "Running drush Cr"
 drush @$sitename_var cr
 }
 
-################################################################################
 # Update pleasy readme with the latest function explanations.
-################################################################################
 makereadme() {
 
   cd

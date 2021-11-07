@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                      Install Drupal For Pleasy Library
 #
 #  This script is used to install a variety of drupal flavours particularly
@@ -14,25 +13,18 @@
 #  2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
 
 # scriptname is set in pl.
 verbose="none"
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Installs a drupal site
@@ -62,35 +54,25 @@ END HELP"
 }
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hyfdb:s:te -l help,yes,files,debug,build-step:,step:,test,extras --name "$scriptname" -- "$@")
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
     echo "please do 'pl install --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 # build_step is for the rebuild steps
 build_step=1
 flag_buildstep=0

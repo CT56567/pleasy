@@ -1,9 +1,7 @@
 #!/bin/bash
 #stg2dev
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Need to check if there is an opencourse git or not.

@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                       make dev mode For Pleasy Library
 #  This script is used to turn on dev mode and enable dev modules.
 #  You just need to state the sitename, eg stg.
@@ -11,25 +10,17 @@
 #  [Insert New]
 #
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 
 # scriptname is set in pl.
 verbose="none"
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Turn dev mode on for a site
@@ -48,35 +39,25 @@ END HELP"
 }
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hds: -l help,debug,step: --name "$scriptname" -- "$@")
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
     echo "please do 'pl makedev --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 # step is for the install steps
 step=1
 while true; do
@@ -109,9 +90,7 @@ echo -e "\e[34m Give site $1 dev mode and modules \e[39m"
 . $script_root/_inc.sh;
 
 # Check number of arguments
-################################################################################
 # If no arguments given, prompt user for arguments
-################################################################################
 if [ "$#" = 0 ]; then
   print_help
   exit 2

@@ -5,9 +5,7 @@
 #This presumes a single dev is able to work on dev and stg on his own, without a common stg server (for now).
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 #turn off dev settings

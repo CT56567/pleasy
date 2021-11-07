@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                      Initialisation For Pleasy Library
 #
 #  This will set up pleasy and initialise the sites as per
@@ -11,14 +10,10 @@
 #  08/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  04//04/2020 Rob Zaar  init is now working with new implementation.
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
 # Add npm, nodejs: https://github.com/Vardot/vartheme_bs4/tree/8.x-6.x/scripts
@@ -26,16 +21,13 @@
 # https://stackoverflow.com/questions/41195952/updating-nodejs-on-ubuntu-16-04
 # If phpadmin does not install properly you may need to follow: https://stackoverflow.com/a/49302706
 #
-################################################################################
 
 # scriptname is set in pl.
 # Change this to debug to debug this script
 verbose="none"
 plcstatus="pass"
 # User help
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
   echo \
     "Initialises pleasy
@@ -83,38 +75,28 @@ END OF HELP"
 }
 
 # Step Variable
-################################################################################
 # Variable step is defined for debug purposes. If the init fails, we can,
 # using step, start at the point of the script which had failed
-################################################################################
 step=${step:-1}
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are --yes --help --step
-################################################################################
 args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
   echo "please do './pl init --help' for more options"
   exit 1
 }
 
 # Set getopt parse backup into $@
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # if no argument passed, default is -- and break loop
-################################################################################
 while true; do
   case "$1" in
   -s | --step)
@@ -159,17 +141,13 @@ while true; do
 done
 
 # Step Display
-################################################################################
 # Display to user which step is chosen if step option is defined
-################################################################################
 if [ $step -gt 1 ]; then
   echo "Starting from step $step"
 fi
 
 # Step 1
-################################################################################
 # Attempt to install gawk
-################################################################################
 if [ $step -lt 2 ]; then
   echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
   # This is needed to avoid the awk: line 43: functionWill
@@ -216,10 +194,8 @@ if [ $step -lt 2 ]; then
 fi
 
 # Step 2
-################################################################################
 # This step must run, regardless of statement since the functions must be included for any other steps to be able to run
 # Since the following steps will need the variables that will be accessible only if parse_pl_yml is run.
-################################################################################
 echo -e "$Cyan step 2 (must be run): checking if folder $sitename_var exists $Color_Off"
 echo running include files...
 # This includes all the functions in _inc.sh for use by init.sh @JamesCHLim
@@ -242,9 +218,7 @@ parse_pl_yml
 #echo "wwwpath $www_path"
 
 # Step 3
-################################################################################
 # Adding pl command to bash commands, including plextras
-################################################################################
 if [ $step -lt 4 ]; then
   echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
 
@@ -269,9 +243,7 @@ if [ $step -lt 4 ]; then
 fi
 
 # Step 4
-################################################################################
 # Create mysql root password file
-################################################################################
 if [ $step -lt 5 ]; then
   echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
   # Create mysql root password file
@@ -308,9 +280,7 @@ EOL
 fi
 
 # Step 5
-################################################################################
 # Updating System..
-################################################################################
 if [ $step -lt 6 ]; then
   echo -e "$Cyan step 5: Updating System..  $Color_Off"
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
@@ -376,9 +346,7 @@ echo "$phpmem"
 fi
 
 # Step 6
-################################################################################
 # Add github credentials
-################################################################################
 if [ $step -lt 7 ]; then
   echo -e "$Cyan step 6: Add github credentials $Color_Off"
   #add github credentials
@@ -389,9 +357,7 @@ fi
 
 echo "github credentials added"
 # Step 7
-################################################################################
 # Installing MySQL
-################################################################################
 if [ $step -lt 8 ]; then
   echo -e "$Cyan step 7: Installing MySQL $Color_Off"
   #Check if mysql is installed
@@ -424,9 +390,7 @@ if [ $step -lt 8 ]; then
 fi
 
 # Step 8
-################################################################################
 # Installing phpMyAdmin
-################################################################################
 if [ $step -lt 9 ]; then
   echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
   sudo apt-get install phpmyadmin -y
@@ -439,9 +403,7 @@ fi
 #echo -e "$Green \n Permissions have been set $Color_Off"
 
 # Step 9
-################################################################################
 # Enabling Modules
-################################################################################
 if [ $step -lt 10 ]; then
   echo -e "$Cyan step 9: Enabling Modules  $Color_Off"
   # Enabling Mod Rewrite, required for WordPress permalinks and .htaccess files
@@ -454,9 +416,7 @@ if [ $step -lt 10 ]; then
 fi
 
 # Step 10
-################################################################################
 #  Install Composer
-################################################################################
 if [ $step -lt 11 ]; then
   echo -e "$Cyan step 10: Install Composer  $Color_Off"
   #Check if composer is installed otherwise install it
@@ -474,9 +434,7 @@ if [ $step -lt 11 ]; then
 fi
 
 # Step 11
-################################################################################
 # Install Drush globally
-################################################################################
 if [ $step -lt 12 ]; then
   echo -e "$Cyan step 11: Install Drush globally $Color_Off"
   # Install drush globally with drush launcher
@@ -556,9 +514,7 @@ if [ $step -lt 12 ]; then
 fi
 
 # Step 12
-################################################################################
 # Install Drupal console globally
-################################################################################
 if [ $step -lt 13 ]; then
   echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
   # Install drupal console
@@ -608,9 +564,7 @@ fi
 fi
 
 # Step 13
-################################################################################
 # setup /var/wwww/oc for websites
-################################################################################
 if [ $step -lt 14 ]; then
   echo -e "$Cyan step 13: setup /var/wwww/oc for websites  $Color_Off"
   #set up website folder for apache
@@ -628,9 +582,7 @@ if [ $step -lt 14 ]; then
 fi
 
 # Step 14
-################################################################################
 # Fix adding extra characters for vi
-################################################################################
 if [ $step -lt 15 ]; then
   echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
   #Set up vi to not add extra characters
@@ -644,9 +596,7 @@ echo " open this link to add the xdebug extension for the browser you want to us
 echo "https://www.jetbrains.com/help/phpstorm/2019.3/browser-debugging-extensions.html?utm_campaign=PS&utm_medium=link&utm_source=product&utm_content=2019.3 "
 
 # Step 15
-################################################################################
 # I don't think this step is needed since theming tools are added to each instance via pl install
-################################################################################
 # jump this step
 if [[ -f ~/.bashrc ]]; then
   ocmsg "source ~/.bashrc" debug

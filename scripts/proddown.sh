@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                       proddown For Pleasy Library
 #
 #  This script is used to overwrite localprod with the actual external
@@ -15,26 +14,18 @@
 #  [Insert New]
 #
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #   -t --test            Download the test server instead.
 #
-################################################################################
-################################################################################
 
 # scriptname is set in pl.
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Overwrite a specified local site with production
@@ -59,42 +50,30 @@ END HELP"
 
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Step Variable
-################################################################################
 # Variable step is defined for debug purposes. If the init fails, we can,
 # using step, start at the point of the script which had failed
-################################################################################
 step=${step:-1}
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hs:d -l help,step:,debug --name "$scriptname" -- "$@")
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
     echo "please do 'pl proddown --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 step=1
 while true; do
   case "$1" in
@@ -217,8 +196,6 @@ fi
 echo -e "$Cyan Opening stg_$sitename_var $Color_Off"
 pl open "stg_$sitename_var"
 # End timer
-################################################################################
 # Finish script, display time taken
-################################################################################
 echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))
 exit 0
