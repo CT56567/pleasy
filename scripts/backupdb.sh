@@ -50,9 +50,6 @@ print_help() {
 SECONDS=0
 echo -e "\e[34mbackup $1 \e[39m"
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o hm: -l help,message: --name "$scriptname" -- "$@")
 #echo "$args"
 

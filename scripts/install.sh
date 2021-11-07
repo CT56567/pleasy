@@ -57,9 +57,6 @@ END HELP"
 # Timer to show how long it took to run the script
 SECONDS=0
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o hyfdb:s:te -l help,yes,files,debug,build-step:,step:,test,extras --name "$scriptname" -- "$@")
 
 # If getopt outputs error to error variable, quit program displaying error

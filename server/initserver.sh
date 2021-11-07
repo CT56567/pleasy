@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eux -o pipefail
+set -eux
 
 SECONDS=0
 scriptname="$(basename $0)"
@@ -8,14 +8,8 @@ scriptname="$(basename $0)"
 # Update the prod site.
 # It is presumed the site files have been uploaded.
 
-# Step Variable
-# Variable step is defined for debug purposes. If the init fails, we can,
-# using step, start at the point of the script which had failed
-step=${step:-1}
+# step is defined for script debug purposesstep=${step:-1}
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are --yes --help --step
 args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
@@ -128,58 +122,85 @@ if ! grep "$user_sudo_enable" /etc/sudoers; then
   echo "$user_sudo_enable" | EDITOR="tee -a" visudo
 fi
 
-echo "send private key to server.
-ssh-keygen
-ssh-copy-id -i $key $user@$ip"
-read  -n 1 -p "Is ssh keys set up?" mainmenuinput
+# copy over ssh auth in new user
+echo "Copying over SSH auth from $USER to $user"
 
-#Stop password authentication
+sudo mkdir -p /home/$user/.ssh
+sudo cp -p $HOME/.ssh/authorized_keys /home/$user/.ssh/authorized_keys
+sudo chown $user:$user /home/$user/.ssh/authorized_keys
+
+# Stop password authentication
 sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/g' /etc/ssh/sshd_config
 sudo systemctl restart ssh
 
-# TODO: WIP
-# $MARIADB_VERSION="$()"
-# export DEBIAN_FRONTEND=noninteractive
-# {
-#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
-#   echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
-# } | sudo debconf-set-selections;
-
+MARIADB_VERSION="$(apt-cache madison mariadb-server | head -n 1 | sed -r 's/.*[0-9]+:([0-9]+\.[0-9]+).*/\1/')"
 export DEBIAN_FRONTEND=noninteractive
-sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password password root'
-sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password_again password root'
+{
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
+} | sudo debconf-set-selections;
+
+if dpkg -l mariadb-server > /dev/null; then
+  echo "WARNING: Mariadb is already installed"
+  echo "Script may not be able to setup the DB properly"
+  echo "Continuing anyway"
+fi
 
 sudo apt install mariadb-server -y
-sudo mysql_secure_installation
-sudo systemctl status mysql
 
-mysql -u root -p
+sudo mysql -sfu root <<EOF || true
+-- set root password
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+-- delete anonymous users
+DELETE FROM mysql.user WHERE User='';
+-- delete remote root capabilities
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+-- drop database 'test'
+DROP DATABASE IF EXISTS test;
+-- also make sure there are lingering permissions to it
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+-- make changes immediately
+FLUSH PRIVILEGES;
+EOF
 
-#need to use
-# sudo mysql
-# use mysql;
-# ALTER USER 'root'@'localhost' IDENTIFIED BY 'PASSWORD_HERE';
-# now the password will be set. mysql_secure_installation does not set the password!!!!
+sudo systemctl status mysql --no-pager
 
 sudo apt install nginx -y
 sudo systemctl enable --now nginx
-sudo apt install php php-fpm php-gd php-common php-mysql php-apcu php-gmp php-curl php-intl php-mbstring php-xmlrpc php-gd php-xml php-cli php-zip -y
+sudo apt install -y --no-install-recommends \
+  php \
+  php-fpm \
+  php-gd \
+  php-common \
+  php-mysql \
+  php-apcu \
+  php-gmp \
+  php-curl \
+  php-intl \
+  php-mbstring \
+  php-xmlrpc \
+  php-gd \
+  php-xml \
+  php-cli \
+  php-zip
 
 #date.timezone = Australia/Melbourne
 #memory_limit = 256M
 #upload_max_filesize = 64M
 #max_execution_time = 600
 #cgi.fix_pathinfo = 0
-sudo sed -i "s/\(date.timezone *= *\).*/\1 Australia\/Melbourne/" /etc/php/7.4/fpm/php.ini
-sudo sed -i '/date.timezone *=* Australia\/Melbourne/s/^;//' /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(memory_limit *= *\).*/\1 256M/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(upload_max_filesize *= *\).*/\1 64M/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(max_execution_time *= *\).*/\1 600/" /etc/php/7.4/fpm/php.ini
-sudo sed -i "s/\(cgi.fix_pathinfo *= *\).*/\1 0/" /etc/php/7.4/fpm/php.ini
-sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/7.4/fpm/php.ini
+PHP_VERSION="$(apt-cache madison php | head -n 1 | sed -r 's/.*[0-9]+:([0-9]+\.[0-9]+).*/\1/')"
 
-sudo systemctl restart php7.4-fpm
-sudo systemctl enable php7.4-fpm
+sudo sed -i "s/\(date.timezone *= *\).*/\1 Australia\/Melbourne/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i '/date.timezone *=* Australia\/Melbourne/s/^;//' /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(memory_limit *= *\).*/\1 256M/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(upload_max_filesize *= *\).*/\1 64M/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(max_execution_time *= *\).*/\1 600/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i "s/\(cgi.fix_pathinfo *= *\).*/\1 0/" /etc/php/$PHP_VERSION/fpm/php.ini
+sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/$PHP_VERSION/fpm/php.ini
+
+sudo systemctl restart php${PHP_VERSION}-fpm
+sudo systemctl enable php${PHP_VERSION}-fpm
 
 sudo apt install certbot -y
 sudo systemctl stop nginx
@@ -369,232 +390,6 @@ EOL
 sudo ln -s /etc/nginx/sites-available/test.$url /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
-# Transfer the files first.
-# Create the settings file.
-
-# Step 1
-# Attempt to install gawk
-if [[ "$step" -lt 2 ]]; then
-  echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
-  # This is needed to avoid the awk: line 43: functionWill
-  # need to install gawk - sudo required asorti never
-  # defined error
-
-  #echo "test mysql"
-  #result=$(mysql -e 'CREATE DATABASE test;' 2>/dev/null | grep -v '+' | cut -d' ' -f2; echo ": ${PIPESTATUS[0]}")
-  #echo "result2: >$result<"
-  #
-  #if [[ "$result" != ": 0" ]]; then
-  #  echo "mysql did not work"
-  #  mysql -e 'CREATE DATABASE test;'
-  #  fi
-  #echo "did it work?"
-
-#  if [[ "$nopassword" == "y" ]]; then
-#    # set up user with sudo
-    #echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo EDITOR="tee -a" visudo
-#
-#  # This could be improved with creating specific scripts that would complete any sudo tasks and each of these be given
-#  # nopasswd permission. This would reduce the security risk of the above command.
-#
-#  fi
-#  # Appears that Ubuntu 20 needs this for gawk to be installed.
-#  sudo apt-get install build-essential -y
-#  sudo apt-get install gawk -y
-#  gout=$(gawk -Wv)
-#  gversion=${gout:8:1}
-#  echo "Gawk version: >$gversion<"
-#
-#  if [[ "$gversion" == "5" ]]; then
-#    echo "Need to purge gawk and install version 4 of gawk"
-#    1:4.1.4+dfsg-1build1
-#    sudo apt-get remove gawk -y
-#
-#    wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz
-#    tar -xvpzf gawk-4.2.1.tar.gz
-#    cd gawk-4.2.1
-#    sudo ./configure && sudo make && sudo make install
-#    sudo apt install gawk=1:5.0.1+dfsg-1
-#  # It installs 5.0.1, but when you run gawk -Wv it says it 4.2.1. Anyway it works. I don't know another way of doing it.
-#  fi
-fi
-#
-## Step 2
-## This step must run, regardless of statement since the functions must be included for any other steps to be able to run
-## Since the following steps will need the variables that will be accessible only if parse_pl_yml is run.
-#echo -e "$Cyan step 2 (must be run): checking if folder $sitename_var exists $Color_Off"
-#echo running include files...
-## This includes all the functions in _inc.sh for use by init.sh @JamesCHLim
-#. "$script_root/_inc.sh"
-#ocmsg "parsing yml" debug
-#ocmsg "location: $folderpath/pl.yml" ocmsg
-#if [ ! -f "$folderpath/pl.yml" ]; then
-#  ocmsg "Copying example.pl.yml to pl.yml and setting some defaults based on the system." debug
-#  cp $folderpath/example.pl.yml $folderpath/pl.yml
-#  # set the user
-#  sed -i "s/stcarlos/$USER/g" $folderpath/pl.yml
-#fi
-## When using parse_pl_yml for the first time, ie as part init.sh, there is no need to update the script, since it
-## doesn't need updating. Updating will cause problems. So we need to make sure it doesn't update by setting the
-## no_config_update to "true". This is the only time it is set to true. We also don't want it to run if we are
-## rerunning the init.sh script.
-#no_config_update="true"
-## Import yaml, presumes $script_root is set
-#parse_pl_yml
-##echo "wwwpath $www_path"
-
-# Step 3
-# Adding pl command to bash commands, including plextras
-#if [ $step -lt 4 ]; then
-#  echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
-#
-#  update_locations
-#
-#  #prep up the debug command with cli and apached locations
-#  echo "adding debug command"
-#  ocbin="/home/$user/$project/bin"
-#  sed -i "3s|.*|phpcli=\"$phpcli\"|" "$ocbin/debug"
-#  sed -i "4s|.*|phpapache=\"$phpapache\"|" "$ocbin/debug"
-#
-#  #set up d8fp, debug and sudoeuri to run without password
-#  echo -e "$Cyan \n Make fixing folder permissions and debug run without sudo $Color_Off"
-#  sudo $folderpath/scripts/lib/installsudoers.sh "$folderpath/bin" $user
-#  echo "export PATH=\"\$PATH:/usr/local/bin/\"" >>~/.bashrc
-#  # todo check this code
-#  #echo ". /usr/local/bin/debug" >>~/.bashrc
-#
-#  cd
-#  source ~/.bashrc
-##plsource
-#fi
-
-## Step 4
-## Create mysql root password file
-#if [ $step -lt 5 ]; then
-#  echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
-#  # Create mysql root password file
-#  # Check if one exists
-#  if [ ! -f $(dirname $script_root)/mysql.cnf ]; then
-#    echo "Creating $(dirname $script_root)/mysql.cnf"
-#
-#    if [[ "$pltest" == "y" ]]; then
-#      echo "Testing: mysql root setup at  $(dirname $script_root)/mysql.cnf"
-#      cat >$(dirname $script_root)/mysql.cnf <<EOL
-#[client]
-#user=root
-#password=root
-#host=localhost
-#EOL
-#    else
-#      cat >$(dirname $script_root)/mysql.cnf <<EOL
-#[client]
-#user=root
-#password=root
-#host=localhost
-#EOL
-#      #Check if mysql is installed
-#      if type mysql >/dev/null 2>&1; then
-#        # User needs to add mysql root credentials.
-#        echo "mysql already installed. Please edit $(dirname $script_root)/mysql.cnf with your mysql root credentials."
-#      fi
-#    fi
-#  else
-#    echo "mysql.cnf already exists"
-#  fi
-##sudo chmod 0600 $(dirname $script_root)/mysql.cnf
-#
-#fi
-
-# Step 5
-# Updating System..
-#if [ $step -lt 6 ]; then
-#  echo -e "$Cyan step 5: Updating System..  $Color_Off"
-#  # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
-#  # Update packages and Upgrade system
-#  sudo apt-get -qqy update && sudo apt-get -qqy upgrade
-#
-#  # Setup php 7.3
-#  sudo apt-get -y install software-properties-common
-#  sudo add-apt-repository -y ppa:ondrej/php
-#  sudo add-apt-repository -y ppa:ondrej/apache2
-#  #
-#  sudo apt -qqy update
-#
-#  ## Install AMP
-#  echo -e "$Cyan \n Installing Apache2 etc $Color_Off"
-#  # php-gettext not installing on ubuntu 20
-#  #sudo apt-get -qq install apache2 php libapache2-mod-php php-mysql php-gettext curl php-cli php-gd php-mbstring php-xml php-curl php-bz2 php-zip git unzip php-xdebug -y
-#  # Install vim to make sure arrow keys work properly.
-#  sudo apt-get -y install apache2 php7.3 libapache2-mod-php7.3 php7.3-mysql php7.3-common curl php7.3-cli php7.3-gd php7.3-mbstring php7.3-xml php7.3-curl php7.3-bz2 php7.3-zip git unzip php-xdebug vim -y
-#
-#  # If Travis, then add some environment variables, particularly to add more memory to php.
-##  echo "pwd: $(pwd)"
-##  if [[ "$(pwd)" == "/home/travis" ]]; then
-##    cd build/rjzaar
-##    phpenv version
-##    echo 'max_execution_time = 1200' >>varbase.php.ini
-##    echo 'max_input_time = 180' >>varbase.php.ini
-##    echo 'max_input_vars = 10000' >>varbase.php.ini
-##    echo 'memory_limit = 4000M' >>varbase.php.ini
-##    echo 'error_reporting = E_ALL' >>varbase.php.ini
-##    echo 'post_max_size = 64M' >>varbase.php.ini
-##    echo 'upload_max_filesize = 32M' >>varbase.php.ini
-##    echo 'max_file_uploads = 40' >>varbase.php.ini
-##    echo 'sendmail_path = /bin/true' >>varbase.php.ini
-##    echo "phpenv config-add"
-##    phpenv config-add varbase.php.ini
-##    echo "phpenv rehash"
-##    phpenv rehash
-##    cd
-##  fi
-#
-## Actually just set the memory limit regardless
-#phpline=$(php -i | grep "Loaded Configuration File")
-#echo "phpline: $phpline"
-#phploc=($phpline)
-#echo "phploc ${phploc[4]}"
-#phpmem=$(grep '^memory_limit ' ${phploc[4]} )
-#echo "phpmem $phpmem"
-#sudo sed -i 's,^memory_limit =.*$,memory_limit = -1,' ${phploc[4]}
-#phpmem=$(grep '^memory_limit ' ${phploc[4]} )
-#echo "$phpmem"
-#fi
-
-
-# Step 7
-# Installing MySQL
-#if [ $step -lt 8 ]; then
-#  echo -e "$Cyan step 7: Installing MySQL $Color_Off"
-#  #Check if mysql is installed
-#  #if type mysql >/dev/null 2>&1; then
-#  #echo "mysql already installed."
-#  #else
-#  # Not installed
-#  # From: https://stackoverflow.com/questions/7739645/install-mysql-on-ubuntu-without-a-password-prompt
-#
-#    if [[ "$host_database" == "mysql" ]]; then
-#  sudo debconf-set-selections <<<'mysql-server mysql-server/root_password password root'
-#  sudo debconf-set-selections <<<'mysql-server mysql-server/root_password_again password root'
-#  sudo apt-get -y install mysql-server
-#  else
-#
-#  export DEBIAN_FRONTEND=noninteractive
-#  sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password password root'
-#  sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password_again password root'
-#  sudo apt-get -y install mariadb-server
-#  fi
-#
-#  # Add good defaults for mariadb from lando
-#  # use mysqld --help --verbose to check variables
-#  #  This is causing an error.... todo fix mariadb my.cnf
-##  sudo wget https://github.com/lando/lando/blob/master/examples/mariadb/config/my.cnf /etc/mysql/mariadb.conf.d/my.cnf
-#  #sudo systemctl restart mariadb
-#
-##fi
-#
-#fi
-
-
 
 # Step 10
 #  Install Composer

@@ -53,14 +53,8 @@ END HELP"
 # Timer to show how long it took to run the script
 SECONDS=0
 
-# Step Variable
-# Variable step is defined for debug purposes. If the init fails, we can,
-# using step, start at the point of the script which had failed
-step=${step:-1}
+# step is defined for script debug purposesstep=${step:-1}
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o hs:d -l help,step:,debug --name "$scriptname" -- "$@")
 
 # If getopt outputs error to error variable, quit program displaying error

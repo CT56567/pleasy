@@ -50,9 +50,6 @@ pl gcom pl \"Improved gcom.\""
 
 }
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -a -o hbvd -l help,backup,verbose,debug --name "$scriptname" -- "$@")
 # echo "$args"
 

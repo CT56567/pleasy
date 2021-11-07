@@ -42,9 +42,6 @@ exit 0
 # Timer to show how long it took to run the script
 SECONDS=0
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o h -l help --name "$scriptname" -- "$@")
 
 # If getopt outputs error to error variable, quit program displaying error

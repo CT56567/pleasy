@@ -59,9 +59,6 @@ pl restore prod stg
 HELP
 }
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -a -o hds:fyo -l help,debug,first,yes,open --name "$scriptname" -- "$@")
 # echo "$args"
 

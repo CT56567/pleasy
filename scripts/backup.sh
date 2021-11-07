@@ -46,9 +46,6 @@ END HELP"
 # Timer to show how long it took to run the script
 SECONDS=0
 
-# Use of Getopt
-# Getopt to parse script and allow arg combinations ie. -yh instead of -h
-# -y. Current accepted args are -h and --help
 args=$(getopt -o hdg -l help,debug,git: --name "$scriptname" -- "$@")
 # echo "$args"
 
