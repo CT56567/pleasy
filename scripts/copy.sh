@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                      Backup prod For Pleasy Library
 #
 #  This script will copy one site to another site. It will copy all files,
@@ -14,34 +13,22 @@
 #  11/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  [Insert New]
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 #                             Commenting with model
 #
 # NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-################################################################################
 # Description - Each bar is 80 #, in vim do 80i#esc
-################################################################################
 #
-################################################################################
-################################################################################
 
 # scriptname is set in pl.
 verbose="none"
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
   echo \
     "Copies one site to another site.
@@ -61,30 +48,22 @@ Examples:"
 }
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hd -l help,debug --name "$scriptname" -- "$@")
 # echo "$args"
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
   echo "please do 'pl copy --help' for more options"
   exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 while true; do
   case "$1" in
   -h | --help)
@@ -107,17 +86,13 @@ while true; do
 done
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 ocmsg "Starting to parse pl.yml" debug
 parse_pl_yml
 ocmsg "Finish parsing pl.yml" debug
 # Check number of user arguments
-################################################################################
 # Depending on number of user arguments, set copy condition
-################################################################################
 if [ $1 == "copy" ] && [ -z "$2" ]; then
   sitename_var="$sites_stg"
   from="$sites_dev"
@@ -132,9 +107,7 @@ fi
 echo "This will copy the site from $from to $sitename_var and then try to import the database"
 
 # Working out site locations
-################################################################################
 # We need to work out where each site is.
-################################################################################
 to=$sitename_var
 import_site_config $from
 ocmsg "Backing up from $from" debug
@@ -161,10 +134,8 @@ cp -rf "$from_sp/$from" "$to_sp/$to"
 #Name=${options[0]:2}
 #-------------------------------------------------------------------------------
 
-################################################################################
 # Global variables are very hard to keep track of for newcomers!!!
 # Yes - sorry - will need to come up with a naming convention and list of these particular variables.
-################################################################################
 #Note $Name was set in backup_db and will now be used in the restore_db. Nice hey.
 
 sitename_var=$to
@@ -189,7 +160,5 @@ bk=$from
 restore_db
 
 # End timer
-################################################################################
 # Finish script, display time taken
-################################################################################
 echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))

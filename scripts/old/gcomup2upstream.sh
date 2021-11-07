@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #               Git commit backup to upstream For Pleasy Library
 #
 #  This will update to the upstream git, it presupposes you have already merged
@@ -17,25 +16,17 @@
 #  [Insert New]
 #
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 
 # scriptname is set in pl.
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Git commit with upstream merge
@@ -56,36 +47,26 @@ END HELP"
 }
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o h -l help, --name "$scriptname" -- "$@")
 # echo "$args"
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
     echo "please do '$scriptname --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 while true; do
   case "$1" in
   -h | --help)
@@ -98,7 +79,6 @@ while true; do
   esac
 done
 
-################################################################################
 
 parse_pl_yml
 
@@ -117,9 +97,7 @@ fi
 echo "This will merge branch with master"
 
 # Check number of arguments
-################################################################################
 # If no arguments given, prompt user for arguments
-################################################################################
 if [ "$#" = 0 ]; then
   print_help
   exit 2

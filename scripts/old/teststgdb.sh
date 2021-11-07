@@ -2,9 +2,7 @@
 #teststg
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 #This will backup everyting including opencourse-project, pull down the prod db and test it.
 db="oc"

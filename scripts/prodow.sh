@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                          prodow For Pleasy Library
 #
 #  This script will overwrite production with the site chosen It will first
@@ -14,24 +13,16 @@
 #  [Insert New]
 #
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zaar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 # scriptname is set in pl.
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 cat << HEREDOC
 Overwrite production with site specified
@@ -52,36 +43,26 @@ HEREDOC
 }
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -o hs:dy -l help,step:,debug,yes --name "$scriptname" -- "$@")
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
   echo "No site specified."
     echo "please do 'pl prodow --help' for more options"
     exit 1
 }
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 step=1
 while true; do
   case "$1" in
@@ -217,9 +198,7 @@ fi
 # If it works, the production site needs to be swapped to prod branch from dev branch and hard rest to dev, is use 'ours'.
 
 # End timer
-################################################################################
 # Finish script, display time taken
-################################################################################
 echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))
 exit 0
 

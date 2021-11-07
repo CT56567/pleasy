@@ -4,9 +4,7 @@
 #This presumes teststg.sh worked, therefore opencat git is upto date with cmi export and all files.
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 parse_pl_yml
 
@@ -58,9 +56,7 @@ drush -y rsync @$sitename_var:../cmi @prod:../cmi -- -O  --delete
 # fix file permissions?
 
 # End timer
-################################################################################
 # Finish script, display time taken
-################################################################################
 echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))
 exit 0
 

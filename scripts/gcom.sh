@@ -1,5 +1,4 @@
 #!/bin/bash
-################################################################################
 #                       Git Commit For Pleasy Library
 #
 #  This will git commit changes and run an backup to capture it.
@@ -10,41 +9,27 @@
 #  15/02/2020 James Lim  Getopt parsing implementation, script documentation
 #  04/04/2020 Rob Zaar    Simplified and updated to new system.
 #
-################################################################################
-################################################################################
 #
 #  Core Maintainer:  Rob Zar
 #  Email:            rjzaar@gmail.com
 #
-################################################################################
-################################################################################
 #                                TODO LIST
 #
-################################################################################
-################################################################################
 #                             Commenting with model
 #
 # NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-################################################################################
 # Description - Each bar is 80 #, in vim do 80i#esc
-################################################################################
 #
-################################################################################
-################################################################################
 
 # start timer
-################################################################################
 # Timer to show how long it took to run the script
-################################################################################
 SECONDS=0
 verbose="none"
 
 # scriptname is set in pl.
 
 # Help menu
-################################################################################
 # Prints user guide
-################################################################################
 print_help() {
 echo \
 "Git commit code with optional backup
@@ -66,32 +51,24 @@ pl gcom pl \"Improved gcom.\""
 }
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are -h and --help
-################################################################################
 args=$(getopt -a -o hbvd -l help,backup,verbose,debug --name "$scriptname" -- "$@")
 # echo "$args"
 
 echo "args: $args"
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 if [ "$#" -eq 0 ] ; then
     echo "please type 'pl gcom --help' for more options"
     exit 1
 fi
 
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
 #ocmsg "\$1: $1" debug
-################################################################################
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
-################################################################################
 
 while true; do
   case "$1" in
@@ -153,9 +130,7 @@ if  [[ "$gcombackup" == "backup" ]] && [[ "$sitename_var" == "pleasy" ]] ; then
 echo "Can't backup pleasy - ignoring backup request."
 fi
 # Check number of arguments
-################################################################################
 # If no arguments given, prompt user for arguments
-################################################################################
 if [ "$#" = 0 ]; then
   print_help
   exit 2

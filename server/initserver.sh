@@ -9,38 +9,28 @@ scriptname="$(basename $0)"
 # It is presumed the site files have been uploaded.
 
 # Step Variable
-################################################################################
 # Variable step is defined for debug purposes. If the init fails, we can,
 # using step, start at the point of the script which had failed
-################################################################################
 step=${step:-1}
 
 # Use of Getopt
-################################################################################
 # Getopt to parse script and allow arg combinations ie. -yh instead of -h
 # -y. Current accepted args are --yes --help --step
-################################################################################
 args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
-################################################################################
 # If getopt outputs error to error variable, quit program displaying error
-################################################################################
 [ $? -eq 0 ] || {
   echo "please do './pl init --help' for more options"
   exit 1
 }
 
 # Set getopt parse backup into $@
-################################################################################
 # Arguments are parsed by getopt, are then set back into $@
-################################################################################
 eval set -- "$args"
 
-################################################################################
 # Case through each argument passed into script
 # if no argument passed, default is -- and break loop
-################################################################################
 while true; do
   case "$1" in
   -s | --step)
@@ -383,9 +373,7 @@ sudo systemctl restart nginx
 # Create the settings file.
 
 # Step 1
-################################################################################
 # Attempt to install gawk
-################################################################################
 if [[ "$step" -lt 2 ]]; then
   echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
   # This is needed to avoid the awk: line 43: functionWill
@@ -432,10 +420,8 @@ if [[ "$step" -lt 2 ]]; then
 fi
 #
 ## Step 2
-#################################################################################
 ## This step must run, regardless of statement since the functions must be included for any other steps to be able to run
 ## Since the following steps will need the variables that will be accessible only if parse_pl_yml is run.
-#################################################################################
 #echo -e "$Cyan step 2 (must be run): checking if folder $sitename_var exists $Color_Off"
 #echo running include files...
 ## This includes all the functions in _inc.sh for use by init.sh @JamesCHLim
@@ -458,9 +444,7 @@ fi
 ##echo "wwwpath $www_path"
 
 # Step 3
-################################################################################
 # Adding pl command to bash commands, including plextras
-################################################################################
 #if [ $step -lt 4 ]; then
 #  echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
 #
@@ -485,9 +469,7 @@ fi
 #fi
 
 ## Step 4
-#################################################################################
 ## Create mysql root password file
-#################################################################################
 #if [ $step -lt 5 ]; then
 #  echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
 #  # Create mysql root password file
@@ -524,9 +506,7 @@ fi
 #fi
 
 # Step 5
-################################################################################
 # Updating System..
-################################################################################
 #if [ $step -lt 6 ]; then
 #  echo -e "$Cyan step 5: Updating System..  $Color_Off"
 #  # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
@@ -582,9 +562,7 @@ fi
 
 
 # Step 7
-################################################################################
 # Installing MySQL
-################################################################################
 #if [ $step -lt 8 ]; then
 #  echo -e "$Cyan step 7: Installing MySQL $Color_Off"
 #  #Check if mysql is installed
@@ -619,9 +597,7 @@ fi
 
 
 # Step 10
-################################################################################
 #  Install Composer
-################################################################################
 if [ $step -lt 11 ]; then
   echo -e "$Cyan step 10: Install Composer  $Color_Off"
   #Check if composer is installed otherwise install it
@@ -639,9 +615,7 @@ if [ $step -lt 11 ]; then
 fi
 
 # Step 11
-################################################################################
 # Install Drush globally
-################################################################################
 if [ $step -lt 12 ]; then
   echo -e "$Cyan step 11: Install Drush globally $Color_Off"
   # Install drush globally with drush launcher
@@ -730,9 +704,7 @@ if [ $step -lt 12 ]; then
 fi
 
 # Step 12
-################################################################################
 # Install Drupal console globally
-################################################################################
 if [ $step -lt 13 ]; then
   echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
   # Install drupal console
@@ -783,9 +755,7 @@ fi
 
 
 # Step 14
-################################################################################
 # Fix adding extra characters for vi
-################################################################################
 if [ $step -lt 15 ]; then
   echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
   #Set up vi to not add extra characters

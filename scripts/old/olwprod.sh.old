@@ -19,9 +19,7 @@ HELP
 exit 0
 }
 # Check number of arguments
-################################################################################
 # If no arguments given, prompt user for arguments
-################################################################################
 if [ "$#" = 0 ]; then
   print_help
   exit 2
