@@ -82,8 +82,8 @@ sudo rm -rf /var/www/$uri && sudo mkdir /var/www/$uri
 sudo rm -rf /var/www/test.$uri && sudo mkdir /var/www/test.$uri 
 
 echo "Unpack site to prod and test locations"
-sudo tar -zxf $uri/prod.tar.gz --directory /var/www/$uri --strip-components=1
-sudo tar -zxf $uri/prod.tar.gz --directory /var/www/test.$uri --strip-components=1
+sudo tar -zxf /home/$user/$uri/prod.tar.gz --directory /var/www/$uri --strip-components=1
+sudo tar -zxf /home/$user/$uri/prod.tar.gz --directory /var/www/test.$uri --strip-components=1
 
 echo "fix file permissions, requires sudo on external server and Restoring correct settings.php"
 sudo chown $user:www-data /var/www/$uri -R

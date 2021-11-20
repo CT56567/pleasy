@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Not sure what this is suppose to do....???
-
-
 #  Fix the site settings files.
 # It is presumed the site files have been uploaded.
 # $1 is the site docroot.
@@ -33,7 +30,7 @@ echo "Docroot: $prod_docroot"
 echo "Uri: $uri"
 
 # Now store the files
-echo "storing the settings file"
+echo "restoring the settings file"
 sudo cp  /home/$user/$uri/settings.php "$prod_docroot/sites/default/settings.php"
 sudo chown $user:www-data "$prod_docroot/sites/default/settings.php"
 

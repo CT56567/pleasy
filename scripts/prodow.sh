@@ -179,8 +179,10 @@ ocmsg "Prod alias $prod_alias uri $uri" debug
 exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
     if [ "$exists" = "exists" ]; then
       echo "Site $prod_docroot exists so just updating it."
-      ssh $prod_alias "./updatesite.sh $prod_docroot"
-      ssh $prod_alias "./updatesite.sh $test_docroot"
+#      ssh $prod_alias "./updatesite.sh $prod_docroot"
+#      ssh $prod_alias "./updatesite.sh $test_docroot"
+    ssh $prod_alias "./createsite.sh $prod_docroot"
+    ssh $prod_alias "./createsite.sh $test_docroot"
     else
         echo "Creating site $prod_docroot."
     ssh $prod_alias "./createsite.sh $prod_docroot"
