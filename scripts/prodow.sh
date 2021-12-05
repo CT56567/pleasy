@@ -98,7 +98,7 @@ fi
 
 sitename_var=$1
 
-echo "overwriting production server with $sitename_var site using rsync method"
+echo "overwriting production server with $sitename_var site using tar method"
 
 parse_pl_yml
 
@@ -144,14 +144,16 @@ ocmsg "Name of sql backup: $Name "
  # Move sql backup to proddb and push
  echo "Using scp method to push db and files to production"
 Name2=${Name::-4}".tar.gz"
-echo "scp: $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql"
+echo "scp: $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/$Name"
 ssh $prod_alias "if [ ! -d $prod_uri ]; then mkdir $prod_uri; fi"
 ssh $prod_alias "if [ ! -d test.$prod_uri ]; then mkdir test.$prod_uri; fi"
- scp $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/prod.sql
- scp $folderpath/sitebackups/$sitename_var/$Name2 $prod_alias:$prod_uri/prod.tar.gz
+ scp $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/$Name
+ scp $folderpath/sitebackups/$sitename_var/$Name2 $prod_alias:$prod_uri/$Name2
 echo "Files and db transfered."
 
 fi
+
+
 
 if [ $step -lt 3 ] ; then
 echo -e "$Pcolor step 2: install production files $Color_off"
@@ -169,7 +171,15 @@ echo "test_docroot: $test_docroot"
 #ssh $prod_alias "rm -rf $prod_root"
 #ssh $prod_alias "mkdir $prod_root"
 #ssh $prod_alias "if [ -d $prod_root.new ]; then sudo rm -rf $prod_root.new ; fi"
+
+exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
+    if [ "$exists" = "exists" ]; then
+      #run the restore function
+      ssh $prod_alias "./restoreprod.sh $prod_docroot -f"
+      else
+
 ssh $prod_alias "./createsites.sh $prod_docroot"
+fi
 fi
 
 if [ $step -lt 4 ] ; then
@@ -177,13 +187,13 @@ echo -e "$Pcolor step 3: creating sites $prod_docroot $prod_profile$Color_off"
     # For now the script should work, but needs various improvments such as, being able to restore on error.
 ocmsg "Prod alias $prod_alias uri $uri" debug
 exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
-    if [ "$exists" = "exists" ]; then
-      echo "Site $prod_docroot exists so just updating it."
-#      ssh $prod_alias "./updatesite.sh $prod_docroot"
-#      ssh $prod_alias "./updatesite.sh $test_docroot"
-    ssh $prod_alias "./createsite.sh $prod_docroot"
-    ssh $prod_alias "./createsite.sh $test_docroot"
-    else
+    if [ ! "$exists" = "exists" ]; then
+#      echo "Site $prod_docroot exists so just updating it."
+##      ssh $prod_alias "./updatesite.sh $prod_docroot"
+##      ssh $prod_alias "./updatesite.sh $test_docroot"
+#    ssh $prod_alias "./createsite.sh $prod_docroot"
+#    ssh $prod_alias "./createsite.sh $test_docroot"
+#    else
         echo "Creating site $prod_docroot."
     ssh $prod_alias "./createsite.sh $prod_docroot"
     ssh $prod_alias "./createsite.sh $test_docroot"
@@ -198,6 +208,7 @@ echo -e "$Pcolor step 4: open production site $Color_off"
       sitename_var=${sitename_var:4}
   fi
   if [ "${sitename_var:0:3}" = "stg" ]; then
+    #todo this might not be needed
     drush @prod_${sitename_var:4} uli &
   else
     drush @prod_${sitename_var} uli &

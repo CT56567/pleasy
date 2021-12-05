@@ -79,11 +79,18 @@ cd
 echo -e "\e[34mrestoring files\e[39m"
 echo "Create prod directories"
 sudo rm -rf /var/www/$uri && sudo mkdir /var/www/$uri
-sudo rm -rf /var/www/test.$uri && sudo mkdir /var/www/test.$uri 
+sudo rm -rf /var/www/test.$uri && sudo mkdir /var/www/test.$uri
+
+cd /home/$USER/$uri
+options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
+echo -e "\e[34mrestoring $1 to $2 with latest backup\e[39m"
+Name=${options[0]:2}
+
+echo "backup is $Name"
 
 echo "Unpack site to prod and test locations"
-sudo tar -zxf /home/$user/$uri/prod.tar.gz --directory /var/www/$uri --strip-components=1
-sudo tar -zxf /home/$user/$uri/prod.tar.gz --directory /var/www/test.$uri --strip-components=1
+sudo tar -zxf /home/$user/$uri/${Name::-4}.tar.gz --directory /var/www/$uri --strip-components=1
+sudo tar -zxf /home/$user/$uri/${Name::-4}.tar.gz --directory /var/www/test.$uri --strip-components=1
 
 echo "fix file permissions, requires sudo on external server and Restoring correct settings.php"
 sudo chown $user:www-data /var/www/$uri -R
