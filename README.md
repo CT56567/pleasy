@@ -34,7 +34,9 @@ plcd d9 #Takes you to the root of the site
 plcd d9 d #Takes you to the webroot fo the site
 ```
 
-The infrastructure for each site is setup. For each site
+The infrastructure for each site is setup. For each site a stage version is setup, eg for d9 the stage version is stg_d9.
+Once a production version is created, both production and test sites are also created by the initserver script, ie prod_d9 and test_d9.
+
 
 Drush also works. Each sitename becomes the alias. This can be accessed from anywhere.
 ```angular2html
@@ -61,22 +63,34 @@ vard: dev varbase-project install using composer
 
 varc: varbase-project install using composer 
 
+# STRUCTURE
+
+Currently each site is stored under /var/www/sitename, eg /var/www/d9
+When a site is backuped up 'pl backup d9' the backup is stored in pleasy/sitebackups/d9
+The backup title includes the time and git reference.f
+This backup can then be restored to another site eg 'pl restore d9 stg_d9'. This command will list all the backups
+and you can choose which one to restore.
+
 # VARBASE
 
-It provides various scripts for development processes which incorporate composer, cmi and backup. It includes three 
-stages, dev (called loc for local), stg and prod. Communication with the production server is via drush and git or scp.
+It provides various scripts for development processes which incorporate composer, cmi and backup. Communication with the 
+production server is via drush and git or scp.
 This project is also based on the varbase two repository structure, varbase and varbase-project.
 This is a good way to go since most updates to varbase don't need to be updated on a varbase based project.
 Those that do are included in varbase-project.
 There are also a lot less files to track in varbase-project than varbase itself.
-It provides an intelligent separation.
 
 A particular site based project needs to include site specific files which should be stored on a private 
-repository for backup. When moving from dev to prod the git repositories will be swapped.
+repository for backup. 
 
 # WORKFLOW
 
-Git is the fastest and easiest way to move files. There are three repositories
+There are several ways to run the workflow. The simplest is via tar files.
+Once you have a production server, eg vanilla ubuntu 20.04 server. You should follow the server readme
+to setup the server. Once the server is setup you need to add your production server details to pl.yml. 
+You will then be able to push up your site to the server, eg 'pl prodow d9'. 'Prodow' stands for PRODuction OverWrite,
+
+
 
 Opencourse (ocrepo): A repo for just the code for opencourse (dev environment)
 

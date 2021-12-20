@@ -26,22 +26,33 @@ www_path: "/var/www/oc"
 user: stcarlos
 host_database: mysql
 github:
-  user: carlos
+  user: githubuser
   key:  github
-  email: carlos@example.com
-prod:
-  alias: cathnet
-  uri: "opencat.org"
-  docroot: "/var/www/opencat.org/docroot"
-  test_uri: "test.opencat.org"
-  test_docroot: "/var/www/test.opencat.org/docroot"
-  user: puregift
-  method: rsync  # Method could be git, rsync or tar.
-  # If method git, you will need to provide a git repo to use. A sanitised database may be stored in the repo.
-  gitrepo: https://github.com/rjzaar/ocorg.git
-  gitkey: /home/puregift/.ssh/github
-  #This is for a separate gitstored db. Locally it will be stored at proddb in sitebackups
-  gitdb: ssh://ocback:/home/git/proddb.git
+  email: rjzaar@gmail.com
+plgit: ocback:/home/git/pleasy.git
+#plgit: git@github.com:rjzaar/pleasy.git
+#prod:
+#  alias: ctn
+#  uri: "covidteachernetwork.org"
+#  user: soph
+#  docroot: "/var/www/covidteachernetwork.org/docroot"
+#  test_uri: "test.covidteachernetwork.org"
+#  test_docroot: "/var/www/test.covidteachernetwork.org/docroot"
+#  method: tar
+#  profile: varbase
+#  alias: max
+#  uri: "dontcriminalisefreespeech.org"
+#  user: max
+#  docroot: "/var/www/dontcriminaliseus.org/web"
+#  test_uri: "test.dontcriminalisefreespeech.org"
+#  test_docroot: "/var/www/test.dontcriminaliseus.org/web"
+#  method: git
+#  # Method could be git or tar.
+#  # If method git, you will need to provide a git repo to use. A sanitised database may be stored in the repo.
+#  gitrepo: ocback:dcfsfiles.git
+#  gitkey: /home/puregift/.ssh/sa
+#  #This is for a separate gitstored db. Locally it will be stored at proddb in sitebackups
+#  gitdb: ssh://ocback:/home/git/dcfsdb.git
 #
 # Since you can create many different sites, each in its own folder. There are certain commands that work with dev, stg and localprod
 # So these need to be specified. Therefore you can change them as you like.
@@ -79,23 +90,18 @@ sites:
 # theme: which theme to install
 # theme_admin: which admin theme to install
 # install_modules: which modules to install
-# reinstall_modules: These module(s) will be be uninstalled and reinstalled. This module is usually a placeholder
-#                 to ensure particular modules are installed. If a new module is required, it will be added to this module
-#                 as a dependency. The runup script will reinstall this module which will ensure the new module is enabled.
-#                 This is because the module might be added through composer, but it still needs to be enabled.
 # dev_modules: which dev modules to install for dev (or uninstall if making production)
 # dev_composer: dev modules which need to be required by composer so the dev_modules will be able to be installed
 # dev_composer is useful for d8 d9 since dev modules not set, but var and oc have dev modules already in composer.json
 #
 recipes:
   default:
-    source: git@github.com:Vardot/varbase-project.git
+    source: git@github.com:rjzaar/opencourse.git
     install_method: git
-    theme: vartheme_bs4
+    theme: octheme_bs4
     theme_admin: vartheme_admin
-    install_modules:
-    reinstall_modules:
-    dev_composer: devel:~3.0 features_ui
+    install_modules: oc_prod oc_content
+    reinstall_modules: oc_prod  # recreate_block_from_config no longer needed since removed superfish! yeah!
     dev_modules: syslog views_ui block_place devel features_ui dblog
     # This is a special directive that will not load any defaults from the default recipe.
     # This is so in this case install_modules will remain blank
@@ -115,8 +121,58 @@ recipes:
   localprod:
     dev:  n
   ins:
+    source: git@github.com:rjzaar/opencourse.git
     install_modules: oc_prod oc_content
   bak:
+  oc:
+    source:  git@github.com:rjzaar/opencourse.git
+    dev:  y
+    profile: varbase
+    webroot:  docroot
+    #    sitename: default # leave blank it will be called the name of the site, eg loc
+    auto:  y
+    apache: y
+    install_method: git
+    git_upstream: git@github.com:Vardot/varbase-project.git
+    theme: octheme_bs4
+    theme_admin: octheme_admin
+    install_modules: oc_prod
+    dev_modules: oc_dev syslog views_ui block_place devel features_ui dblog search_kint twig_xdebug
+    lando: n
+    prod:
+      alias: cathnet
+      uri: "opencat.org"
+      user: puregift
+      docroot: "/var/www/opencat.org/docroot"
+      test_uri: "test.opencat.org"
+      test_docroot: "/var/www/test.opencat.org/docroot"
+      method: tar
+      # Method could be git or tar.
+      # If method git, you will need to provide a git repo to use. A sanitised database may be stored in the repo.
+      gitrepo: https://github.com/rjzaar/ocorg.git
+      gitkey: /home/puregift/.ssh/github
+      #This is for a separate gitstored db. Locally it will be stored at proddb in sitebackups
+      gitdb: ssh://ocback:/home/git/proddb.git
+  vadc:
+    source: Vardot/varbase-project:~9
+    install_method: composer
+    theme: vartheme_bs4
+    theme_admin: vartheme_admin
+    install_modules:
+    dev_modules: syslog views_ui block_place devel features_ui dblog
+    default: n
+    profile: varbase
+    webroot: docroot
+    prod:
+      alias: ctn
+      uri: "covidteachernetwork.org"
+      user: soph
+      docroot: "/var/www/covidteachernetwork.org/docroot"
+      test_uri: "test.covidteachernetwork.org"
+      test_docroot: "/var/www/test.covidteachernetwork.org/docroot"
+      method: tar
+      profile: varbase
+      gitkey: ctn
   d9:
     source: https://www.drupal.org/download-latest/tar.gz
     install_method: file
@@ -148,6 +204,15 @@ recipes:
     dev_composer: devel features_ui
     dev_modules: syslog views_ui block_place devel features_ui dblog
   tes:
+  t1:
+  t2:
+    dev:  n
+  t3:
+    dev:  n
+  t4:
+    dev:  n
+  st1:
+  st2:
   varg:
     source: git@github.com:Vardot/varbase-project.git
     install_method: git
@@ -159,7 +224,7 @@ recipes:
     # This is so in this case install_modules will remain blank
     default: n
   varc:
-    source: vardot/varbase-project:^8.8.7
+    source: vardot/varbase-project:^9.0.3
     install_method: composer
     theme: vartheme_bs4
     theme_admin: vartheme_admin
@@ -175,7 +240,23 @@ recipes:
     install_modules:
     dev_modules: syslog views_ui block_place devel features_ui dblog
     default: n
-  oc:
+  varl:
+    source: vardot/varbase-project
+    install_method: composer
+    theme: vartheme_bs4
+    theme_admin: vartheme_admin
+    install_modules:
+    dev_modules: syslog views_ui block_place devel features_ui dblog
+    default: n
+    lando: y
+  guardr:
+    install_method: composer
+    theme: bartik
+    default: n
+    dev_modules: syslog views_ui block_place devel features_ui dblog
+    webroot: web
+    profile: standard
+  cat:
     source:  git@github.com:rjzaar/opencourse.git
     dev:  y
     profile: varbase
@@ -190,12 +271,22 @@ recipes:
     install_modules: oc_prod
     dev_modules: oc_dev syslog views_ui block_place devel features_ui dblog search_kint twig_xdebug
     lando: n
-  varl:
-    source: vardot/varbase-project
+    prod:
+      alias: opencat
+      uri: "opencat.org"
+      user: opencat
+      docroot: "/var/www/opencat.org/docroot"
+      test_uri: "test.opencat.org"
+      test_docroot: "/var/www/test.opencat.org/docroot"
+      method: tar
+      # Method could be git or tar.
+      # If method git, you will need to provide a git repo to use. A sanitised database may be stored in the repo.
+      gitrepo: https://github.com/rjzaar/ocorg.git
+      gitkey: /home/puregift/.ssh/github
+      #This is for a separate gitstored db. Locally it will be stored at proddb in sitebackups
+      gitdb: ssh://ocback:/home/git/proddb.git
+  op:
+    source: opigno/opigno-composer:^3.0
     install_method: composer
-    theme: vartheme_bs4
-    theme_admin: vartheme_admin
-    install_modules:
     dev_modules: syslog views_ui block_place devel features_ui dblog
     default: n
-    lando: y
