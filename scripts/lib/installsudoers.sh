@@ -11,13 +11,13 @@ if [ $(id -u) != 0 ]; then
   print_help
   exit 1
 fi
-cp "$1/d8fp.sh" /usr/local/bin
+cp "$1/dfp.sh" /usr/local/bin
 cp "$1/debug" /usr/local/bin
 cp "$1/sudoeuri.sh" /usr/local/bin
 sudo chown root:root /usr/local/bin/dfp.sh
 sudo chown root:root /usr/local/bin/debug
 sudo chown root:root /usr/local/bin/sudoeuri.sh
-sudo echo "$2 ALL = (root) NOPASSWD: /usr/local/bin/d8fp.sh" > /etc/sudoers.d/pl
+sudo echo "$2 ALL = (root) NOPASSWD: /usr/local/bin/dfp.sh" > /etc/sudoers.d/pl
 sudo echo "$2 ALL = (root) NOPASSWD: /usr/local/bin/debug" >> /etc/sudoers.d/pl
 sudo echo "$2 ALL = (root) NOPASSWD: /usr/local/bin/sudoeuri.sh" >> /etc/sudoers.d/pl
 

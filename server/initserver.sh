@@ -114,10 +114,11 @@ echo "$user:$pword" | sudo chpasswd
 
 usermod -aG sudo $user
 ufw allow OpenSSH
-ufw enable
-ufw status
 ufw allow http
 ufw allow https
+ufw enable
+ufw status
+
 user_sudo_enable="$user ALL=(ALL:ALL) NOPASSWD: ALL" 
 if ! grep "$user_sudo_enable" /etc/sudoers; then
   echo "$user_sudo_enable" | EDITOR="tee -a" visudo

@@ -4,9 +4,11 @@
 
 This is a Devops framework for drupal sites, particularly based on varbase.
 The framework is run through the pl (short for please), plcd and plvi commands.
-The pl command has been added to bash commands so can be accessed anywhere. It is followed by the script name and usually which instance to be worked on, eg "pl backup stg" will backup the stage instance.
-There is a yaml file which contains the framework setup. An example yaml file is provided and is ready to be used, with some tweaking required.
-You set it up with the following commands
+The pl command has been added to bash commands so can be accessed anywhere. It is followed by the script name and 
+usually which instance to be worked on, eg "pl backup varc" will backup the 'varc' instance (varc is a varbase install using composer)
+There is a yaml file which contains the framework setup (pl.yml). An example yaml file is provided and is ready to be used, with 
+some tweaking required ('example.pl.yml' copy this file to pl.yml and tweak it).
+You set pleasy up with the following commands
 
 ```
 git clone git@github.com:rjzaar/pleasy.git 
@@ -20,24 +22,26 @@ You will now have a functioning pleasy.
 
 You should now be able to install your first site:
 ```
-pl install d8
+pl install d9
 ```
 OR if you want to install the varbase distribution
 ```
-pl install var
+pl install varc
 ```
 You can then move around between sites using plcd
 ```angular2html
-plcd loc #Takes you to the root of the site
-plcd loc d #Takes you to the webroot fo the site
+plcd d9 #Takes you to the root of the site
+plcd d9 d #Takes you to the webroot fo the site
 ```
+
+The infrastructure for each site is setup. For each site
 
 Drush also works. Each sitename becomes the alias. This can be accessed from anywhere.
 ```angular2html
-drush @loc status #runs the status command on the loc site.
-drush @stg_loc status #runs the status command on the local stage site.
-drush @prod_loc status #runs the status commend on the production version of the loc site.
-drush @test_loc status #runs the status commend on the test version of the loc site which is on the production server.
+drush @d9 status #runs the status command on the d9 site.
+drush @stg_d9 status #runs the status command on the stage version of d9 site.
+drush @prod_d9 status #runs the status commend on the production version of the d9 site, if there is a production version of the site.
+drush @test_d9 status #runs the status commend on the test version of the loc site which is on the production server, if it is setup.
 ```
 Drupal console aliases are also setup.
 
@@ -47,9 +51,9 @@ The main configuration is in a single file called pl.yml. This is created from t
 to be edited to suit the current user, eg setting github credentials. But it has enough information to be useable 
 out of the box. The following site information is ready to go
 
-d8: Drupal 8 install
+d9: Drupal 9 install
 
-d8c: Drupal 8 composer install
+d9c: Drupal 9 composer install
 
 varg: varbase-project install using git
 
