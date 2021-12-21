@@ -82,7 +82,7 @@ echo "Uri: $uri"
 echo "Webroot: $webroot"
 
 
-cd $uri
+cd /home/$USER/$uri
 
 options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
 if [[ $flag_first ]]; then
@@ -111,6 +111,7 @@ if [[ -d "$prod" ]]; then
 fi
 
 sudo mkdir "$prod"
+echo "Untaring /home/$user/$uri/${Name::-4}.tar.gz into $prod"
 sudo tar -zxf "/home/$user/$uri/${Name::-4}.tar.gz" --directory   "$prod" --strip-components=1
 wait
 #cd $1/..
@@ -138,10 +139,7 @@ mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CH
 mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < /home/$user/$uri/$Name
 
 echo "Database restored."
-cd $prod_docroot
-drush sset system.maintenance_mode FALSE
-drush cr
-
+bash ./home/$USER/mainoff.sh $prod_docroot
 #Now check the site
 
 

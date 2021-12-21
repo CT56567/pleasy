@@ -175,9 +175,10 @@ echo "test_docroot: $test_docroot"
 exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
     if [ "$exists" = "exists" ]; then
       #run the restore function
+      echo "Prod exits so just restoring it."
       ssh $prod_alias "./restoreprod.sh $prod_docroot -f"
       else
-
+echo "Prod doesn't exist so creating it."
 ssh $prod_alias "./createsites.sh $prod_docroot"
 fi
 fi

@@ -18,5 +18,6 @@ prod_docroot="var/www/$url/docroot" # This is only needed for the initial first 
   # prod_docroot is passed via variable ($1) and prod_docroot=$1 after ./secrets.sh is called.
 prod_key="gitkey"
 cont="n"
+server_timezone="Australia/Melbourne"
 
 export user

@@ -1,48 +1,23 @@
 #!/bin/bash
 #                      Move dev to stage For Pleasy Library
-#
-#  This script will use git to update the files from dev repo (ocdev) on the stage
-#  site dev to stg. If one argument is given it will copy dev to the site
-#  specified. If two arguments are give it will copy the first to the second.
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  15/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-#
-
 # scriptname is set in pl.
-
 # Help menu
-# Prints user guide
 print_help() {
 echo \
 "Uses git to update a stage site with the dev files.
 Usage: pl dev2stg [OPTION] ... [SOURCE]
-This script will use git to update the files from dev repo (ocdev) on the stage
-site dev to stg. If one argument is given it will copy dev to the site
-specified. If two arguments are give it will copy the first to the second.
-Presumes the dev git has already been pushed. Git is used for this rather than
-simple file transfer so it follows the requirements in .gitignore.
+This script will use git to update the files from the dev site to the stage
+site, eg d9 to stg_d9. If one argument is given it will copy the site specified to the stage site. If two arguments are
+give it will copy the first to the second.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -y --yes                Auto Yes to all options
   -d --debug              Provide debug information when running this script.
 
-Examples:"
-
+Examples:
+pl dev2stg d9
+pl dev2stg d9 t1"
 }
 step=${step:-1}
 args=$(getopt -o hs:d -l help,step:,debug --name "$scriptname" -- "$@")
@@ -65,6 +40,9 @@ while true; do
     print_help
     exit 2 # works
     ;;
+  -y | --yes)
+    flag_yes="-y"
+    shift; ;;
   -s | --step)
     flag_step=1
     shift
@@ -90,8 +68,8 @@ if [ $1 == "dev2stg" ] && [ -z "$2" ]
   from="$sites_dev"
 elif [ -z "$2" ]
   then
-    sitename_var=$1
-    from="$sites_dev"
+    sitename_var="stg_$1"
+    from=$1
    else
     from=$1
     sitename_var=$2
@@ -117,7 +95,8 @@ import_site_config $from
 from_site_path=$site_path
 
 # Make sure cmi is exported
-drush @"$from" cex
+
+drush @"$from" cex "$flag_yes"
 
 #    if [ ! -d "$from_site_path/$from/.git" ]; then
 #      echo "There is no git in the dev site $from. Aborting."

@@ -1,17 +1,17 @@
 #!/bin/bash
-#                            Enmod For Pleasy Library
+#                            Unmod For Pleasy Library
 # Help menu
 # Prints user guide
 print_help() {
 echo \
-"Usage: pl enmod [OPTION] ... [SITE] [MODULE]
-This script will install a module first using composer, then fix the file/dir
-ownership and then enable the module using drush automatically.
+"Usage: pl unmod [OPTION] ... [SITE] [MODULE]
+This script will uninstall a module first using drush then composer.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
 
-Examples:"
+Examples:
+pl unmod cat migrate_plus"
 }
 
 args=$(getopt -o h -l help --name "$scriptname" -- "$@")
@@ -19,7 +19,7 @@ args=$(getopt -o h -l help --name "$scriptname" -- "$@")
 
 # If getopt outputs error to error variable, quit program displaying error
 [ $? -eq 0 ] || {
-    echo "please do 'pl enmod --help' for more options"
+    echo "please do 'pl unmod --help' for more options"
     exit 1
 }
 
@@ -51,7 +51,7 @@ SECONDS=0
 # This seems to be a GOD FUNCTION
 parse_pl_yml
 
-if [ $1 == "enmod" ]; then
+if [ $1 == "unmod" ]; then
   echo "You need to specify the site and the module in that order"
   print_help
 elif [ -z "$2" ]; then
@@ -66,15 +66,12 @@ echo "This will install and enable the $mod module for the site $sitename_var us
 parse_pl_yml
 import_site_config $sitename_var
 
+echo "Uninstalling using drush"
+drush @$sitename_var pm-uninstall -y $mod
+
 cd $site_path/$sitename_var
-echo "Installing module using composer"
-composer require drupal/$mod
-
-echo "Fixing site permissions."
-sudo chown :www-data $site_path/$sitename_var -R
-
-echo "installing using drush"
-drush @$sitename_var en -y $mod
+echo "Removing module using composer"
+composer remove drupal/$mod
 
 # End timer
 # Finish script, display time taken

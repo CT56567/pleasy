@@ -65,9 +65,9 @@ varc: varbase-project install using composer
 
 # STRUCTURE
 
-Currently each site is stored under /var/www/sitename, eg /var/www/d9
+Currently each site is stored under /var/www/oc/sitename, eg /var/www/d9
 When a site is backuped up 'pl backup d9' the backup is stored in pleasy/sitebackups/d9
-The backup title includes the time and git reference.f
+The backup title includes the time and git reference.
 This backup can then be restored to another site eg 'pl restore d9 stg_d9'. This command will list all the backups
 and you can choose which one to restore.
 
@@ -90,6 +90,7 @@ Once you have a production server, eg vanilla ubuntu 20.04 server. You should fo
 to setup the server. Once the server is setup you need to add your production server details to pl.yml. 
 You will then be able to push up your site to the server, eg 'pl prodow d9'. 'Prodow' stands for PRODuction OverWrite,
 
+To pull down the site use 'pl proddown d9' and this will download and install the site to stg_d9.
 
 
 Opencourse (ocrepo): A repo for just the code for opencourse (dev environment)
@@ -292,17 +293,18 @@ Examples:
 
 **<summary>dev2stg: Uses git to update a stage site with the dev files. :white_check_mark: </summary>**
 Usage: pl dev2stg [OPTION] ... [SOURCE]
-This script will use git to update the files from dev repo (ocdev) on the stage
-site dev to stg. If one argument is given it will copy dev to the site
-specified. If two arguments are give it will copy the first to the second.
-Presumes the dev git has already been pushed. Git is used for this rather than
-simple file transfer so it follows the requirements in .gitignore.
+This script will use git to update the files from the dev site to the stage
+site, eg d9 to stg_d9. If one argument is given it will copy the site specified to the stage site. If two arguments are
+give it will copy the first to the second.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
+  -y --yes                Auto Yes to all options
   -d --debug              Provide debug information when running this script.
 
 Examples:
+pl dev2stg d9
+pl dev2stg d9 t1
 
 </details>
 
@@ -818,6 +820,21 @@ Mandatory arguments to long options are mandatory for short options too.
 Examples:
 pl testsite stg
 END HELP
+
+</details>
+
+<details>
+
+**<summary>unmod: Usage: pl unmod [OPTION] ... [SITE] [MODULE] :white_check_mark: </summary>**
+--**BROKEN DOCUMENTATION**--
+This script will uninstall a module first using drush then composer.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+
+Examples:
+pl unmod cat migrate_plus
+--**BROKEN DOCUMENTATION**--
 
 </details>
 

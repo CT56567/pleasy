@@ -92,6 +92,8 @@ echo "User: $user"
 
 apt update && apt upgrade -y
 
+#Setup the timezone set in the secrets file. This should match the dev machine.
+timedatectl set-timezone "$server_timezone"
 # see line 320 in init.sh.
   #setup unattended upgrades
   sudo apt install unattended-upgrades
