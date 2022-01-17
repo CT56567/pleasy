@@ -32,6 +32,10 @@ import_site_config $sitename_var
 echo "Updating varbase"
 # The code below is a pleasy version of
 
+# Check to see if there has been any changes to varbase updater
+
+
+
 
 # Varbase Updater
 

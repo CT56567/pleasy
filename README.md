@@ -31,12 +31,33 @@ pl install varc
 You can then move around between sites using plcd
 ```angular2html
 plcd d9 #Takes you to the root of the site
-plcd d9 d #Takes you to the webroot fo the site
+plcd d9 d #Takes you to the webroot of the site
 ```
 
-The infrastructure for each site is setup. For each site a stage version is setup, eg for d9 the stage version is stg_d9.
+The infrastructure for each site is setup including a stage version, eg for d9 the stage version is stg_d9.
 Once a production version is created, both production and test sites are also created by the initserver script, ie prod_d9 and test_d9.
 
+Here is the overview of all the possible locations using the d9 sitename as an example.
+
+**d9**          the main dev site for d9 stored locally. Location: [www_path][sitename] Backup: [pleasy][sitebackups][sitename]
+
+eg: Location "/var/www/oc/d9" backup "/home/[USER]/pleasy/sitebackups/d9" URL: pleasy.d9
+
+**stg_d9**      the stage site for d9 stored locally.   Location: [www_path][sitename] Backup: [pleasy][sitebackups][sitename]
+
+eg: Location "/var/www/oc/stg_d9" backup "/home/[USER]/pleasy/sitebackups/stg_d9" URL: pleasy.stg_d9
+
+**prod_d9**     the production site for d9 on the server.
+
+eg: Location "/var/www/[siteurl]" backup "/home/[USER]/[siteurl]/" URL: [siteurl]
+
+**test_d9**     the test site for d9 on the server.
+
+eg: Location "/var/www/test.[siteurl]" backup "/home/[USER]/test.[siteurl]/" URL: test.[siteurl]
+
+**d9_prod**     This is just to store the production backup locally.
+
+eg: There is no location. backup "/home/[USER]/pleasy/sitebackups/d9/prod/" There is no URL.
 
 Drush also works. Each sitename becomes the alias. This can be accessed from anywhere.
 ```angular2html
@@ -63,13 +84,15 @@ vard: dev varbase-project install using composer
 
 varc: varbase-project install using composer 
 
-# STRUCTURE
+More specifically the following variables are set in pl.yml
 
-Currently each site is stored under /var/www/oc/sitename, eg /var/www/d9
-When a site is backuped up 'pl backup d9' the backup is stored in pleasy/sitebackups/d9
-The backup title includes the time and git reference.
-This backup can then be restored to another site eg 'pl restore d9 stg_d9'. This command will list all the backups
-and you can choose which one to restore.
+hosts_path: "/etc/hosts"
+
+vhosts_path: "/etc/apache2/sites-available/"
+
+www_path: "/var/www/oc"
+
+host_database: mysql
 
 # VARBASE
 
@@ -138,6 +161,21 @@ If there is a problem on production.
 pl restoreprod  #This restores Prod to the old site. Only if needed.
 ```
  
+# BACKUP AND RESTORE
+
+The backup command is able to backup any site to its sitebackup folder, eg /var/www/oc/d9 is backed up to 
+/home/[USER]/[siteurl]/[backupname].sql and [backupname].tar.gz
+
+The [backupname] is generated from the date, time, git hash code and backup message.
+
+If the production site is backed up, it will be backed up on the server, ie pl backup prod_d9.
+If the production site is backed up to prod, ie pl backup prod_d9 prod, then it will also be
+stored locally in /home/[USER]/[siteurl]/prod/[backupname].sql location (including the tar 
+file).
+
+The restore command will restore the site from a chosen backup or to a new location. 
+
+
 # PLEASY RATIONALE
 
 What makes pleasy different? Pleasy is trying to use the simplest tools (bash scripting) to leverage drupal and varbase tools 
@@ -151,11 +189,9 @@ scripts. It hopes to grow into a complete devops solution incorporating the best
 
 2) The varbase script varbase-update.sh needs to be integrated into pleasy.
 
-3) A server version needs to be developed.
-
 4) All the remaining scripts (ie with status todo) need to be updated and integrated.
 
-5) All scripts tested with travis
+5) All scripts tested with CircleCI
 
 6) This will become a 1.0 release
 
@@ -163,29 +199,29 @@ scripts. It hopes to grow into a complete devops solution incorporating the best
 
 8) New functions to set up site testing using varbase behat code.
 
-9) Automatical travis testing of any commits.
+9) Automatic CircleCI testing of any commits.
 
-10) These new functions to set up travis tests that respond to drupal core security updates automatically and if passing auto push to production.
+10) These new functions to set up CircleCI tests that respond to drupal core security updates automatically and if passing auto push to production.
 
-11) New update functions to set up travis tests that respond to varbase project updates, test automatically and create stage site which is tested automatically. One line code push to production.
+11) New update functions to set up CircleCI tests that respond to varbase project updates, test automatically and create stage site which is tested automatically. One line code push to production.
 
-Other improvements: nginx as an option. Varnish as an option. Incorporate https://github.com/drevops/drevops
+Other improvements: Varnish as an option. Incorporate https://github.com/drevops/drevops
 
 
 
 Status codes
 
-pass: Working and passing Travis CI :white_check_mark:
+pass: Working and passing CircleCI  ☑
 
-works: Working but not yet integrated to Travis CI :heavy_check_mark:
+works: Working but not yet integrated to Travis CI  👷
 
-todo: Has not been looked at yet :question:
+todo: Has not been looked at yet   ❓
 
 
 # FUNCTION LIST
 <details>
 
-**<summary>addc: Add github credentials :white_check_mark: </summary>**
+**<summary>addc: Add github credentials 👷 </summary>**
 Usage: pl addc [OPTION]
   This script is used to add github credentials
 
@@ -199,7 +235,7 @@ Usage: pl addc [OPTION]
 
 <details>
 
-**<summary>backupdb: [34mbackup --help [39m :white_check_mark: </summary>**
+**<summary>backupdb: [34mbackup --help [39m 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 Backs up the database only
     Usage: pl backupdb [OPTION] ... [SOURCE]
@@ -222,27 +258,31 @@ Backs up the database only
 
 <details>
 
-**<summary>backup: Backup site and database :heavy_check_mark: </summary>**
-Usage: pl backup [OPTION] ... [SOURCE] [MESSAGE]
+**<summary>backup: Backup site and database ☑ </summary>**
+Usage: pl backup [OPTION] ... [SOURCE] [DESTINATION] [MESSAGE]
 This script is used to backup a particular site's files and database.
 You just need to state the sitename, eg dev and an optional message.
+You can also optionally specify where the site will be backedup to. This is useful if you are backing up the production
+site to a local location, instead of on the production server.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
   -d --debug              Provide debug information when running this script.
   -g --git                Also create a git backup of site.
+  -m --message            A message for the backup
 
 Examples:
 pl backup -h
-pl backup dev
-pl backup tim 'First tim backup'
+pl backup dev -m='Fixed error'
+pl backup tim fred -m='First tim backup'
+
 END HELP
 
 </details>
 
 <details>
 
-**<summary>copyf: Copies only the files from one site to another :white_check_mark: </summary>**
+**<summary>copyf: Copies only the files from one site to another 👷 </summary>**
 Usage: pl copyf [OPTION] ... [SOURCE]
 This script will copy one site to another site. It will copy only the files
 but will set up the site settings. If no argument is given, it will copy dev
@@ -258,7 +298,7 @@ Examples:
 
 <details>
 
-**<summary>copypt: Copy the production site to the test site. :white_check_mark: </summary>**
+**<summary>copypt: Copy the production site to the test site. 👷 </summary>**
 Usage: pl copypt [SITE] [OPTION]
   This script is used to copy the production site to the test site. The site
   details are in pl.yml.
@@ -273,13 +313,10 @@ Usage: pl copypt [SITE] [OPTION]
 
 <details>
 
-**<summary>copy: Copies one site to another site. :heavy_check_mark: </summary>**
+**<summary>copy: Copies one site to another site. ☑ </summary>**
     Usage: pl copy [OPTION] ... [SOURCE] [DESTINATION]
 This script will copy one site to another site. It will copy all
-files, set up the site settings and import the database. If no
-argument is given, it will copy dev to stg. If one argument is given it
-will copy dev to the site specified. If two arguments are give it will
-copy the first to the second.
+files, set up the site settings and import the database.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -291,7 +328,7 @@ Examples:
 
 <details>
 
-**<summary>dev2stg: Uses git to update a stage site with the dev files. :white_check_mark: </summary>**
+**<summary>dev2stg: Uses git to update a stage site with the dev files. 👷 </summary>**
 Usage: pl dev2stg [OPTION] ... [SOURCE]
 This script will use git to update the files from the dev site to the stage
 site, eg d9 to stg_d9. If one argument is given it will copy the site specified to the stage site. If two arguments are
@@ -310,7 +347,7 @@ pl dev2stg d9 t1
 
 <details>
 
-**<summary>doctest: Add github credentials :white_check_mark: </summary>**
+**<summary>doctest: Add github credentials 👷 </summary>**
 Usage: pl addc [OPTION]
   This script is used to add github credentials
 
@@ -324,7 +361,7 @@ Usage: pl addc [OPTION]
 
 <details>
 
-**<summary>enmod: Usage: pl enmod [OPTION] ... [SITE] [MODULE] :white_check_mark: </summary>**
+**<summary>enmod: Usage: pl enmod [OPTION] ... [SITE] [MODULE] 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 This script will install a module first using composer, then fix the file/dir
 ownership and then enable the module using drush automatically.
@@ -339,7 +376,7 @@ Examples:
 
 <details>
 
-**<summary>fixp: Usage: pl fixp [OPTION] ... [SOURCE] :white_check_mark: </summary>**
+**<summary>fixp: Usage: pl fixp [OPTION] ... [SOURCE] 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 This script is used to fix permissions of a Drupal site You just need to
 state the sitename, eg dev.
@@ -354,7 +391,7 @@ Examples:
 
 <details>
 
-**<summary>fixss: Usage: pl fixss [OPTION] ... [SOURCE] :white_check_mark: </summary>**
+**<summary>fixss: Usage: pl fixss [OPTION] ... [SOURCE] 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 This will fix (or set) the site settings in local.settings.php You just need
 to state the sitename, eg dev.
@@ -369,7 +406,7 @@ Examples:
 
 <details>
 
-**<summary>gcom: args:  --help -- :white_check_mark: </summary>**
+**<summary>gcom: args:  --help -- 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 Git commit code with optional backup
 Usage: pl gcom [SITE] [MESSAGE] [OPTION]
@@ -392,7 +429,7 @@ pl gcom pl "Improved gcom."
 
 <details>
 
-**<summary>gcomvup: Git commit and update to latest varbase stable :question: </summary>**
+**<summary>gcomvup: Git commit and update to latest varbase stable ❓ </summary>**
 Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 Varbase update, git commit changes and backup. This script follows the
 correct path to git commit changes You just need to state the
@@ -411,7 +448,7 @@ END HELP
 
 <details>
 
-**<summary>gulp: Turn on gulp :white_check_mark: </summary>**
+**<summary>gulp: Turn on gulp 👷 </summary>**
 Usage: pl  [OPTION] ... [SITE] [URL]
 This script is used to set up gulp browser sync for a particular page. You
 just need to state the sitename and optionally a particular page
@@ -430,7 +467,7 @@ END HELP
 
 <details>
 
-**<summary>info: Information on site(s) :heavy_check_mark: </summary>**
+**<summary>info: Information on site(s) ☑ </summary>**
 Usage: pl info [SITE] [TYPE] [OPTION]
 This script is used to provide various information about a site.
 You just need to state the sitename, eg dev and optionally the type of information
@@ -448,7 +485,7 @@ END HELP
 
 <details>
 
-**<summary>init: Initialises pleasy :heavy_check_mark: </summary>**
+**<summary>init: Initialises pleasy ☑ </summary>**
   Usage: pl init [OPTION]
 This will set up pleasy and initialise the sites as per
 pl.yml, including the current production shared database.
@@ -495,7 +532,7 @@ END OF HELP
 
 <details>
 
-**<summary>install: Installs a drupal site :heavy_check_mark: </summary>**
+**<summary>install: Installs a drupal site ☑ </summary>**
 Usage: pl install site [OPTION]
 This script is used to install a variety of drupal flavours particularly
 opencourse This will use opencourse-project as a wrapper. It is presumed you
@@ -523,7 +560,7 @@ END HELP
 
 <details>
 
-**<summary>main: Turn maintenance mode on or off :white_check_mark: </summary>**
+**<summary>main: Turn maintenance mode on or off 👷 </summary>**
 Usage: pl main [OPTION] ... [SITE] [MODULES]
 This script will turn maintenance mode on or off. You will need to specify the
 site first than on or off, eg pl main loc on
@@ -540,7 +577,7 @@ END HELP
 
 <details>
 
-**<summary>makedb: Create the database for a site :white_check_mark: </summary>**
+**<summary>makedb: Create the database for a site 👷 </summary>**
 Usage: pl makedb [OPTION] ... [SITE]
 <ADD DESC HERE>
 
@@ -555,7 +592,7 @@ END HELP
 
 <details>
 
-**<summary>makedev: Turn dev mode on for a site :heavy_check_mark: </summary>**
+**<summary>makedev: Turn dev mode on for a site ☑ </summary>**
 Usage: pl  [OPTION] ... [SITE]
 This script is used to turn on dev mode and enable dev modules.
 You just need to state the sitename, eg stg.
@@ -572,7 +609,7 @@ END HELP
 
 <details>
 
-**<summary>makeprod: Turn production mode on and remove dev modules :heavy_check_mark: </summary>**
+**<summary>makeprod: Turn production mode on and remove dev modules ☑ </summary>**
 Usage: pl makeprod [OPTION] ... [SITE]
 This script is used to turn off dev mode and uninstall dev modules.  You just
 need to state the sitename, eg stg.
@@ -588,7 +625,7 @@ END HELP
 
 <details>
 
-**<summary>open: Opens the specified site :white_check_mark: </summary>**
+**<summary>open: Opens the specified site 👷 </summary>**
 Usage: pl open [OPTION] ... [SOURCE]
 This script will open the specified site.
 
@@ -602,7 +639,7 @@ pl open loc
 
 <details>
 
-**<summary>proddown: Overwrite a specified local site with production :white_check_mark: </summary>**
+**<summary>proddown: Overwrite a specified local site with production 👷 </summary>**
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
 site. Note: If the local site will be deleted if it already exists. Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
@@ -623,7 +660,7 @@ END HELP
 
 <details>
 
-**<summary>prodowgit: Overwrite production with site specified :question: </summary>**
+**<summary>prodowgit: Overwrite production with site specified ❓ </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -641,7 +678,7 @@ END HELP
 
 <details>
 
-**<summary>prodow: Overwrite production with site specified :question: </summary>**
+**<summary>prodow: Overwrite production with site specified ❓ </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -659,7 +696,7 @@ END HELP
 
 <details>
 
-**<summary>prodowtar: Overwrite production with site specified :question: </summary>**
+**<summary>prodowtar: Overwrite production with site specified ❓ </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -677,7 +714,7 @@ END HELP
 
 <details>
 
-**<summary>prodstat: Production status :white_check_mark: </summary>**
+**<summary>prodstat: Production status 👷 </summary>**
 Usage: pl prodow [OPTION] ... [SITE]
 This script will provide the status of the production site
 
@@ -692,7 +729,7 @@ END HELP
 
 <details>
 
-**<summary>rebuild: Rebuild a site's database :question: </summary>**
+**<summary>rebuild: Rebuild a site's database ❓ </summary>**
 Usage: pl rebuild [OPTION] ... [SITE]
 This script is used to rebuild a particular site's database. You just need to
 state the sitename, eg loc.
@@ -707,7 +744,7 @@ END HELP
 
 <details>
 
-**<summary>recreateserverdb: Recreate the server Database :question: </summary>**
+**<summary>recreateserverdb: Recreate the server Database ❓ </summary>**
 Usage: pl createserverdb [OPTION] ... [SITE]
 
 Mandatory arguments to long options are mandatory for short options too.
@@ -722,7 +759,7 @@ END HELP
 
 <details>
 
-**<summary>restoredb: Restore a particular site's files and database. :white_check_mark: </summary>**
+**<summary>restoredb: Restore a particular site's files and database. 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 You just need to state the sitename, eg dev.
 You can alternatively restore the site into a different site which is the second argument.
@@ -741,7 +778,7 @@ pl  d8 # This will restore the db on the d8 site.
 
 <details>
 
-**<summary>restore: Restore a particular site's files and database from backup :heavy_check_mark: </summary>**
+**<summary>restore: Restore a particular site's files and database from backup ☑ </summary>**
 Usage: pl restore [FROM] [TO] [OPTION]
 You just need to state the sitename, eg dev.
 You can alternatively restore the site into a different site which is the second argument.
@@ -765,7 +802,7 @@ pl restore prod stg
 
 <details>
 
-**<summary>runup: This script will run any updates on the stg site or the site specified. :white_check_mark: </summary>**
+**<summary>runup: This script will run any updates on the stg site or the site specified. 👷 </summary>**
 Usage: pl runupdates [OPTION] ... [SOURCE]
 This script presumes the files including composer.json have been updated in some way and will now run those updates.
 
@@ -780,7 +817,7 @@ pl runup test # This will run the updates on the external test server.
 
 <details>
 
-**<summary>stopgulp: This script is used to kill any processes started by gulp. There are no arguments required. :white_check_mark: </summary>**
+**<summary>stopgulp: This script is used to kill any processes started by gulp. There are no arguments required. 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 
 --**BROKEN DOCUMENTATION**--
@@ -789,7 +826,7 @@ pl runup test # This will run the updates on the external test server.
 
 <details>
 
-**<summary>testserver: Test the production server initialisation :question: </summary>**
+**<summary>testserver: Test the production server initialisation ❓ </summary>**
 Usage: pl testserver [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -807,7 +844,7 @@ END HELP
 
 <details>
 
-**<summary>testsite: Overwrite production with site specified :question: </summary>**
+**<summary>testsite: Overwrite production with site specified ❓ </summary>**
 Usage: pl testsite [OPTION] ... [SITE]
 This script will overwrite production with the site chosen It will first backup
 prod The external site details are also set in pl.yml under prod:
@@ -825,7 +862,7 @@ END HELP
 
 <details>
 
-**<summary>unmod: Usage: pl unmod [OPTION] ... [SITE] [MODULE] :white_check_mark: </summary>**
+**<summary>unmod: Usage: pl unmod [OPTION] ... [SITE] [MODULE] 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
 This script will uninstall a module first using drush then composer.
 
@@ -840,7 +877,7 @@ pl unmod cat migrate_plus
 
 <details>
 
-**<summary>updateprod: Update Production (or test) server with stg or specified site. :white_check_mark: </summary>**
+**<summary>updateprod: Update Production (or test) server with stg or specified site. 👷 </summary>**
 Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 This will copy stg or site specified to the production (or test) server and run
 the updates on that server. It will also backup the server. It presumes the server
@@ -860,7 +897,7 @@ pl  d8 -t # This will update the test site specified in pl.yml with the d8 site.
 
 <details>
 
-**<summary>updateserver: Update Production Server Scripts. :white_check_mark: </summary>**
+**<summary>updateserver: Update Production Server Scripts. 👷 </summary>**
 Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 
 Mandatory arguments to long options are mandatory for short options too.
@@ -874,7 +911,7 @@ pl  d8 # This will update production with the d8 site.
 
 <details>
 
-**<summary>update: Update all site configs :heavy_check_mark: </summary>**
+**<summary>update: Update all site configs ☑ </summary>**
 Usage: pl update [OPTION]
 This script will update the configs for all sites
 
@@ -888,7 +925,7 @@ Examples:
 
 <details>
 
-**<summary>updatestg: Update stg or specified site. :white_check_mark: </summary>**
+**<summary>updatestg: Update stg or specified site. 👷 </summary>**
 Usage: pl  [OPTION] ... [SITE] [MESSAGE]
 This will run the updates on stg or specified site.
 
@@ -905,21 +942,14 @@ pl  d8 stg_t3 # This is update the stg_t3 site with the code in d8.
 
 <details>
 
-**<summary>testim:  :question: </summary>**
+**<summary>test:  ❓ </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 
 </details>
 
 <details>
 
-**<summary>test:  :question: </summary>**
-**DOCUMENTATION NOT IMPLEMENTED**
-
-</details>
-
-<details>
-
-**<summary>varup:  :question: </summary>**
+**<summary>varup:  ❓ </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 
 </details>

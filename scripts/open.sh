@@ -84,6 +84,9 @@ if [ $1 == "open" ] && [ -z "$2" ]
 fi
 
 sitename_var=$1
+
+# todo check to see if url is setup otherwise sudoeuri
+
 echo "about to open $sitename_var"
 drush @$sitename_var uli &
 

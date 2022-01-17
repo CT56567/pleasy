@@ -64,8 +64,8 @@ done
 
 if [ $1 == "dev2stg" ] && [ -z "$2" ]
   then
-  sitename_var="$sites_stg"
-  from="$sites_dev"
+  echo "No site specified. Exiting."
+  exit 0
 elif [ -z "$2" ]
   then
     sitename_var="stg_$1"
@@ -78,7 +78,7 @@ fi
 # Timer to show how long it took to run the script
 SECONDS=0
 parse_pl_yml
-
+import_site_config $sitename_var
 # Step Display
 # Display to user which step is chosen if step option is defined
 if [ $step -gt 1 ]; then
@@ -91,7 +91,6 @@ if [ $step -lt 2 ]; then
   echo -e "$Cyan step 1: This will update the stage site $sitename_var with the latest from $from $Color_Off"
 
 to_site=$sitename_var
-import_site_config $from
 from_site_path=$site_path
 
 # Make sure cmi is exported
@@ -204,7 +203,10 @@ if [[ "$reinstall_modules" != "" ]] ; then
   drush @$sitename_var en $reinstall_modules -y
 fi
 # deal with bad config.
-
+fi
+if [ $step -lt 4 ]; then
+  echo -e "$Cyan step 3: Clean up, ie fixp, out of maintenance_mode and out of readonlymode, cr $Color_Off"
+echo "sitename $sitename_var"
     set_site_permissions
     echo -e "\e[34m make sure out of maintenance and readonly mode\e[39m"
 drush @$sitename_var sset system.maintenance_mode FALSE

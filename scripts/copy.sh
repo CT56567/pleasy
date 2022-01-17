@@ -1,31 +1,5 @@
 #!/bin/bash
-#                      Backup prod For Pleasy Library
-#
-#  This script will copy one site to another site. It will copy all files,
-#  set up the site settings and import the database. If no argument is
-#  given, it will copy dev to stg If one argument is given it will copy dev
-#  to the site specified If two arguments are give it will copy the first
-#  to the second.
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  11/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-#
 
-# scriptname is set in pl.
 verbose="none"
 # Help menu
 # Prints user guide
@@ -34,10 +8,7 @@ print_help() {
     "Copies one site to another site.
     Usage: pl copy [OPTION] ... [SOURCE] [DESTINATION]
 This script will copy one site to another site. It will copy all
-files, set up the site settings and import the database. If no
-argument is given, it will copy dev to stg. If one argument is given it
-will copy dev to the site specified. If two arguments are give it will
-copy the first to the second.
+files, set up the site settings and import the database.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -91,11 +62,11 @@ ocmsg "Finish parsing pl.yml" debug
 # Check number of user arguments
 # Depending on number of user arguments, set copy condition
 if [ $1 == "copy" ] && [ -z "$2" ]; then
-  sitename_var="$sites_stg"
-  from="$sites_dev"
+ echo "You need to specify the from and to sites."
+ exit
 elif [ -z "$2" ]; then
-  sitename_var=$1
-  from="$sites_dev"
+ echo "You need to specify the from and to sites."
+ exit
 else
   from=$1
   sitename_var=$2

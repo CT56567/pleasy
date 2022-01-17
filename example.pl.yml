@@ -28,7 +28,7 @@ host_database: mysql
 github:
   user: githubuser
   key:  github
-  email: rjzaar@gmail.com
+  email: myname@gmail.com
 plgit: ocback:/home/git/pleasy.git
 #plgit: git@github.com:rjzaar/pleasy.git
 #prod:
@@ -53,18 +53,6 @@ plgit: ocback:/home/git/pleasy.git
 #  gitkey: /home/puregift/.ssh/sa
 #  #This is for a separate gitstored db. Locally it will be stored at proddb in sitebackups
 #  gitdb: ssh://ocback:/home/git/dcfsdb.git
-#
-# Since you can create many different sites, each in its own folder. There are certain commands that work with dev, stg and localprod
-# So these need to be specified. Therefore you can change them as you like.
-# dev(development site) is where you will do most of your development work. Its set to 'loc' for local since drupal console automatically sets up
-# a uri which as the site name last. If dev were used, google owns .dev and would not show it properly so loc is used instead. Unless you want to set up local ssl cert.
-# localprod will be a copy of the current production website as is. This will save time if you need to test stg multiple times.
-# stg is usually created from localprod files with the new files from loc and the localprod database ready to test the changes.
-#
-sites:
-  dev:  loc
-  stg:  stg
-  localprod:  localprod
 #
 # RECIPES
 # Recipes are the recipes for each site. The default is used for every site unless overwritten.

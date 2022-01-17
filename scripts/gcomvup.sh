@@ -1,38 +1,5 @@
 #!/bin/bash
-#                 Git commit for updating varbase For Pleasy Library
-#
-#  This is when you want to update. This will update to latest varbase stable.
-#
-#  https://events.drupal.org/vienna2017/sessions/
-#  advanced-configuration-management-config-split-et-al
-#  at 29:36
-#  That is a combination of (always presume sharing and do a backup first):
-#
-#  The safe sequence for updating
-#  Update code: varbase update
-#  Run updates: drush updb
-#  Export updated config: drush cex
-#  Commit git add && git commit
-#  Push: git push
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  29/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
 
-# scriptname is set in pl.
-
-# Help menu
-# Prints user guide
 print_help() {
 echo \
 "Git commit and update to latest varbase stable
@@ -86,7 +53,8 @@ done
 parse_pl_yml
 
 if [ $1 == "gcomvup" ] && [ -z "$2" ]; then
-  sitename_var="$sites_dev"
+ echo "You need to specify a site."
+ exit
   elif [ -z "$2" ]; then
     sitename_var=$1
     msg="Updating."

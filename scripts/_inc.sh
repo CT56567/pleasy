@@ -67,8 +67,8 @@ import_site_config() {
   stage=""
   if [ "${sitename_var:0:3}" = "stg" ]; then
     # set up stg
-  sitename_var=${sitename_var:4}
-  stage="stg_"
+    sitename_var=${sitename_var:4}
+    stage="stg_"
   fi
 
   # First load the defaults
@@ -142,7 +142,7 @@ import_site_config() {
   else
     dbpass=""
   fi
-    rp="recipes_default_lando"
+  rp="recipes_default_lando"
   rpv=${!rp}
   if [ "$rpv" != "" ]; then
     lando=${!rp}
@@ -213,7 +213,6 @@ import_site_config() {
   else
     dev_modules=""
   fi
-
 
   # Collect the details from pl.yml if they exist otherwise make blank This
   # first one is to override the defaults, ie default= n so if a site wants to
@@ -342,18 +341,16 @@ import_site_config() {
     lando=${!rp}
   fi
 
-if [ "$stage" = "stg_" ]; then
-  db=""
-  dbuser=""
-  dbpass=""
-  dev="n"
-  uri="pleasy.$stage$sitename_var"
-  # Not sure about gitupstream
-  #now set the sitename
-  sitename_var="stg_$sitename_var"
-fi
-
-
+  if [ "$stage" = "stg_" ]; then
+    db=""
+    dbuser=""
+    dbpass=""
+    dev="n"
+    uri="pleasy.$stage$sitename_var"
+    # Not sure about gitupstream
+    #now set the sitename
+    sitename_var="stg_$sitename_var"
+  fi
 
   if [ "$db" = "" ]; then
     db="$sitename_var$folder"
@@ -379,31 +376,30 @@ fi
     site_path="$www_path"
   fi
 
-# Create stg site
+  # Create stg site
 
-
-# Clear all prod variables
+  # Clear all prod variables
   prod_alias=""
-  prod_docroot=""      
-  prod_gitdb=""      
-  prod_gitkey=""     
-  prod_gitrepo=""       
-  prod_method=""       
-  prod_reinstall_modules=""       
-  prod_test_docroot=""      
-  prod_test_uri=""  
-  prod_uri=""       
-  prod_user=""       
+  prod_docroot=""
+  prod_gitdb=""
+  prod_gitkey=""
+  prod_gitrepo=""
+  prod_method=""
+  prod_reinstall_modules=""
+  prod_test_docroot=""
+  prod_test_uri=""
+  prod_uri=""
+  prod_user=""
 
-# Allow for getting prod information for stg site.
-if [ "$stage" = "stg_" ]; then
-store_sitename=$sitename_var
-sitename_var=${sitename_var:4}
-fi
+  # Allow for getting prod information for stg site.
+  if [ "$stage" = "stg_" ]; then
+    store_sitename=$sitename_var
+    sitename_var=${sitename_var:4}
+  fi
 
-ocmsg "Working out prod creds sitename is $sitename_var" debug
+  ocmsg "Working out prod creds sitename is $sitename_var" debug
 
-rp="recipes_${sitename_var}_prod_user"
+  rp="recipes_${sitename_var}_prod_user"
   rpv=${!rp}
   if [[ "$rpv" != "" ]]; then
     #make all the prod variables based on the site variables
@@ -473,10 +469,10 @@ rp="recipes_${sitename_var}_prod_user"
     fi
   fi
 
-# swap name back
-if [ "$stage" = "stg_" ]; then
-sitename_var=$store_sitename
-fi
+  # swap name back
+  if [ "$stage" = "stg_" ]; then
+    sitename_var=$store_sitename
+  fi
 }
 
 # Called all the time
@@ -579,7 +575,6 @@ update_all_configs() {
 
   ocmsg "Create drush aliases" debug
 
-
   ocmsg "Delete old credentials folder if it exists" debug
   if [ -d $folderpath/credentials ]; then rm $folderpath/credentials -rf; fi
   mkdir $folderpath/credentials
@@ -634,11 +629,11 @@ EOL
   ),
 );
 EOL
-salias="recipes_${site}_prod_alias"
-hasalias=${!salias}
-echo "salias $salias hasalias $hasalias"
-if [[ ! "$hasalias" = "" ]]; then
-  cat >>$user_home/.drush/$folder.aliases.drushrc.php <<EOL
+    salias="recipes_${site}_prod_alias"
+    hasalias=${!salias}
+    echo "salias $salias hasalias $hasalias"
+    if [[ ! "$hasalias" == "" ]]; then
+      cat >>$user_home/.drush/$folder.aliases.drushrc.php <<EOL
 \$aliases['prod_$site'] = array (
 'uri' => '$prod_uri',
 'root' => '$prod_docroot',
@@ -652,19 +647,19 @@ if [[ ! "$hasalias" = "" ]]; then
 'remote-host' => '$prod_uri',
 );
 EOL
-fi
+    fi
     #Now add drupal console aliases.
     cat >>$user_home/.console/sites/$folder.yml <<EOL
 $sitename_var:
   root: $site_path/$sitename_var
   type: local
 EOL
-### repeat for the stage site ####
-site="stg_$site"
+    ### repeat for the stage site ####
+    site="stg_$site"
     # Database defaults
-sdb="stg_$sitename_var$folder"
-sdbuser=$sdb
-sdbpass=$sdb
+    sdb="stg_$sitename_var$folder"
+    sdbuser=$sdb
+    sdbpass=$sdb
 
     cat >$(dirname $script_root)/credentials/$site.mysql <<EOL
 [client]
@@ -689,11 +684,13 @@ EOL
 EOL
     #Now add drupal console aliases.
     cat >>$user_home/.console/sites/$folder.yml <<EOL
+
+    ### END repeat for the stage site ####
 $sitename_var:
   root: $site_path/$sitename_var
   type: local
 EOL
-### END repeat for the stage site ####
+
   done
   IFS=$Field_Separator
 
@@ -747,8 +744,8 @@ fix_site_settings() {
 
 EOL
   fi
-if [[ "$lando" == "y" ]] ; then
-   cat >$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
+  if [[ "$lando" == "y" ]]; then
+    cat >$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
   <?php
   \$settings['install_profile'] = '$profile';
   \$databases['default']['default'] = [
@@ -762,8 +759,8 @@ if [[ "$lando" == "y" ]] ; then
   'driver' => 'mysql',
 ];
 EOL
-else
-  cat >$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
+  else
+    cat >$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
 <?php
 
 \$settings['install_profile'] = '$profile';
@@ -780,7 +777,7 @@ else
 );
 \$settings["config_sync_directory"] = '../cmi';
 EOL
-fi
+  fi
   if [ "$dev" == "y" ]; then
     cat >>$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
 \$settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';
@@ -788,8 +785,8 @@ fi
 \$settings['cache']['bins']['dynamic_page_cache'] = 'cache.backend.null';
 \$config['config_split.config_split.config_dev']['status'] = TRUE;
 EOL
-else
-  cat >>$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
+  else
+    cat >>$site_path/$sitename_var/$webroot/sites/default/settings.local.php <<EOL
 \$config['config_split.config_split.config_dev']['status'] = FALSE;
 #if (PHP_SAPI !== 'cli') {
 #  $settings['config_readonly'] = TRUE;
@@ -834,7 +831,6 @@ EOL
 
   # Now make sure files have correct permissions - this is a lot faster than fixp
   sudo chown $user:www-data $site_path/$sitename_var -R
-
 
 }
 
@@ -893,8 +889,8 @@ rebuild_site() {
     echo -e "$Purple build step 1: create the database $Color_Off"
     if [[ "$lando" == "y" ]]; then
       echo "Skip make_db since Lando come with a databse."
-      else
-    make_db
+    else
+      make_db
     fi
   fi
 
@@ -907,14 +903,14 @@ rebuild_site() {
     if [[ "$lando" == "y" ]]; then
       cd $site_path/$sitename_var
       lando drush -y site-install $profile --db-url=mysql://drupal8:drupal8@database/drupal8 --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$sitename_var" --sites-subdir=default
-    exit 0
+      exit 0
     else
-    # drupal site:install  varbase --langcode="en" --db-type="mysql" --db-host="127.0.0.1" --db-name="$dir" --db-user="$dir" --db-pass="$dir" --db-port="3306" --site-name="$dir" --site-mail="admin@example.com" --account-name="admin" --account-mail="admin@example.com" --account-pass="admin" --no-interaction
-    cd $site_path/$sitename_var/$webroot
+      # drupal site:install  varbase --langcode="en" --db-type="mysql" --db-host="127.0.0.1" --db-name="$dir" --db-user="$dir" --db-pass="$dir" --db-port="3306" --site-name="$dir" --site-mail="admin@example.com" --account-name="admin" --account-mail="admin@example.com" --account-pass="admin" --no-interaction
+      cd $site_path/$sitename_var/$webroot
 
-    #echo "drush -y site-install $profile  --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$sitename_var" --sites-subdir=default"
+      #echo "drush -y site-install $profile  --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$sitename_var" --sites-subdir=default"
 
-    drush -y site-install $profile --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$sitename_var" --sites-subdir=default
+      drush -y site-install $profile --account-name=admin --account-pass=admin --account-mail=admin@example.com --site-name="$sitename_var" --sites-subdir=default
     #don''t need --db-url=mysql://$dir:$dir@localhost:3306/$dir in drush because the settings.local.php has it.
     fi
   fi
@@ -1024,35 +1020,42 @@ backup_site() {
     mkdir "$folderpath/sitebackups"
   fi
 
+  if [ ! -d "$site_path/$sitename_var" ]; then
+    echo "No site folder $sitename_var so no need to backup"
+    exit
+  fi
+
   # Check if site backup folder exists
   if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
     mkdir "$folderpath/sitebackups/$sitename_var"
   fi
 
-  if [ ! -d "$site_path/$sitename_var" ]; then
-    echo "No site folder $sitename_var so no need to backup"
-  else
-    ocmsg "cd $site_path/$sitename_var" debug
-    cd "$site_path/$sitename_var"
-    #this will not affect a current git present
-    git init
-    cd "$webroot"
-    msg="${msg// /_}"
-    Name=$(date +%Y%m%d\T%H%M%S-)$(git branch | grep \* | cut -d ' ' -f2 | sed -e 's/[^A-Za-z0-9._-]/_/g')-$(git rev-parse HEAD | cut -c 1-8)$msg.sql
-
-    echo -e "\e[34mbackup db $Name\e[39m"
-    # Make database smaller.
-    drush cr
-    # Could add more directives to make database even smaller.
-    drush sql-dump --result-file="$folderpath/sitebackups/$sitename_var/$Name"
-
-    #backupfiles
-    Name2=${Name::-4}".tar.gz"
-
-    echo -e "\e[34mbackup files $Name2\e[39m"
-    cd $site_path
-    tar -czf $folderpath/sitebackups/$sitename_var/$Name2 $sitename_var
+  # Check if site backup folder exists
+  if [ ! -d "$folderpath/sitebackups/$site_to" ]; then
+    mkdir "$folderpath/sitebackups/$site_to"
   fi
+
+  ocmsg "cd $site_path/$sitename_var" debug
+  cd "$site_path/$sitename_var"
+  #this will not affect a current git present
+  git init
+  cd "$webroot"
+  msg="${msg// /_}"
+  Name=$(date +%Y%m%d\T%H%M%S-)$(git branch | grep \* | cut -d ' ' -f2 | sed -e 's/[^A-Za-z0-9._-]/_/g')-$(git rev-parse HEAD | cut -c 1-8)$msg.sql
+
+  echo -e "\e[34mbackup db $Name\e[39m"
+  # Make database smaller.
+  drush cr
+  # Could add more directives to make database even smaller.
+  drush sql-dump --result-file="$folderpath/sitebackups/$site_to/$Name"
+
+  #backupfiles
+  Name2=${Name::-4}".tar.gz"
+
+  echo -e "\e[34mbackup files $Name2\e[39m"
+  cd $site_path
+  tar -czf $folderpath/sitebackups/$site_to/$Name2 $sitename_var
+
 }
 
 #
@@ -1060,25 +1063,23 @@ backup_site() {
 gitbackupdb() {
   #    drush @prod sql-dump --result-file="/home/$prod_user/proddb/prod.sql"
   #    ssh $prod_alias "cd proddb && git add . && git commit -m \"$(date +%Y%m%d\T%H%M%S-)\" && git push"
-echo -e "$Purple gitbackupdb: $prod_docroot@$prod_alias"
+  echo -e "$Purple gitbackupdb: $prod_docroot@$prod_alias"
   ssh $prod_alias "./gitbackupdb.sh $prod_docroot  $Bname"
 
   #Don't need all this since git database is only going one way now
-#  echo -e "$Purple git pull"
-#  if [[ ! -d $folderpath/sitebackups/proddb ]] ; then
-##    mkdir $folderpath/sitebackups/proddb
-#    # need to clone the database
-##    cd $folderpath/sitebackups/proddb
-#    git clone $prod_gitdb
-#  else
-#    cd $folderpath/sitebackups/proddb
-#    ocmsg "Git pull -X theirs"
-#    git pull -X theirs
-#  fi
+  #  echo -e "$Purple git pull"
+  #  if [[ ! -d $folderpath/sitebackups/proddb ]] ; then
+  ##    mkdir $folderpath/sitebackups/proddb
+  #    # need to clone the database
+  ##    cd $folderpath/sitebackups/proddb
+  #    git clone $prod_gitdb
+  #  else
+  #    cd $folderpath/sitebackups/proddb
+  #    ocmsg "Git pull -X theirs"
+  #    git pull -X theirs
+  #  fi
 
-
-
-    echo -e "$Color_Off"
+  echo -e "$Color_Off"
 }
 
 #
@@ -1088,7 +1089,6 @@ gitbackupfiles() {
   ssh $prod_alias "./gitbackupfiles.sh $prod_docroot $Bname"
   echo -e "$Color_Off"
 }
-
 
 #
 # User server script to backup production files so it can be run in parallel
@@ -1100,15 +1100,15 @@ gitprodpush() {
   #https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/set-up-a-local-development-drupal-0-7
 
   msg=${1// /_}
-    # Run commands in parallel
-    echo -e "$Cyan Running git pull for site and db on production $Color_Off"
-     Bname=$(date +%d%b%gT%l:%M:%S%p)
-     Bname=${Bname//[[:blank:]]/}
-     echo "Commit name >$Bname<"
-    gitbackupdb
-    gitbackupfiles
-    #wait
-    echo "Production site and files backuped"
+  # Run commands in parallel
+  echo -e "$Cyan Running git pull for site and db on production $Color_Off"
+  Bname=$(date +%d%b%gT%l:%M:%S%p)
+  Bname=${Bname//[[:blank:]]/}
+  echo "Commit name >$Bname<"
+  gitbackupdb
+  gitbackupfiles
+  #wait
+  echo "Production site and files backuped"
 
 }
 
@@ -1122,68 +1122,70 @@ backup_prod() {
   #use git:
   #https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/set-up-a-local-development-drupal-0-7
 
-  msg=${1// /_}
-  cd
-  # Check if site backup folder exists
+  if [[ "$sitename_var == $site_to" ]]; then
+    # Backup production on production
+    ssh $prod_alias -t "./backupprod.sh $prod_docroot"
 
-  if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
-    mkdir "$folderpath/sitebackups/$sitename_var"
-  fi
-  if [ ! -d "$folderpath/sitebackups/$sitename_var/prod" ]; then
-    mkdir "$folderpath/sitebackups/$sitename_var/prod"
-  fi
-  #cd "$webroot"
-
-
-  if [[ "$prod_method" == "git" ]]; then
-      if [[ ! "$prod_gitdb" == "" ]]; then
-      echo "proddb $prod_gitdb"
-      add_git_credentials
-    gitprodpush
-    else
-      echo "Git method for prod backup chosen, but no gitdb set. Exiting"
-      exit 1
-    #Now move the db and files down to local
-#    scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
-#    wget https://github.com/rjzaar/ocorg/archive/master.tar.gz -O "$folderpath/sitebackups/prod/$Bname.tar.gz"
-
-#    # Use git to put the files in the correct place
-#      rm -rf "$site_path/$sitename_var"
-#      cd $site_path
-#      git clone $prod_gitrepo $sitename_var
-#    # now tar it.
-#    tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
-    fi
   else
-    import_site_config $sitename_var
-    #site_info
-    #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
-    Name="prod$(date +%Y%m%d\T%H%M%S-)$msg"
-    Namesql="$folderpath/sitebackups/$sitename_var/prod/$Name.sql"
-    echo -e "\e[34mbackup db $Name.sql\e[39m"
-    echo "Trying $Namesql "
-    #drush @prod sql-dump   > "$Namesql"
-    echo "Dumping to /home/$prod_user/$Name.sql"
-    drush @prod_${sitename_var} sql-dump --result-file="/home/$prod_user/$Name.sql"
-    scp "$prod_alias:$Name.sql" "$Namesql"
-    Namef=$Name.tar.gz
-    echo -e "\e[34mbackup files $Namef\e[39m"
-    # drush ard doesn't work in drush 9 onwards. so use tar instead
-    #drush @prod ard --destination="$prod_docroot/../../../$Name"
-    ssh $prod_alias "tar -zcf \"$Namef\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.local.php\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.php\" \"$prod_docroot/..\""
-    scp "$prod_alias:$Namef" "$folderpath/sitebackups/$sitename_var/prod/$Namef"
-    #tar -czf  $folderpath/sitebackups/prod/$Name.tar.gz $folderpath/sitebackups/prod/$Name.tar
-    #rm $folderpath/sitebackups/prod/$Name.tar
 
-  #gzip -d "$Namesql.gz"
+    cd
+    # Check if site backup folder exists
+
+    if [ ! -d "$folderpath/sitebackups/$site_to" ]; then
+      mkdir "$folderpath/sitebackups/$site_to"
+    fi
+    #cd "$webroot"
+
+    if [[ "$prod_method" == "git" ]]; then
+      if [[ ! "$prod_gitdb" == "" ]]; then
+        echo "proddb $prod_gitdb"
+        add_git_credentials
+        gitprodpush
+      else
+        echo "Git method for prod backup chosen, but no gitdb set. Exiting"
+        exit 1
+        #Now move the db and files down to local
+        #    scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
+        #    wget https://github.com/rjzaar/ocorg/archive/master.tar.gz -O "$folderpath/sitebackups/prod/$Bname.tar.gz"
+
+        #    # Use git to put the files in the correct place
+        #      rm -rf "$site_path/$sitename_var"
+        #      cd $site_path
+        #      git clone $prod_gitrepo $sitename_var
+        #    # now tar it.
+        #    tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+      fi
+    else
+      import_site_config $sitename_var
+      #site_info
+      #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
+      Name="prod$(date +%Y%m%d\T%H%M%S-)$msg"
+      Namesql="$folderpath/sitebackups/$site_to/$Name.sql"
+      echo -e "\e[34mbackup db $Name.sql\e[39m"
+      echo "Trying $Namesql "
+      #drush @prod sql-dump   > "$Namesql"
+      echo "Dumping to $Namesql"
+      drush @${sitename_var} sql-dump --result-file="$Namesql"
+      scp "$prod_alias:$Name.sql" "$Namesql"
+      Namef=$Name.tar.gz
+      echo -e "\e[34mbackup files $Namef\e[39m"
+      # drush ard doesn't work in drush 9 onwards. so use tar instead
+      #drush @prod ard --destination="$prod_docroot/../../../$Name"
+      ssh $prod_alias "tar -zcf \"$Namef\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.local.php\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.php\" \"$prod_docroot/..\""
+      scp "$prod_alias:$Namef" "$folderpath/sitebackups/$sitename_var/prod/$Namef"
+      #tar -czf  $folderpath/sitebackups/prod/$Name.tar.gz $folderpath/sitebackups/prod/$Name.tar
+      #rm $folderpath/sitebackups/prod/$Name.tar
+
+    #gzip -d "$Namesql.gz"
+    fi
   fi
 }
 
 #
 # This will copy the production site to the test site.
 copy_prod_test() {
-echo "Copying the production site to the test site."
-ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot"
+  echo "Copying the production site to the test site."
+  ssh $prod_alias -t "./copy_prod_test.sh $prod_docroot"
 }
 #
 #
@@ -1353,10 +1355,10 @@ restore_db() {
     )
 
   elif [[ "$bk" == prod ]] && [[ "$prod_method" == "tar" ]]; then
-  result=$(
-        mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$Name" 2>/dev/null | grep -v '+' | cut -d' ' -f2
-        echo ": ${PIPESTATUS[0]}"
-      )
+    result=$(
+      mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$Name" 2>/dev/null | grep -v '+' | cut -d' ' -f2
+      echo ": ${PIPESTATUS[0]}"
+    )
 
   else
     echo -e "\e[34mrestore $db database using $folderpath/sitebackups/$bk/$Name\e[39m"
@@ -1373,28 +1375,28 @@ restore_db() {
     exit 1
   fi
 
-drush @$sitename_var cr 2>/dev/null | grep -v '+' | cut -d' ' -f2
-if [[ "${PIPESTATUS[0]}" == "1" ]]; then
-  # If there is an error, it is most likely due to a drush issue so reinstall drush.
-  echo "There is a problem with drush. Reinstalling drush."
-  rm "$site_path/$sitename_var/vendor/drush" -rf
+  drush @$sitename_var cr 2>/dev/null | grep -v '+' | cut -d' ' -f2
+  if [[ "${PIPESTATUS[0]}" == "1" ]]; then
+    # If there is an error, it is most likely due to a drush issue so reinstall drush.
+    echo "There is a problem with drush. Reinstalling drush."
+    rm "$site_path/$sitename_var/vendor/drush" -rf
 
-  # Make sure example.gitignore is present.
-  if [[ ! -f "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/example.gitignore" ]]; then
-    wget https://raw.githubusercontent.com/drupal/drupal/9.2.x/example.gitignore -P "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/"
-  fi
+    # Make sure example.gitignore is present.
+    if [[ ! -f "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/example.gitignore" ]]; then
+      wget https://raw.githubusercontent.com/drupal/drupal/9.2.x/example.gitignore -P "$site_path/$sitename_var/$docroot/core/assets/scaffold/files/"
+    fi
 
-  cd "$site_path/$sitename_var/"
-  composer install --no-dev
-  sudo chown :www-data vendor/drush -R
-  echo "Drush reinstalled."
+    cd "$site_path/$sitename_var/"
+    composer install --no-dev
+    sudo chown :www-data vendor/drush -R
+    echo "Drush reinstalled."
   fi
   echo "Turn off maintenance mode."
   drush @$sitename_var sset system.maintenance_mode FALSE
   echo "Turn off read only mode if present"
   result_rom=$(drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; })
-  if [[ ! "$result_rom" == "" ]] ; then
-  drush @$sitename_var cset readonlymode.settings enabled 0 -y
+  if [[ ! "$result_rom" == "" ]]; then
+    drush @$sitename_var cset readonlymode.settings enabled 0 -y
   fi
 }
 
@@ -1637,102 +1639,102 @@ plcomposer() {
 # Run updates for a drupal site. Can be external.
 runupdates() {
 
-if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
-  echo "Runupdates  on $prod_alias  on site $sitename_var"
-  # todo work out why these next three lines are needed.
-#    eval $(ssh-agent -s)
-#    echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
-#    ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
-  # presume you don't need toProduction site fix site settings for production sites.
-  if [[ "${sitename_var:0:4}" == "test" ]]; then
-    # This script just runs the composer install --no-dev and fixes site permissions.
-    echo "Running updatetest.sh"
-    ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_reinstall_modules"
-    exit 0
+  if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
+    echo "Runupdates  on $prod_alias  on site $sitename_var"
+    # todo work out why these next three lines are needed.
+    #    eval $(ssh-agent -s)
+    #    echo "Adding: $(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
+    #    ssh-add "$(dirname $(dirname $script_root))/.ssh/$prod_gitkey"
+    # presume you don't need toProduction site fix site settings for production sites.
+    if [[ "${sitename_var:0:4}" == "test" ]]; then
+      # This script just runs the composer install --no-dev and fixes site permissions.
+      echo "Running updatetest.sh"
+      ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_reinstall_modules"
+      exit 0
+    else
+      #Now run the rest of the update process.
+      echo "Running updateprod.sh"
+      ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_reinstall_modules"
+      # The updateprod script does it all.
+      exit 0
+    fi
   else
-#Now run the rest of the update process.
-echo "Running updateprod.sh"
-    ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_reinstall_modules"
-    # The updateprod script does it all.
-    exit 0
+    echo "Runupdates  on site $sitename_var"
+    ocmsg "Path: $site_path/$sitename_var" debug
+    cd $site_path/$sitename_var
+    # composer install
+    echo -e "\e[34m composer install \e[39m"
+    # Looks like it is best to remove composer.lock so getting the latest according to composer.json
+    if [[ -f $site_path/$sitename_var/composer.lock ]]; then
+      rm $site_path/$sitename_var/composer.lock
+    fi
+    #rm $site_path/$sitename_var/vendor -rf
+    composer install --no-dev # composer install needs phing. so remove phing!
+    set_site_permissions
+    fix_site_settings
   fi
-else
-  echo "Runupdates  on site $sitename_var"
-  ocmsg "Path: $site_path/$sitename_var" debug
-  cd $site_path/$sitename_var
-  # composer install
-echo -e "\e[34m composer install \e[39m"
-# Looks like it is best to remove composer.lock so getting the latest according to composer.json
-  if [[ -f $site_path/$sitename_var/composer.lock ]]; then
-rm $site_path/$sitename_var/composer.lock
-fi
-#rm $site_path/$sitename_var/vendor -rf
-  composer install --no-dev  # composer install needs phing. so remove phing!
-  set_site_permissions
-  fix_site_settings
-fi
-cd
-echo -e "\e[34m update database for $sitename_var\e[39m"
-drush @$sitename_var updb -y
-#echo -e "\e[34m fra\e[39m"
-#drush @$sitename_var fra -y
-echo -e "\e[34m import config\e[39m"
-if [[ "$reinstall_modules" != "" ]] ; then
-  drush @$sitename_var pm-uninstall $reinstall_modules -y
-#  drush @$sitename_var en $reinstall_modules -y
-fi
-if [[ "$force" == "true" ]] ; then
-  # Collect the error from the import.
-  import_result="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
-  # Process the result
-  echo "cim result $import_result result"
+  cd
+  echo -e "\e[34m update database for $sitename_var\e[39m"
+  drush @$sitename_var updb -y
+  #echo -e "\e[34m fra\e[39m"
+  #drush @$sitename_var fra -y
+  echo -e "\e[34m import config\e[39m"
+  if [[ "$reinstall_modules" != "" ]]; then
+    drush @$sitename_var pm-uninstall $reinstall_modules -y
+  #  drush @$sitename_var en $reinstall_modules -y
+  fi
+  if [[ "$force" == "true" ]]; then
+    # Collect the error from the import.
+    import_result="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+    # Process the result
+    echo "cim result $import_result result"
 
-  import_result1="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
-  import_result2="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+    import_result1="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+    import_result2="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
   #if error then delete the erroneous config files.
   #Still needs to be written #####
 
-
   else
+
     echo "Run CMI import"
     # see for the reason for this structure: https://www.bounteous.com/insights/2020/03/11/automate-drupal-deployments/
     drush @$sitename_var cim -y || drush @$sitename_var cim -y #--source=../cmi
     drush @$sitename_var cim -y
   fi
 
-if [[ "$reinstall_modules" != "" ]] ; then
-  echo "reinstalling modules"
-#  drush @$sitename_var pm-uninstall $reinstall_modules -y
-  drush @$sitename_var en $reinstall_modules -y
-fi
-# deal with bad config.
-echo "fixing site permissions"
-if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
-   if [[ "$sitename_var" == "test" ]]; then
-      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
-   else
-    ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
+  if [[ "$reinstall_modules" != "" ]]; then
+    echo "reinstalling modules"
+    #  drush @$sitename_var pm-uninstall $reinstall_modules -y
+    drush @$sitename_var en $reinstall_modules -y
   fi
-  # Take out of maintenance or readonly mode
-  echo "Checking for readonly mode"
-  readonly_en=$(ssh -t cathnet "cd $prod_test_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }" )
-if [ ! "$readonly_en" == "" ]; then
-    ssh -t cathnet "cd $prod_test_docroot && drush cset readonlymode.settings enabled 0 -y"
+  # deal with bad config.
+  echo "fixing site permissions"
+  if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
+    if [[ "$sitename_var" == "test" ]]; then
+      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
+    else
+      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
+    fi
+    # Take out of maintenance or readonly mode
+    echo "Checking for readonly mode"
+    readonly_en=$(ssh -t cathnet "cd $prod_test_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }")
+    if [ ! "$readonly_en" == "" ]; then
+      ssh -t cathnet "cd $prod_test_docroot && drush cset readonlymode.settings enabled 0 -y"
     else
       # otherwise put into maintenance mode
-    ssh -t cathnet "cd $prod_test_docroot && drush sset maintenance_mode 0"
-fi
+      ssh -t cathnet "cd $prod_test_docroot && drush sset maintenance_mode 0"
+    fi
 
   else
     set_site_permissions
     echo -e "\e[34m make sure out of maintenance and readonly mode\e[39m"
-drush @$sitename_var sset system.maintenance_mode FALSE
-drush @$sitename_var cset readonlymode.settings enabled 0 -y
+    drush @$sitename_var sset system.maintenance_mode FALSE
+    drush @$sitename_var cset readonlymode.settings enabled 0 -y
 
+  fi
 
-fi
-echo "Running drush cr"
-drush @$sitename_var cr
+  echo "Running drush cr"
+  drush @$sitename_var cr
 }
 
 # Update pleasy readme with the latest function explanations.
@@ -1740,19 +1742,19 @@ makereadme() {
 
   cd
   cd pleasy
-    if [ ! -f README.md ]; then
-      echo "Need a README.md to start with!"
-      exit 1
-    fi
+  if [ ! -f README.md ]; then
+    echo "Need a README.md to start with!"
+    exit 1
+  fi
 
-    cp README.md README_TEMP.md
-    # Strip out old functions
-    fline=$(grep -n '# FUNCTION LIST' README_TEMP.md)
-    ocmsg "fline ${fline:0:3}" debug
-    fline=${fline:0:3}
-    fline=$((fline + 1));
-    ocmsg "fline $fline" debug
-    sed -i "$fline,2000d" ./README_TEMP.md
+  cp README.md README_TEMP.md
+  # Strip out old functions
+  fline=$(grep -n '# FUNCTION LIST' README_TEMP.md)
+  ocmsg "fline ${fline:0:3}" debug
+  fline=${fline:0:3}
+  fline=$((fline + 1))
+  ocmsg "fline $fline" debug
+  sed -i "$fline,2000d" ./README_TEMP.md
 
   if [ -d $script_root ]; then
     cd "$script_root"
@@ -1760,9 +1762,6 @@ makereadme() {
     echo 'ERROR: Either pleasy $script_root variable does not exist, or the value is set incorrectly.'
     exit 1
   fi
-
-
-
 
   (
     documented_scripts=$(grep -l --directories=skip --exclude={_inc,makereadme*}.sh '^args=$(getopt' *.sh)
@@ -1785,16 +1784,16 @@ HEREDOC
       getstatus=$("$working_dir/$command" --help)
       case "$?" in
       0 | 1)
-        status=":question:"
+        status="❓"
         ;;
       2)
-        status=":white_check_mark:" # works but not tested with Travis
+        status="👷" # works but not tested with Travis
         ;;
       3)
-        status=":heavy_check_mark:" # works and passing Travis
+        status="☑" # works and passing Travis
         ;;
       *)
-        status=":question:"
+        status="❓"
         ;;
       esac
 
@@ -1813,7 +1812,7 @@ HEREDOC
       cat <<HEREDOC
 <details>
 
-**<summary>${command%%.sh}:  :question: </summary>**
+**<summary>${command%%.sh}:  ❓ </summary>**
 **DOCUMENTATION NOT IMPLEMENTED**
 
 </details>

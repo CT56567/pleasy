@@ -90,7 +90,8 @@ done
 parse_pl_yml
 
 if [ "$1" == "updateprod" ] && [ -z "$2" ]; then
-  sitename_var="$sites_stg"
+  echo "You have not specified a site to update. Exiting."
+  exit 0
 elif [ -z "$2" ]; then
   sitename_var=$1
 fi
