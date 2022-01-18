@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# todo The argument passing could be better. Not sure how to eliminate the need to have -e=
+
 print_help() {
   echo \
     "Backup site and database
-Usage: pl backup [OPTION] ... [SOURCE] [DESTINATION] [MESSAGE]
+Usage: pl backup [OPTION] ... [SOURCE] [MESSAGE]
 This script is used to backup a particular site's files and database.
 You just need to state the sitename, eg dev and an optional message.
 You can also optionally specify where the site will be backedup to. This is useful if you are backing up the production
@@ -13,12 +15,12 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
   -d --debug              Provide debug information when running this script.
   -g --git                Also create a git backup of site.
-  -m --message            A message for the backup
+  -e --endpoint           The backup destination
 
 Examples:
 pl backup -h
-pl backup dev -m='Fixed error'
-pl backup tim fred -m='First tim backup'
+pl backup dev 'Fixed error'
+pl backup tim -e=fred 'First tim backup'
 
 END HELP"
 }
@@ -27,7 +29,7 @@ END HELP"
 # Timer to show how long it took to run the script
 SECONDS=0
 
-args=$(getopt -o hdgm: -l help,debug,git,message: --name "$scriptname" -- "$@")
+args=$(getopt -o hdge: -l help,debug,git,message: --name "$scriptname" -- "$@")
 # echo "$args"
 
 # If getopt outputs error to error variable, quit program displaying error
@@ -41,6 +43,7 @@ eval set -- "$args"
 
 # Case through each argument passed into script
 # If no argument passed, default is -- and break loop
+site_to=""
 while true; do
   case "$1" in
   -h | --help)
@@ -55,11 +58,10 @@ while true; do
     flag_git=1
     shift
     ;;
-  -m | --message)
+  -e | --endpoint)
     shift
-    msg=${1:1}
-    shift
-    ;;
+    site_to=${1:1}
+    shift; ;;
   --)
     shift
     break
@@ -78,15 +80,19 @@ if [[ "$1" == "backup" ]] && [[ -z "$2" ]]; then
   echo "No site specified."
 elif [[ "$1" == "backup" ]]; then
   sitename_var=$2
-  site_to=$2
 elif [[ -z "$2" ]]; then
   sitename_var=$1
-  site_to=$1
-  echo "No destination site specified"
 else
   sitename_var=$1
-  site_to=$2
+  msg="'$*'"
+  sitename_var_len=$(echo -n $sitename_var | wc -m)
+  msg=${msg:$(($sitename_var_len+2)):-1}
 fi
+if [[ "$site_to" == "" ]] ; then
+  site_to=$sitename_var
+  fi
+
+
 
 echo -e "\e[34mbackup $sitename_var to $site_to with message $msg\e[39m"
 

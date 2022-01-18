@@ -1,35 +1,8 @@
 #!/bin/bash
-#                       Git Commit For Pleasy Library
-#
-#  This will git commit changes and run an backup to capture it.
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  15/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  04/04/2020 Rob Zaar    Simplified and updated to new system.
-#
-#
-#  Core Maintainer:  Rob Zar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-#
 
-# start timer
-# Timer to show how long it took to run the script
 SECONDS=0
 verbose="none"
 
-# scriptname is set in pl.
-
-# Help menu
-# Prints user guide
 print_help() {
 echo \
 "Git commit code with optional backup

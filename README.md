@@ -259,7 +259,7 @@ Backs up the database only
 <details>
 
 **<summary>backup: Backup site and database ☑ </summary>**
-Usage: pl backup [OPTION] ... [SOURCE] [DESTINATION] [MESSAGE]
+Usage: pl backup [OPTION] ... [SOURCE] [MESSAGE]
 This script is used to backup a particular site's files and database.
 You just need to state the sitename, eg dev and an optional message.
 You can also optionally specify where the site will be backedup to. This is useful if you are backing up the production
@@ -269,12 +269,12 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
   -d --debug              Provide debug information when running this script.
   -g --git                Also create a git backup of site.
-  -m --message            A message for the backup
+  -e --endpoint           The backup destination
 
 Examples:
 pl backup -h
-pl backup dev -m='Fixed error'
-pl backup tim fred -m='First tim backup'
+pl backup dev 'Fixed error'
+pl backup tim -e=fred 'First tim backup'
 
 END HELP
 

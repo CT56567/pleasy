@@ -65,11 +65,19 @@ import_site_config() {
   # setup basic defaults
   sitename_var=$1
   stage=""
+  sitename_store=$1
   if [ "${sitename_var:0:3}" = "stg" ]; then
     # set up stg
     sitename_var=${sitename_var:4}
     stage="stg_"
   fi
+  ocmsg "short ${sitename_var:0:4} normal $sitename_var new sitename ${sitename_var:5}" debug
+  if [ "${sitename_var:0:4}" = "prod" ]; then
+    # set up stg
+    sitename_var=${sitename_var:5}
+    stage="prod_"
+  fi
+
 
   # First load the defaults
   rp="recipes_default_source"
@@ -341,7 +349,7 @@ import_site_config() {
     lando=${!rp}
   fi
 
-  if [ "$stage" = "stg_" ]; then
+  if [[ "$stage" = "stg_" || "$stage" = "prod_" ]]; then
     db=""
     dbuser=""
     dbpass=""
@@ -349,7 +357,7 @@ import_site_config() {
     uri="pleasy.$stage$sitename_var"
     # Not sure about gitupstream
     #now set the sitename
-    sitename_var="stg_$sitename_var"
+    sitename_var=$sitename_store
   fi
 
   if [ "$db" = "" ]; then
@@ -396,7 +404,10 @@ import_site_config() {
     store_sitename=$sitename_var
     sitename_var=${sitename_var:4}
   fi
-
+  if [ "$stage" = "prod_" ]; then
+    store_sitename=$sitename_var
+    sitename_var=${sitename_var:5}
+  fi
   ocmsg "Working out prod creds sitename is $sitename_var" debug
 
   rp="recipes_${sitename_var}_prod_user"
@@ -473,6 +484,9 @@ import_site_config() {
   if [ "$stage" = "stg_" ]; then
     sitename_var=$store_sitename
   fi
+    if [ "$stage" = "prod_" ]; then
+      sitename_var=$store_sitename
+    fi
 }
 
 # Called all the time
@@ -1121,20 +1135,13 @@ backup_prod() {
   #backup db.
   #use git:
   #https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/set-up-a-local-development-drupal-0-7
-
-  if [[ "$sitename_var == $site_to" ]]; then
+  ocmsg "Backing up site $sitename_var with alias $prod_alias and message $msg to $site_to" debug
+  if [[ "$sitename_var" == "$site_to" ]]; then
     # Backup production on production
-    ssh $prod_alias -t "./backupprod.sh $prod_docroot"
+    echo "Backing up production site $sitename_var on server only."
+    ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
 
   else
-
-    cd
-    # Check if site backup folder exists
-
-    if [ ! -d "$folderpath/sitebackups/$site_to" ]; then
-      mkdir "$folderpath/sitebackups/$site_to"
-    fi
-    #cd "$webroot"
 
     if [[ "$prod_method" == "git" ]]; then
       if [[ ! "$prod_gitdb" == "" ]]; then
@@ -1156,27 +1163,51 @@ backup_prod() {
         #    tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
       fi
     else
-      import_site_config $sitename_var
+
+      if [ "${site_to: -4}" = "prod" ]; then
+        siteto_var_len=$(echo -n $site_to | wc -m)
+        sitename_pre=${site_to:0:$(($siteto_var_len-5))}
+echo "site_to $site_to sitename_pre $sitename_pre"
+  # Store the backup to the production folder on the dev machine.
+
+             if [ ! -d "$folderpath/sitebackups/$sitename_pre" ]; then
+                 mkdir "$folderpath/sitebackups/$sitename_pre"
+             fi
+             if [ ! -d "$folderpath/sitebackups/$sitename_pre/prod" ]; then
+                 mkdir "$folderpath/sitebackups/$sitename_pre/prod"
+             fi
+             site_to="$sitename_pre/prod"
+       else
+
+          # Check if site backup folder exists
+        if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
+            mkdir "$folderpath/sitebackups/$sitename_var"
+        fi
+        if [ ! -d "$folderpath/sitebackups/$sitename_var/prod" ]; then
+            mkdir "$folderpath/sitebackups/$sitename_var/prod"
+        fi
+        site_to="$sitename_var/prod"
+      fi
+            msg="${msg// /_}"
+      ocmsg "Backing up production site $sitename_var on server with alias $prod_alias with message $msg and onto dev at $folderpath/sitebackups/$site_to" debug
+
       #site_info
       #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
-      Name="prod$(date +%Y%m%d\T%H%M%S-)$msg"
-      Namesql="$folderpath/sitebackups/$site_to/$Name.sql"
-      echo -e "\e[34mbackup db $Name.sql\e[39m"
-      echo "Trying $Namesql "
-      #drush @prod sql-dump   > "$Namesql"
-      echo "Dumping to $Namesql"
-      drush @${sitename_var} sql-dump --result-file="$Namesql"
-      scp "$prod_alias:$Name.sql" "$Namesql"
-      Namef=$Name.tar.gz
-      echo -e "\e[34mbackup files $Namef\e[39m"
-      # drush ard doesn't work in drush 9 onwards. so use tar instead
-      #drush @prod ard --destination="$prod_docroot/../../../$Name"
-      ssh $prod_alias "tar -zcf \"$Namef\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.local.php\" --exclude=\"$(basename $prod_docroot)/sites/default/settings.php\" \"$prod_docroot/..\""
-      scp "$prod_alias:$Namef" "$folderpath/sitebackups/$sitename_var/prod/$Namef"
-      #tar -czf  $folderpath/sitebackups/prod/$Name.tar.gz $folderpath/sitebackups/prod/$Name.tar
-      #rm $folderpath/sitebackups/prod/$Name.tar
 
-    #gzip -d "$Namesql.gz"
+      ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
+
+# Get the latest backup name
+   Prodsql=$(ssh $prod_alias -t "./getlatestbackup.sh $prod_uri")
+   # todo this next line is needed for some reason don't know why.
+   Prodsql=${Prodsql::-1}
+ocmsg "Prodsql >$Prodsql<" debug
+    Name="${Prodsql::-4}.tar.gz"
+    ocmsg "sql: $Prodsql tar: $Name" debug
+      Namesql="$folderpath/sitebackups/$site_to/$Prodsql"
+      ocmsg "backup name /home/$prod_user/$prod_uri/$Prodsql" debug
+      scp "$prod_alias:/home/$prod_user/$prod_uri/$Prodsql" "$Namesql"
+      echo -e "\e[34mbackup files $Name\e[39m"
+      scp "$prod_alias:/home/$prod_user/$prod_uri/$Name" "$folderpath/sitebackups/$site_to/$Name"
     fi
   fi
 }

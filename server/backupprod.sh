@@ -1,16 +1,22 @@
 #!/bin/bash
 
-echo "Backup site at $1."
+
 
 if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."
 exit 0
+elif [[ -z "$2" ]]; then
+ echo "No message specified."
 else
 prod_docroot=$1
+  msg="'$*'"
 fi
+sitename_var_len=$(echo -n $prod_docroot | wc -m)
+msg=${msg:$(($sitename_var_len+2)):-1}
+msg="${msg// /_}"
 
+echo "Backup site at $1 with message $msg"
 user=$USER
-
 prod_docroot=$1
 webroot=$(basename $1)
 prod=$(dirname $1)
