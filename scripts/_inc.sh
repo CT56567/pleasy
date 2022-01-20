@@ -1691,13 +1691,11 @@ runupdates() {
       # This script just runs the composer install --no-dev and fixes site permissions.
       echo "Running updatetest.sh"
       ssh -t $prod_alias "./updatetest.sh $prod_test_docroot $prod_reinstall_modules"
-      exit 0
     else
       #Now run the rest of the update process.
       echo "Running updateprod.sh"
       ssh -t $prod_alias "./updateprod.sh $prod_docroot $prod_reinstall_modules"
       # The updateprod script does it all.
-      exit 0
     fi
   else
     echo "Runupdates  on site $sitename_var"
@@ -1713,69 +1711,71 @@ runupdates() {
     composer install --no-dev # composer install needs phing. so remove phing!
     set_site_permissions
     fix_site_settings
-  fi
-  cd
-  echo -e "\e[34m update database for $sitename_var\e[39m"
-  drush @$sitename_var updb -y
-  #echo -e "\e[34m fra\e[39m"
-  #drush @$sitename_var fra -y
-  echo -e "\e[34m import config\e[39m"
-  if [[ "$reinstall_modules" != "" ]]; then
-    drush @$sitename_var pm-uninstall $reinstall_modules -y
-  #  drush @$sitename_var en $reinstall_modules -y
-  fi
-  if [[ "$force" == "true" ]]; then
-    # Collect the error from the import.
-    import_result="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
-    # Process the result
-    echo "cim result $import_result result"
-
-    import_result1="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
-    import_result2="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
-  #if error then delete the erroneous config files.
-  #Still needs to be written #####
-
-  else
-
-    echo "Run CMI import"
-    # see for the reason for this structure: https://www.bounteous.com/insights/2020/03/11/automate-drupal-deployments/
-    drush @$sitename_var cim -y || drush @$sitename_var cim -y #--source=../cmi
-    drush @$sitename_var cim -y
-  fi
-
-  if [[ "$reinstall_modules" != "" ]]; then
-    echo "reinstalling modules"
-    #  drush @$sitename_var pm-uninstall $reinstall_modules -y
-    drush @$sitename_var en $reinstall_modules -y
-  fi
-  # deal with bad config.
-  echo "fixing site permissions"
-  if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
-    if [[ "$sitename_var" == "test" ]]; then
-      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
-    else
-      ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
+    cd
+    echo -e "\e[34m update database for $sitename_var\e[39m"
+    drush @$sitename_var updb -y
+    #echo -e "\e[34m fra\e[39m"
+    #drush @$sitename_var fra -y
+    echo -e "\e[34m import config\e[39m"
+    if [[ "$reinstall_modules" != "" ]]; then
+      drush @$sitename_var pm-uninstall $reinstall_modules -y
+    #  drush @$sitename_var en $reinstall_modules -y
     fi
-    # Take out of maintenance or readonly mode
-    echo "Checking for readonly mode"
-    readonly_en=$(ssh -t cathnet "cd $prod_test_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }")
-    if [ ! "$readonly_en" == "" ]; then
-      ssh -t cathnet "cd $prod_test_docroot && drush cset readonlymode.settings enabled 0 -y"
+    if [[ "$force" == "true" ]]; then
+      # Collect the error from the import.
+      import_result="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+      # Process the result
+      echo "cim result $import_result result"
+
+      import_result1="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+      import_result2="$(drush @$sitename_var cim -y --pipe 2>&1 >/dev/null || true)"
+    #if error then delete the erroneous config files.
+    #Still needs to be written #####
+
     else
-      # otherwise put into maintenance mode
-      ssh -t cathnet "cd $prod_test_docroot && drush sset maintenance_mode 0"
+
+      echo "Run CMI import"
+      # see for the reason for this structure: https://www.bounteous.com/insights/2020/03/11/automate-drupal-deployments/
+      drush @$sitename_var cim -y || drush @$sitename_var cim -y #--source=../cmi
+      drush @$sitename_var cim -y
     fi
 
-  else
-    set_site_permissions
-    echo -e "\e[34m make sure out of maintenance and readonly mode\e[39m"
-    drush @$sitename_var sset system.maintenance_mode FALSE
-    drush @$sitename_var cset readonlymode.settings enabled 0 -y
+    if [[ "$reinstall_modules" != "" ]]; then
+      echo "reinstalling modules"
+      #  drush @$sitename_var pm-uninstall $reinstall_modules -y
+      drush @$sitename_var en $reinstall_modules -y
+    fi
+    # deal with bad config.
+    echo "fixing site permissions"
+    if [[ "${sitename_var:0:4}" == "prod" || "${sitename_var:0:4}" == "test" ]]; then
+      if [[ "$sitename_var" == "test" ]]; then
+        ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_test_docroot"
+      else
+        ssh -t $prod_alias "sudo ./dfp.sh --drupal_user=$prod_user --drupal_path=$prod_docroot"
+      fi
+      # Take out of maintenance or readonly mode
+      echo "Checking for readonly mode"
+      readonly_en=$(ssh -t cathnet "cd $prod_test_docroot && drush pm-list --pipe --type=module --status=enabled --no-core | { grep 'readonlymode' || true; }")
+      if [ ! "$readonly_en" == "" ]; then
+        ssh -t cathnet "cd $prod_test_docroot && drush cset readonlymode.settings enabled 0 -y"
+      else
+        # otherwise put into maintenance mode
+        ssh -t cathnet "cd $prod_test_docroot && drush sset maintenance_mode 0"
+      fi
+
+    else
+      set_site_permissions
+      echo -e "\e[34m make sure out of maintenance and readonly mode\e[39m"
+      drush @$sitename_var sset system.maintenance_mode FALSE
+      drush @$sitename_var cset readonlymode.settings enabled 0 -y
+
+    fi
+
+    echo "Running drush cr"
+    drush @$sitename_var cr
 
   fi
 
-  echo "Running drush cr"
-  drush @$sitename_var cr
 }
 
 # Update pleasy readme with the latest function explanations.
