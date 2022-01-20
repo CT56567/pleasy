@@ -64,6 +64,6 @@ echo "Webroot: $webroot"
 
     echo -e "\e[34mbackup files $Name2\e[39m"
     cd $prod/..
-    tar -czf /home/$user/$uri/$Name2 $uri
+    tar --exclude='./$webroot/sites/default/settings.local.php' --exclude='./$webroot/sites/default/settings.php' -czf /home/$user/$uri/$Name2 $uri
 echo "Backup $Name2 is completed."
 

@@ -1,38 +1,11 @@
 #!/bin/bash
-#                Update Prod Production For Pleasy Library
-#
-#  This will update the production server with code from the local site.
-#  current code
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  15/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-#
 
-# scriptname is set in pl.
-
-# Help menu
-# Prints user guide
 print_help() {
 echo \
-"Update Production (or test) server with stg or specified site.
-Usage: pl $scriptname [OPTION] ... [SITE] [MESSAGE]
-This will copy stg or site specified to the production (or test) server and run
-the updates on that server. It will also backup the server. It presumes the server
-has git which will be used to restore the server if there was a problem.
+"Update Production (or test) server with the specified site.
+Usage: pl $scriptname [OPTION] ... [SITE]
+This will copy the site specified to the production (or test) server and run
+the updates on that server.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -40,9 +13,8 @@ Mandatory arguments to long options are mandatory for short options too.
   -t --test               Update the test server not production.
 
 Examples:
-pl $scriptname # This will use the site specified in pl.yml by sites: stg:
-pl $scriptname d8 # This will update production with the d8 site.
-pl $scriptname d8 -t # This will update the test site specified in pl.yml with the d8 site."
+pl $scriptname d9 # This will update production with the d9 site.
+pl $scriptname d9 -t # This will update the test site specified in pl.yml with the d9 site."
 }
 
 # start timer
@@ -96,7 +68,7 @@ elif [ -z "$2" ]; then
   sitename_var=$1
 fi
 
-if [[ "$test" ]]; then
+if [[ ! "$test" ]]; then
     echo "This will update production with site $sitename_var"
   else
     echo "This will update the test server with site $sitename_var"
@@ -195,9 +167,9 @@ copy_prod_test
 fi
 
 if [[ "$step" -lt 3 ]] ; then
-echo -e "$Pcolor step 2: Copy files from local site to prod_site $Color_Off"
-prod_site="$prod_alias:$(dirname $prod_test_docroot)"
-echo "Prod_site: $prod_site"
+  prod_site="$prod_alias:$(dirname $prod_test_docroot)"
+echo -e "$Pcolor step 2: Copy files from local site $sitename_var test site $prod_site $Color_Off"
+
 #  Copy files from local site to prod_site
 if [ "$site_path" = "" ] || [ "$sitename_var" = "" ] || [ "$prod_site" == "" ]; then
   #It's really really bad if rsync is run with empty values! It can wipe your home directory!

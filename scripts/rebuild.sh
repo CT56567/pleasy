@@ -1,27 +1,5 @@
 #!/bin/bash
-#                       make dev mode For Pleasy Library
-#
-#  This script is used to rebuild a particular site's database. You just need
-#  to state the sitename, eg loc.
-#
-#  Change History
-#  2019 - 2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#
-#  Core Maintainer:  Rob Zar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
 
-# scriptname is set in pl.
-
-# Help menu
-# Prints user guide
 print_help() {
 cat << HEREDOC
 Rebuild a site's database

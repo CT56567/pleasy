@@ -78,7 +78,6 @@ import_site_config() {
     stage="prod_"
   fi
 
-
   # First load the defaults
   rp="recipes_default_source"
   rpv=${!rp}
@@ -349,7 +348,7 @@ import_site_config() {
     lando=${!rp}
   fi
 
-  if [[ "$stage" = "stg_" || "$stage" = "prod_" ]]; then
+  if [[ "$stage" == "stg_" || "$stage" == "prod_" ]]; then
     db=""
     dbuser=""
     dbpass=""
@@ -484,9 +483,9 @@ import_site_config() {
   if [ "$stage" = "stg_" ]; then
     sitename_var=$store_sitename
   fi
-    if [ "$stage" = "prod_" ]; then
-      sitename_var=$store_sitename
-    fi
+  if [ "$stage" = "prod_" ]; then
+    sitename_var=$store_sitename
+  fi
 }
 
 # Called all the time
@@ -729,6 +728,7 @@ fix_site_settings() {
   # Check that settings.php has reference to local.settings.php
   echo "Fixing settings at $site_path/$sitename_var/$webroot"
   echo "Making sure settings.php exists"
+  uri="pleasy.$sitename_var"
   if [ -f "$site_path/$sitename_var/$webroot/sites/default/settings.php.old" ]; then
     #cp "$site_path/$sitename_var/$webroot/sites/default/settings.php.old" "$site_path/$sitename_var/$webroot/sites/default/settings.php"
     # get rid of any old settings.php
@@ -790,6 +790,13 @@ EOL
   'driver' => 'mysql',
 );
 \$settings["config_sync_directory"] = '../cmi';
+\$settings['trusted_host_patterns'] = [
+  '^www\.test\.${uri//./\\.}$',
+  '^test\.${uri//./\\.}$',
+  '^www\.${uri//./\\.}$',
+  '^${uri//./\\.}$',
+];
+
 EOL
   fi
   if [ "$dev" == "y" ]; then
@@ -1166,29 +1173,29 @@ backup_prod() {
 
       if [ "${site_to: -4}" = "prod" ]; then
         siteto_var_len=$(echo -n $site_to | wc -m)
-        sitename_pre=${site_to:0:$(($siteto_var_len-5))}
-echo "site_to $site_to sitename_pre $sitename_pre"
-  # Store the backup to the production folder on the dev machine.
+        sitename_pre=${site_to:0:$(($siteto_var_len - 5))}
+        ocmsg "site_to $site_to sitename_pre $sitename_pre" debug
+        # Store the backup to the production folder on the dev machine.
 
-             if [ ! -d "$folderpath/sitebackups/$sitename_pre" ]; then
-                 mkdir "$folderpath/sitebackups/$sitename_pre"
-             fi
-             if [ ! -d "$folderpath/sitebackups/$sitename_pre/prod" ]; then
-                 mkdir "$folderpath/sitebackups/$sitename_pre/prod"
-             fi
-             site_to="$sitename_pre/prod"
-       else
+        if [ ! -d "$folderpath/sitebackups/$sitename_pre" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_pre"
+        fi
+        if [ ! -d "$folderpath/sitebackups/$sitename_pre/prod" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_pre/prod"
+        fi
+        site_to="$sitename_pre/prod"
+      else
 
-          # Check if site backup folder exists
+        # Check if site backup folder exists
         if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
-            mkdir "$folderpath/sitebackups/$sitename_var"
+          mkdir "$folderpath/sitebackups/$sitename_var"
         fi
         if [ ! -d "$folderpath/sitebackups/$sitename_var/prod" ]; then
-            mkdir "$folderpath/sitebackups/$sitename_var/prod"
+          mkdir "$folderpath/sitebackups/$sitename_var/prod"
         fi
         site_to="$sitename_var/prod"
       fi
-            msg="${msg// /_}"
+      msg="${msg// /_}"
       ocmsg "Backing up production site $sitename_var on server with alias $prod_alias with message $msg and onto dev at $folderpath/sitebackups/$site_to" debug
 
       #site_info
@@ -1196,13 +1203,13 @@ echo "site_to $site_to sitename_pre $sitename_pre"
 
       ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
 
-# Get the latest backup name
-   Prodsql=$(ssh $prod_alias -t "./getlatestbackup.sh $prod_uri")
-   # todo this next line is needed for some reason don't know why.
-   Prodsql=${Prodsql::-1}
-ocmsg "Prodsql >$Prodsql<" debug
-    Name="${Prodsql::-4}.tar.gz"
-    ocmsg "sql: $Prodsql tar: $Name" debug
+      # Get the latest backup name
+      Prodsql=$(ssh $prod_alias -t "./getlatestbackup.sh $prod_uri")
+      # todo this next line is needed for some reason don't know why.
+      Prodsql=${Prodsql::-1}
+      ocmsg "Prodsql >$Prodsql<" debug
+      Name="${Prodsql::-4}.tar.gz"
+      ocmsg "sql: $Prodsql tar: $Name" debug
       Namesql="$folderpath/sitebackups/$site_to/$Prodsql"
       ocmsg "backup name /home/$prod_user/$prod_uri/$Prodsql" debug
       scp "$prod_alias:/home/$prod_user/$prod_uri/$Prodsql" "$Namesql"
@@ -1378,16 +1385,19 @@ restore_db() {
 
   make_db
 
-  if [[ "$bk" == prod ]] && [[ "$prod_method" == "git" ]]; then
+  if [[ "${bk: -4}" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
+    # todo this needs to be updated
+    echo "restore_db prod git needs to be updated. Exiting"
+    exit
     echo -e "\e[34mrestore $db database using git production\e[39m"
     result=$(
       mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$folderpath/sitebackups/$sitename_var/prod/proddb/prod.sql" 2>/dev/null | grep -v '+' | cut -d' ' -f2
       echo ": ${PIPESTATUS[0]}"
     )
 
-  elif [[ "$bk" == prod ]] && [[ "$prod_method" == "tar" ]]; then
+  elif [[ "${bk: -4}" == "prod" ]] && [[ "$prod_method" == "tar" ]]; then
     result=$(
-      mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$Name" 2>/dev/null | grep -v '+' | cut -d' ' -f2
+      mysql --defaults-extra-file="$folderpath/mysql.cnf" $db <"$folderpath/sitebackups/$bk/$Name" 2>/dev/null | grep -v '+' | cut -d' ' -f2
       echo ": ${PIPESTATUS[0]}"
     )
 

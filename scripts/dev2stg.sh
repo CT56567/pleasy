@@ -95,7 +95,7 @@ from_site_path=$site_path
 
 # Make sure cmi is exported
 
-drush @"$from" cex "$flag_yes"
+drush @"$from" cex "$flag_yes" -y
 
 #    if [ ! -d "$from_site_path/$from/.git" ]; then
 #      echo "There is no git in the dev site $from. Aborting."

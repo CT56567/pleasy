@@ -1,38 +1,9 @@
 #!/bin/bash
-#                Restore the database  For Pleasy Library
-#
-#  This will update the production server with new production scripts
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  15/02/2020 James Lim  Getopt parsing implementation, script documentation
-#  [Insert New]
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-##restore database
- ## $1 is the backup
- ## $2 if present is the site to restore into
- ## $sitename_var is the site to import into
- ## $bk is the backed up site.
 
-# scriptname is set in pl.
-
-# Help menu
-# Prints user guide
 print_help() {
 echo \
-"Restore a particular site's files and database.
-You just need to state the sitename, eg dev.
+"Restore a particular site's  database.
+You just need to state the sitename, eg d9.
 You can alternatively restore the site into a different site which is the second argument.
 
 Usage: pl $scriptname [OPTION] ... [SITE] [MESSAGE]
@@ -42,7 +13,7 @@ Mandatory arguments to long options are mandatory for short options too.
   -d --debug              Provide debug information when running this script.
 
 Examples:
-pl $scriptname d8 # This will restore the db on the d8 site."
+pl $scriptname d9 # This will restore the db on the d8 site."
 }
 
 # start timer
@@ -108,8 +79,13 @@ import_site_config $sitename_var
 
 # Prompt to choose which database to backup, 1 will be the latest.
 prompt="Please select a backup:"
-cd
-cd "$folder/sitebackups/$bk"
+if [ "${bk: -4}" = "prod" ]; then
+      siteto_var_len=$(echo -n $bk | wc -m)
+      sitename_pre=${bk:0:$(($siteto_var_len - 5))}
+  cd "$folderpath/sitebackups/$sitename_pre/prod/"
+  else
+  cd "$folderpath/sitebackups/$bk"
+fi
 
 options=( $(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t ) )
 

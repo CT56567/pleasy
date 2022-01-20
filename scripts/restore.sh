@@ -1,37 +1,6 @@
 #!/bin/bash
-#                       Restore site For Pleasy Library
-#
-#  This will restore files and database from a backup
-#
-#  Change History
-#  2019 ~ 08/02/2020  Robert Zaar   Original code creation and testing,
-#                                   prelim commenting
-#  04/07/2020 Rob Zaar    Simplified and updated to new system.
-#
-#
-#  Core Maintainer:  Rob Zaar
-#  Email:            rjzaar@gmail.com
-#
-#                                TODO LIST
-#  Add the ability to choose a prod git commit to be restored.
-#
-#                             Commenting with model
-#
-# NAME OF COMMENT (USE FOR RATHER SIGNIFICANT COMMENTS)
-# Description - Each bar is 80 #, in vim do 80i#esc
-#
 
-# start timer
-# Timer to show how long it took to run the script
 SECONDS=0
-
-#restore site and database
-# $1 is the backup
-# $2 if present is the site to restore into
-# $sitename_var is the site to import into
-# $bk is the backed up site.
-
-# scriptname is set in pl.
 verbose="none"
 
 # Help menu
@@ -51,11 +20,11 @@ OPTIONS
   -y --yes                Auto delete current content
 
 Examples:
-pl restore loc
-pl restore loc stg -fy
+pl restore d9
+pl restore d9 stg_d9 -fy
 pl restore -h
-pl restore loc -d
-pl restore prod stg
+pl restore d9 -d
+pl restore d9_prod stg_d9
 HELP
 }
 
@@ -87,7 +56,8 @@ while true; do
     flag_step=1
     shift
     step=${1:1}
-    shift; ;;
+    shift
+    ;;
   -f | --first)
     flag_first=1
     shift
@@ -119,22 +89,30 @@ if [[ $1 == "restore" ]] && [ -z "$2" ]; then
   exit 1
 elif [ -z "$2" ]; then
   sitename_var=$1
-  bk=$1
+  site_from=$1
 else
   sitename_var=$2
-  bk=$1
+  site_from=$1
 fi
-echo "Importing site config for $sitename_var"
+ocmsg "sitename_var $sitename_var site_from $site_from" debug
 import_site_config $sitename_var
 
 stage=""
-  if [ "${sitename_var:0:3}" = "stg" ]; then
-    # set up stg
+if [ "${sitename_var:0:3}" = "stg" ]; then
+  # set up stg
   sitename_var=${sitename_var:4}
   stage="stg_"
-  fi
+fi
 
-echo "Restoring site $bk to $stage$sitename_var"
+bk=$site_from
+#if [ "${site_from: -4}" = "prod" ]; then
+#  # set up stg
+##  site_from=${site_from:5}
+#  bk="prod"
+#
+#fi
+#  ocmsg "site_from $site_from shortened ${site_from: -4} bk $bk" debug
+echo "Restoring site $site_from to $stage$sitename_var"
 if [[ "$step" -gt 1 ]]; then
   echo "Starting from step $step"
 fi
@@ -143,206 +121,223 @@ fi
 #  exit 0
 #fi
 
-
-
 if [[ "$step" -lt 2 ]]; then
 
-# Prompt to choose which database to backup, 1 will be the latest.
-# Could be a better way to go: https://stackoverflow.com/questions/42789273/bash-choose-default-from-case-when-enter-is-pressed-in-a-select-prompt
-cd "$folderpath/sitebackups/$bk"
-if [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]] && [[ "$sitename_var" == "prod" ]]; then
-  echo "Restoring production site from last git push"
-  ssh $prod_alias -t "./restoreprod.sh $prod_docroot $prod_gitrepo"
-  # The script does it all. No need for anything else.
-  exit 0
-elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
+  # Prompt to choose which database to backup, 1 will be the latest.
+  # Could be a better way to go: https://stackoverflow.com/questions/42789273/bash-choose-default-from-case-when-enter-is-pressed-in-a-select-prompt
 
-  echo "Restoring production site to site: $stage$sitename_var using git"
-  # First get the database
-  #scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
-  #cp "$folderpath/sitebackups/prod/$Bname.sql" "$folderpath/sitebackups/proddb/prod.sql" -rf
- if [[ ! -d "$folderpath/sitebackups/$sitename_var" ]]; then
-   mkdir "$folderpath/sitebackups/$sitename_var"
-   fi
+  if [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]] && [[ "$sitename_var" == "prod" ]]; then
+    # todo This needs to be fixed.
+    echo "The code for restoring production using git needs work. Exiting"
+    exit 1
+    echo "Restoring production site from last git push"
+    ssh $prod_alias -t "./restoreprod.sh $prod_docroot $prod_gitrepo"
+    # The script does it all. No need for anything else.
+    exit 0
+  elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "git" ]]; then
+    # todo This needs to be fixed.
+    echo "The code for restoring production using git needs work. Exiting"
+    exit 1
+    echo "Restoring production site to site: $stage$sitename_var using git"
+    # First get the database
+    #scp "$prod_alias:proddb/prod.sql" "$folderpath/sitebackups/prod/$Bname.sql"
+    #cp "$folderpath/sitebackups/prod/$Bname.sql" "$folderpath/sitebackups/proddb/prod.sql" -rf
+    if [[ ! -d "$folderpath/sitebackups/$sitename_var" ]]; then
+      mkdir "$folderpath/sitebackups/$sitename_var"
+    fi
 
-  # Check if database is already present
-  if [[ -f "$folderpath/sitebackups/$sitename_var/proddb/prod.sql" ]]; then
-    if [[ "$(git config --get remote.origin.url)" == "$prod_gitdb" ]]; then
+    # Check if database is already present
+    if [[ -f "$folderpath/sitebackups/$sitename_var/proddb/prod.sql" ]]; then
+      if [[ "$(git config --get remote.origin.url)" == "$prod_gitdb" ]]; then
 
-      ocmsg "Pull the database down to proddb." debug
-      cd $folderpath/sitebackups/$sitename_var/proddb/
-      git fetch --all
-      #git checkout -b backup-master
-      git reset --hard origin/master
+        ocmsg "Pull the database down to proddb." debug
+        cd $folderpath/sitebackups/$sitename_var/proddb/
+        git fetch --all
+        #git checkout -b backup-master
+        git reset --hard origin/master
+      else
+        removedb="yes"
+      fi
     else
       removedb="yes"
     fi
-  else
-    removedb="yes"
-  fi
-  if [[ "$removedb" == "yes" ]]; then
-    # Check if proddb exits
-    if [[ -d "$folderpath/sitebackups/$sitename_var/proddb/" ]]; then
-      echo "removing proddb"
-      rm "$folderpath/sitebackups/proddb" -rf
+    if [[ "$removedb" == "yes" ]]; then
+      # Check if proddb exits
+      if [[ -d "$folderpath/sitebackups/$sitename_var/proddb/" ]]; then
+        echo "removing proddb"
+        rm "$folderpath/sitebackups/proddb" -rf
+      fi
+      echo "Cloning $prod_gitdb into $folderpath/sitebackups/$sitename_var/proddb/"
+      git clone $prod_gitdb "$folderpath/sitebackups/$sitename_var/proddb/"
+      echo "Git clone complete."
     fi
-    echo "Cloning $prod_gitdb into $folderpath/sitebackups/$sitename_var/proddb/"
-    git clone $prod_gitdb "$folderpath/sitebackups/$sitename_var/proddb/"
-    echo "Git clone complete."
-  fi
 
-  echo "Now get the site files."
+    echo "Now get the site files."
 
-  if [[ -d "$site_path/$stage$sitename_var" ]]; then
-    # Check that if the site exists, that it has the prod repo. Then only need to pull it!
-    ocmsg "The site: $stage$sitename_var already exits. Now check if it is has the prod repo." debug
-    cd "$site_path/$stage$sitename_var"
-    ocmsg "Local: $(git config --get remote.origin.url) Remote: $prod_gitrepo"
-    if [[ "$(git config --get remote.origin.url)" == "$prod_gitrepo" ]]; then
-      # Nice and simple!
-      ocmsg "Pull the files down." debug
-      git fetch --all
-      #git checkout -b backup-master
-      git reset --hard origin/master
+    if [[ -d "$site_path/$stage$sitename_var" ]]; then
+      # Check that if the site exists, that it has the prod repo. Then only need to pull it!
+      ocmsg "The site: $stage$sitename_var already exits. Now check if it is has the prod repo." debug
+      cd "$site_path/$stage$sitename_var"
+      ocmsg "Local: $(git config --get remote.origin.url) Remote: $prod_gitrepo"
+      if [[ "$(git config --get remote.origin.url)" == "$prod_gitrepo" ]]; then
+        # Nice and simple!
+        ocmsg "Pull the files down." debug
+        git fetch --all
+        #git checkout -b backup-master
+        git reset --hard origin/master
+      else
+        ocmsg "Removing old $sitename_var site and cloning the files into $sitename_var" debug
+        # Set up the prod repo in the desired site location after deleting what is already there.
+        rm -rf "$site_path/$stage$sitename_var"
+        cd $site_path
+        git clone $prod_gitrepo $stage$sitename_var
+      fi
     else
-      ocmsg "Removing old $sitename_var site and cloning the files into $sitename_var" debug
-      # Set up the prod repo in the desired site location after deleting what is already there.
-      rm -rf "$site_path/$stage$sitename_var"
+      # clone the repo
+      ocmsg "Cloning the files into $stage$sitename_var" debug
+      echo "Cloning the files into $stage$sitename_var"
       cd $site_path
       git clone $prod_gitrepo $stage$sitename_var
     fi
-  else
-    # clone the repo
-    ocmsg "Cloning the files into $stage$sitename_var" debug
-    echo "Cloning the files into $stage$sitename_var"
-    cd $site_path
-    git clone $prod_gitrepo $stage$sitename_var
-  fi
 
-  # now tar it so it is backed up for future use while we are at it.
-  #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
-  echo "Fix site settings"
-  # messy
-  store_sitename_var=$sitename_var
-  sitename_var="$stage$sitename_var"
-  fix_site_settings
+    # now tar it so it is backed up for future use while we are at it.
+    #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+    echo "Fix site settings"
+    # messy
+    store_sitename_var=$sitename_var
+    sitename_var="$stage$sitename_var"
+    fix_site_settings
 
+    echo "Set site permissions"
+    set_site_permissions $sitename_var
 
-  echo "Set site permissions"
-  set_site_permissions $sitename_var
+    #restore db
+    db_defaults
+    echo -e "$Cyan Restore the database $Color_Off"
+    restore_db
+    echo -e "$Cyan Files and database have been restored $Color_Off"
 
-  #restore db
-  db_defaults
-  echo -e "$Cyan Restore the database $Color_Off"
-  restore_db
-  echo -e "$Cyan Files and database have been restored $Color_Off"
+    # messy but put the value back.
+    sitename_var=$store_sitename_var
+    exit
+  elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "tar" ]]; then
+    # todo This is kind of defunct since the else below covers d9_prod scenario which this is
+    # dealing with. But this could replace the backup of prod itself....
+    echo "restore prod tar needs work. Exiting."
+    exit
+    echo "Restoring production site to site: $stage$sitename_var using tar method"
 
-  # messy but put the value back.
-  sitename_var=$store_sitename_var
-  exit
-elif [[ "$bk" == "prod" ]] && [[ "$prod_method" == "tar" ]]; then
-  echo "Restoring production site to site: $stage$sitename_var using tar method"
+    echo "Now get the site files."
 
-  echo "Now get the site files."
-
-  if [[ -d "$site_path/$stage$sitename_var" ]]; then
-    rm "$site_path/$stage$sitename_var" -rf
-    mkdir "$site_path/$stage$sitename_var"
+    if [[ -d "$site_path/$stage$sitename_var" ]]; then
+      rm "$site_path/$stage$sitename_var" -rf
+      mkdir "$site_path/$stage$sitename_var"
     else
       mkdir "$site_path/$stage$sitename_var"
-  fi
- if [[ "$Namef" = "" ]]; then
-   #get the latest file
-   cd $folderpath/sitebackups/$sitename_var/prod/
-   options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
-   Name=${options[0]:2}
-   tar -zxf "$folderpath/sitebackups/$sitename_var/prod/${Name::-4}.tar.gz" -C  "$site_path/$stage$sitename_var"
-   else
- tar -zxf "$folderpath/sitebackups/$sitename_var/prod/$Namef" -C  "$site_path/$stage$sitename_var"
-fi
-  # now tar it so it is backed up for future use while we are at it.
-  #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
-   store_sitename_var=$sitename_var
-   sitename_var="$stage$sitename_var"
+    fi
+    if [[ "$Namef" == "" ]]; then
+      #get the latest file
+      cd $folderpath/sitebackups/$site_from/prod/
+      options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
+      Name=${options[0]:2}
+      tar -zxf "$folderpath/sitebackups/$site_from/prod/${Name::-4}.tar.gz" -C "$site_path/$stage$sitename_var"
+    else
+      tar -zxf "$folderpath/sitebackups/$site_from/prod/$Namef" -C "$site_path/$stage$sitename_var"
+    fi
+    # now tar it so it is backed up for future use while we are at it.
+    #tar --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.local.php' --exclude='$site_path/$sitename_var/$webroot/sites/default/settings.php' -zcf "$folderpath/sitebackups/prod/$bname.tar.gz" "$site_path/$sitename_var"
+    store_sitename_var=$sitename_var
+    sitename_var="$stage$sitename_var"
 
-  echo "Fix site settings"
-  fix_site_settings
+    echo "Fix site settings"
+    fix_site_settings
 
-  echo "Set site permissions"
-  set_site_permissions $sitename_var
+    echo "Set site permissions"
+    set_site_permissions $sitename_var
 
-  #restore db
-  db_defaults
-  echo -e "$Cyan Restore the database $Color_Off"
-  restore_db
-  echo -e "$Cyan Files and database have been restored $Color_Off"
-  sitename_var=$store_sitename_var
-  drush @$sitename_var uli &
-  echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
+    #restore db
+    db_defaults
+    echo -e "$Cyan Restore the database $Color_Off"
+    restore_db
+    echo -e "$Cyan Files and database have been restored $Color_Off"
+    sitename_var=$store_sitename_var
+    drush @$sitename_var uli &
+    echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
 
-  exit 0
+    exit 0
 
-else
-  echo "Restoring $bk site to site: $stage$sitename_var "
-sitename_var="$stage$sitename_var"
-
-  ocmsg "flag_first is $flag_first" debug
-  options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
-  if [[ $flag_first ]]; then
-    echo -e "\e[34mrestoring $1 to $2 with latest backup\e[39m"
-    Name=${options[0]:2}
-    echo "Restoring with $Name"
   else
-    prompt="Please select a backup:"
-    PS3="$prompt "
-    select opt in "${options[@]}" "Quit"; do
-      if ((REPLY == 1 + ${#options[@]})); then
-        exit
-      elif ((REPLY > 0 && REPLY <= ${#options[@]})); then
-        echo "You picked $REPLY which is file ${opt:2}"
-        Name=${opt:2}
-        break
-      else
-        echo "Invalid option. Try another one."
-      fi
-    done
+    echo "Restoring $site_from site to site: $stage$sitename_var "
+    sitename_var="$stage$sitename_var"
+
+    if [ "${bk: -4}" = "prod" ]; then
+      siteto_var_len=$(echo -n $bk | wc -m)
+      sitename_pre=${bk:0:$(($siteto_var_len - 5))}
+      ocmsg "Goto $folderpath/sitebackups/$sitename_pre/prod/" debug
+      cd "$folderpath/sitebackups/$sitename_pre/prod/"
+      bk="${sitename_pre}/prod"
+    else
+      cd "$folderpath/sitebackups/$bk"
+      ocmsg "Goto $folderpath/sitebackups/$bk" debug
+    fi
+    ocmsg "bk: $bk " debug
+    ocmsg "flag_first is $flag_first" debug
+    options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
+    if [[ $flag_first ]]; then
+      echo -e "\e[34mrestoring $1 to $2 with latest backup\e[39m"
+      Name=${options[0]:2}
+      echo "Restoring with $Name"
+    else
+      prompt="Please select a backup:"
+      PS3="$prompt "
+      select opt in "${options[@]}" "Quit"; do
+        if ((REPLY == 1 + ${#options[@]})); then
+          exit
+        elif ((REPLY > 0 && REPLY <= ${#options[@]})); then
+          echo "You picked $REPLY which is file ${opt:2}"
+          Name=${opt:2}
+          break
+        else
+          echo "Invalid option. Try another one."
+        fi
+      done
+    fi
   fi
-fi
 fi
 
 if [[ "$step" -lt 3 ]]; then
 
-echo " site_path: $site_path/$sitename_var"
-# Check to see if folder already exits.
-if [[ -d "$site_path/$sitename_var" ]]; then
-  if [[ ! "$flag_yes" == "1" ]]; then
-    read -p "$sitename_var exists. If you proceed, $sitename_var will first be deleted. Do you want to proceed?(Y/n)" question
-    case $question in
-    n | c | no | cancel)
-      echo exiting immediately, no changes made
-      exit 1
-      ;;
-    esac
-  fi
-  rm -rf "$site_path/$sitename_var"
+  echo " site_path: $site_path/$sitename_var"
+  # Check to see if folder already exits.
+  if [[ -d "$site_path/$sitename_var" ]]; then
+    if [[ ! "$flag_yes" == "1" ]]; then
+      read -p "$sitename_var exists. If you proceed, $sitename_var will first be deleted. Do you want to proceed?(Y/n)" question
+      case $question in
+      n | c | no | cancel)
+        echo exiting immediately, no changes made
+        exit 1
+        ;;
+      esac
+    fi
+    rm -rf "$site_path/$sitename_var"
 
-fi
+  fi
 fi
 if [[ "$step" -lt 4 ]]; then
-echo -e "\e[34mrestoring files\e[39m"
-# Will need to first move the source folder ($bk) if it exists, so we can create the new folder $sitename_var
-echo "path $site_path/$sitename_var folderpath $folderpath"
+  echo -e "\e[34mrestoring files\e[39m"
+  # Will need to first move the source folder ($bk) if it exists, so we can create the new folder $sitename_var
+  echo "path $site_path/$sitename_var folderpath $folderpath"
 
-mkdir "$site_path/$sitename_var"
-echo "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz into $site_path/$sitename_var"
-# Check to see if the backup includes the root folder or not.
-Dir_name=$(tar -tzf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" | head -1 | cut -f1 -d"/")
-#echo "Dir_name = >$Dir_name<"
-if [[ $Dir_name == "." ]]; then
-  tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var"
-else
-  tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var" --strip-components=1
-fi
+  mkdir "$site_path/$sitename_var"
+  echo "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz into $site_path/$sitename_var"
+  # Check to see if the backup includes the root folder or not.
+  Dir_name=$(tar -tzf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" | head -1 | cut -f1 -d"/")
+  #echo "Dir_name = >$Dir_name<"
+  if [[ $Dir_name == "." ]]; then
+    tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var"
+  else
+    tar -zxf "$folderpath/sitebackups/$bk/${Name::-4}.tar.gz" -C "$site_path/$sitename_var" --strip-components=1
+  fi
 
 # Move settings.php and settings.local.php out the way before they are overwritten just in case you might need them.
 #echo "Moving settings.php and settings.local.php"
@@ -356,28 +351,26 @@ fi
 
 if [[ "$step" -lt 5 ]]; then
 
-
-fix_site_settings
+  fix_site_settings
 fi
 
-
 if [[ "$step" -lt 6 ]]; then
-echo "Set site permissions"
-set_site_permissions $sitename_var
+  echo "Set site permissions"
+  set_site_permissions $sitename_var
 fi
 
 if [[ "$step" -lt 7 ]]; then
-#restore db
-db_defaults
-echo -e "$Cyan Restore the database $Color_Off"
-restore_db
-echo -e "$Cyan Files and database have been restored $Color_Off"
+  #restore db
+  db_defaults
+  echo -e "$Cyan Restore the database $Color_Off"
+  restore_db
+  echo -e "$Cyan Files and database have been restored $Color_Off"
 fi
 
 if [[ "$step" -lt 8 ]]; then
-if [[ $flag_open ]]; then
-  drush @$sitename_var uli &
-fi
+  if [[ $flag_open ]]; then
+    drush @$sitename_var uli &
+  fi
 fi
 #drush @sitename_var cr
 # End timer

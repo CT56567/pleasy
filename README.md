@@ -639,10 +639,11 @@ pl open loc
 
 <details>
 
-**<summary>proddown: Overwrite a specified local site with production 👷 </summary>**
+**<summary>proddown: Overwrite the stage site with production 👷 </summary>**
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
-site. Note: If the local site will be deleted if it already exists. Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
+site. Note: If the local site will be deleted if it already exists.
+Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -651,9 +652,8 @@ Mandatory arguments to long options are mandatory for short options too.
 
 
 Examples:
-pl proddown loc
-pl proddown loc -s=2
-pl proddown
+pl proddown d9
+pl proddown d9 -s=2
 END HELP
 
 </details>
@@ -759,9 +759,9 @@ END HELP
 
 <details>
 
-**<summary>restoredb: Restore a particular site's files and database. 👷 </summary>**
+**<summary>restoredb: Restore a particular site's  database. 👷 </summary>**
 --**BROKEN DOCUMENTATION**--
-You just need to state the sitename, eg dev.
+You just need to state the sitename, eg d9.
 You can alternatively restore the site into a different site which is the second argument.
 
 Usage: pl  [OPTION] ... [SITE] [MESSAGE]
@@ -771,7 +771,7 @@ Mandatory arguments to long options are mandatory for short options too.
   -d --debug              Provide debug information when running this script.
 
 Examples:
-pl  d8 # This will restore the db on the d8 site.
+pl  d9 # This will restore the db on the d8 site.
 --**BROKEN DOCUMENTATION**--
 
 </details>
@@ -792,11 +792,11 @@ OPTIONS
   -y --yes                Auto delete current content
 
 Examples:
-pl restore loc
-pl restore loc stg -fy
+pl restore d9
+pl restore d9 stg_d9 -fy
 pl restore -h
-pl restore loc -d
-pl restore prod stg
+pl restore d9 -d
+pl restore d9_prod stg_d9
 
 </details>
 
@@ -877,11 +877,10 @@ pl unmod cat migrate_plus
 
 <details>
 
-**<summary>updateprod: Update Production (or test) server with stg or specified site. 👷 </summary>**
-Usage: pl  [OPTION] ... [SITE] [MESSAGE]
-This will copy stg or site specified to the production (or test) server and run
-the updates on that server. It will also backup the server. It presumes the server
-has git which will be used to restore the server if there was a problem.
+**<summary>updateprod: Update Production (or test) server with the specified site. 👷 </summary>**
+Usage: pl  [OPTION] ... [SITE]
+This will copy the site specified to the production (or test) server and run
+the updates on that server.
 
 Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
@@ -889,9 +888,8 @@ Mandatory arguments to long options are mandatory for short options too.
   -t --test               Update the test server not production.
 
 Examples:
-pl  # This will use the site specified in pl.yml by sites: stg:
-pl  d8 # This will update production with the d8 site.
-pl  d8 -t # This will update the test site specified in pl.yml with the d8 site.
+pl  d9 # This will update production with the d9 site.
+pl  d9 -t # This will update the test site specified in pl.yml with the d9 site.
 
 </details>
 

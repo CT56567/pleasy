@@ -138,4 +138,6 @@ echo "10 * * * * /usr/bin/env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr
 sudo crontab mycron
 rm mycron
 
+# Should also setup email forwarding https://www.binarytides.com/postfix-mail-forwarding-debian/ see point 3.
+
 echo "Site setup finished."

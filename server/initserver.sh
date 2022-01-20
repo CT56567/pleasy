@@ -665,11 +665,25 @@ if [ $step -lt 15 ]; then
 set nocompatible
 EOL
 fi
+
+if [ $step -lt 16 ]; then
+  echo -e "$Cyan step 15: Add email tools  $Color_Off"
+
+# todo This needs work. Dumping some of what is needed for now.
+
+# DKIM setup https://www.linuxbabe.com/mail-server/setting-up-dkim-and-spf
+#sudo apt-get install postfix opendkim opendkim-tools
+# sudo gpasswd -a postfix opendkim
+
+# Should also setup email forwarding https://www.binarytides.com/postfix-mail-forwarding-debian/ see point 3.
+
+fi
+
+
 echo " open this link to add the xdebug extension for the browser you want to use"
 echo "https://www.jetbrains.com/help/phpstorm/2019.3/browser-debugging-extensions.html?utm_campaign=PS&utm_medium=link&utm_source=product&utm_content=2019.3 "
 
 cd
-
 
 echo "All done!"
 
