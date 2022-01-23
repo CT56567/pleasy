@@ -4,9 +4,6 @@ SECONDS=0
 
 # Copy the production site to the test site
 # $1 is the prod site. docroot location
-# $2 is the user
-# $3 modules to be reinstalled. Put the modules in quotation marks.
-# Put production into readonly mode
 
 if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."

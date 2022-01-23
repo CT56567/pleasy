@@ -12,11 +12,12 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
   -s --step=[1-2]         Select step to proceed (If it stalls on a step)
   -d --debug              Provide messages to help with debugging this function
+  -y --yes                Answer yes to all prompts
 
 
 Examples:
-pl proddown d9
-pl proddown d9 -s=2
+pl proddown stg_d9
+pl proddown stg_d9 -s=2
 END HELP"
 
 }
@@ -29,7 +30,7 @@ SECONDS=0
 
 # step is defined for script debug purposesstep=${step:-1}
 
-args=$(getopt -o hs:d -l help,step:,debug --name "$scriptname" -- "$@")
+args=$(getopt -o hs:dy -l help,step:,debug,yes --name "$scriptname" -- "$@")
 
 # If getopt outputs error to error variable, quit program displaying error
 [ $? -eq 0 ] || {
@@ -57,6 +58,9 @@ while true; do
   -d | --debug)
     verbose="debug"
     shift; ;;
+  -y | --yes)
+    flag_yes=1
+    shift; ;;
 #  -t | --test)
 #    test="y"
 #    shift; ;;
@@ -75,23 +79,39 @@ if [ $1 = "proddown" ] && [ -z "$2" ]; then
   echo "No site specified, exiting"
 fi
 
-
-
 # Make sure @prod is setup.
 update_all_configs
 import_site_config $sitename_var
 echo "step $step"
 
-echo "Importing $sitename_var production site into stg_$sitename_var"
+  if [ "${sitename_var:0:3}" = "stg" ]; then
+    # set up stg
+    sitename_short=${sitename_var:4}
+  else
+    if [ ! "$flag_yes"  ]; then
+      #Double check!
+      echo "You have chosen a non-stg target, ie $sitename_var. Do you want to proceed - type y"
+      read proc
+      if [ "$proc" != "y" ]; then
+        exit
+      else
+        echo "Proceeding"
+      fi
+    fi
+    sitename_short=$sitename_var
+  fi
 sitename_store=$sitename_var
+
+echo "Importing $sitename_short production site into $sitename_var"
+
 if [[ "$step" -gt 1 ]] ; then
   echo "Starting from step $step"
 fi
 
 if [[ "$step" -lt 2 ]] ; then
   echo -e "$Cyan step 1: backup production $Color_Off"
-  sitename_var="prod_$sitename_var"
-  site_to="${sitename_store}_prod"
+  sitename_var="prod_$sitename_short"
+  site_to="${sitename_short}_prod"
   msg="proddown"
   backup_prod
   # sql file: $Namesql
@@ -100,19 +120,19 @@ sitename_var=$sitename_store
 fi
 
 if [[ "$step" -lt 3 ]] ; then
-  echo -e "$Cyan step 2: restore ${sitename_var}_prod to stg_$sitename_var $Color_Off"
+  echo -e "$Cyan step 2: restore ${sitename_short}_prod to $sitename_var $Color_Off"
   if [[ "$verbose" == "debug" ]]; then
-  pl restore "${sitename_var}_prod" "stg_$sitename_var" -yfd
+  pl restore "${sitename_short}_prod" "$sitename_var" -yfd
   else
-  pl restore "${sitename_var}_prod" "stg_$sitename_var" -yf
+  pl restore "${sitename_short}_prod" "$sitename_var" -yf
   fi
 fi
 #
 
 # Make sure url is setup and open it!
 #pl sudoeuri localprod
-echo -e "$Cyan Opening stg_$sitename_var $Color_Off"
-pl open "stg_$sitename_var"
+echo -e "$Cyan Opening $sitename_var $Color_Off"
+pl open "$sitename_var"
 # End timer
 # Finish script, display time taken
 echo 'Finished in H:'$(($SECONDS/3600))' M:'$(($SECONDS%3600/60))' S:'$(($SECONDS%60))

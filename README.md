@@ -111,9 +111,9 @@ repository for backup.
 There are several ways to run the workflow. The simplest is via tar files.
 Once you have a production server, eg vanilla ubuntu 20.04 server. You should follow the server readme
 to setup the server. Once the server is setup you need to add your production server details to pl.yml. 
-You will then be able to push up your site to the server, eg 'pl prodow d9'. 'Prodow' stands for PRODuction OverWrite,
+You will then be able to push up your site to the server, eg 'pl prodow stg_d9'. 'Prodow' stands for PRODuction OverWrite,
 
-To pull down the site use 'pl proddown d9' and this will download and install the site to stg_d9.
+To pull down the site use 'pl proddown stg_d9' and this will download and install the site to stg_d9.
 
 
 Opencourse (ocrepo): A repo for just the code for opencourse (dev environment)
@@ -649,11 +649,12 @@ Mandatory arguments to long options are mandatory for short options too.
   -h --help               Display help (Currently displayed)
   -s --step=[1-2]         Select step to proceed (If it stalls on a step)
   -d --debug              Provide messages to help with debugging this function
+  -y --yes                Answer yes to all prompts
 
 
 Examples:
-pl proddown d9
-pl proddown d9 -s=2
+pl proddown stg_d9
+pl proddown stg_d9 -s=2
 END HELP
 
 </details>

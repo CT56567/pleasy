@@ -2,27 +2,14 @@
 
 SECONDS=0
 
-# Update the prod site.
+# Swap the production site with the test site
 # $1 is the prod site. docroot location
-# $2 modules to be reinstalled. Put the modules in quotation marks.
 
-# This presumes the production site has been copied to test.
+# Put production into readonly mode
 
 if [ -z "$1" ]; then
 echo "No prod site info provided. Exiting."
 exit 0
-fi
-
-if [ -z "$2" ] ; then
-echo "No modules will be reinstalled."
-else
-reinstall_modules=$2
-fi
-
-echo "Update Production"
-if [[ "$1" = "" ]]; then
-  echo "docroot variable is empty. Aborting."
-  exit 1
 fi
 user=$USER
 prod_docroot=$1
@@ -41,15 +28,13 @@ echo "Prod docroot: $prod_docroot"
 echo "Prod uri: $uri"
 echo "Test uri: $test_uri"
 echo "user: $user"
-echo "Reinstall Modules: $reinstall_modules"
 
-#update test
-echo "Run the updates on test"
-cd
-./updatetest.sh $test_docroot $reinstall_modules
 
 # swap the sites
 echo "Swap test and prod sites."
+./mainon.sh $test_docroot
+./mainon.sh $prod_docroot
+
 cd /var/www
 echo "Move prod to old"
 sudo mv $uri "old.$uri"
@@ -68,7 +53,9 @@ sudo mv /home/$user/settings.php /home/$user/$uri/settings.php
 echo "Put old prod {test.opencat.org} out of readonly mode or maintenance mode."
 cd
 ./mainoff.sh $test_docroot
+./mainoff.sh $prod_docroot
 
-echo "Production update completed." 
+echo "Production update completed."
 
 echo 'Finished in H:'$(($SECONDS / 3600))' M:'$(($SECONDS % 3600 / 60))' S:'$(($SECONDS % 60))
+
