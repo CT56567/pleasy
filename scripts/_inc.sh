@@ -644,7 +644,7 @@ EOL
 EOL
     salias="recipes_${site}_prod_alias"
     hasalias=${!salias}
-    echo "salias $salias hasalias $hasalias"
+#    echo "salias $salias hasalias $hasalias"
     if [[ ! "$hasalias" == "" ]]; then
       cat >>$user_home/.drush/$folder.aliases.drushrc.php <<EOL
 \$aliases['prod_$site'] = array (
