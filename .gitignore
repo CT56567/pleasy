@@ -55,6 +55,7 @@ pl_var.sh
 /sitebackups/*
 !/server
 server/secrets.sh
+!/.circleci
 
 
 

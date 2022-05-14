@@ -1,0 +1,19 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202201-02
+    steps:
+      - checkout
+      - run:
+          command: |
+            bash ./bin/pl init -d
+            source ~/.bashrc
+            pl update -d
+            pl install -yd d8
+#            pl copy d8 loc -d
+#            pl makedev loc -d
+#            pl copy loc stg -d
+#            pl makeprod stg -d
+#            pl backup loc
+#            pl restore loc localprod -dfy
