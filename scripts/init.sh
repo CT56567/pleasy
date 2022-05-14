@@ -98,7 +98,7 @@ while true; do
     step="$(echo "$1" | sed 's/^=//g')"
     #echo "$step"
     # If step is in an invalid range, display invalid and exit program
-    if [[ "$step" -gt 15 || "$step" -lt 1 ]]; then
+    if [[ $step -gt 15 || $step -lt 1 ]]; then
       {
         echo "Invalid step value "$step" - valid range [1,15]"
         exit 1
@@ -136,13 +136,13 @@ done
 
 # Step Display
 # Display to user which step is chosen if step option is defined
-if [ "$step" -gt 1 ]; then
+if [[ $step -gt 1 ]]; then
   echo "Starting from step $step"
 fi
 
 # Step 1
 # Attempt to install gawk
-if [ "$step" -lt 2 ]; then
+if [[ $step -lt 2 ]]; then
   echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
   # This is needed to avoid the awk: line 43: functionWill
   # need to install gawk - sudo required asorti never
@@ -213,7 +213,7 @@ parse_pl_yml
 
 # Step 3
 # Adding pl command to bash commands, including plextras
-if [ "$step" -lt 4 ]; then
+if [ $step -lt 4 ]; then
   echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
 
   update_locations
@@ -238,7 +238,7 @@ fi
 
 # Step 4
 # Create mysql root password file
-if [ "$step" -lt 5 ]; then
+if [ $step -lt 5 ]; then
   echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
   # Create mysql root password file
   # Check if one exists
@@ -275,7 +275,7 @@ fi
 
 # Step 5
 # Updating System..
-if [ "$step" -lt 6 ]; then
+if [ $step -lt 6 ]; then
   echo -e "$Cyan step 5: Updating System..  $Color_Off"
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
   # Update packages and Upgrade system
@@ -341,7 +341,7 @@ fi
 
 # Step 6
 # Add github credentials
-if [ "$step" -lt 7 ]; then
+if [ $step -lt 7 ]; then
   echo -e "$Cyan step 6: Add github credentials $Color_Off"
   #add github credentials
   git config --global user.email $github_email
@@ -352,7 +352,7 @@ fi
 echo "github credentials added"
 # Step 7
 # Installing MySQL
-if [ "$step" -lt 8 ]; then
+if [ $step -lt 8 ]; then
   echo -e "$Cyan step 7: Installing MySQL $Color_Off"
   #Check if mysql is installed
   #if type mysql >/dev/null 2>&1; then
@@ -385,7 +385,7 @@ fi
 
 # Step 8
 # Installing phpMyAdmin
-if [ "$step" -lt 9 ]; then
+if [ $step -lt 9 ]; then
   echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
   sudo apt-get install phpmyadmin -y
 fi
@@ -398,7 +398,7 @@ fi
 
 # Step 9
 # Enabling Modules
-if [ "$step" -lt 10 ]; then
+if [ $step -lt 10 ]; then
   echo -e "$Cyan step 9: Enabling Modules  $Color_Off"
   # Enabling Mod Rewrite, required for WordPress permalinks and .htaccess files
   sudo a2enmod rewrite
@@ -411,7 +411,7 @@ fi
 
 # Step 10
 #  Install Composer
-if [ "$step" -lt 11 ]; then
+if [ $step -lt 11 ]; then
   echo -e "$Cyan step 10: Install Composer  $Color_Off"
   #Check if composer is installed otherwise install it
   # From https://www.digitalocean.com/community/tutorials/how-to-install-and-use-composer-on-ubuntu-16-04?comment=67716
@@ -429,7 +429,7 @@ fi
 
 # Step 11
 # Install Drush globally
-if [ "$step" -lt 12 ]; then
+if [ $step -lt 12 ]; then
   echo -e "$Cyan step 11: Install Drush globally $Color_Off"
   # Install drush globally with drush launcher
   # see: https://github.com/drush-ops/drush-launcher  ### xdebug issues?
@@ -509,7 +509,7 @@ fi
 
 # Step 12
 # Install Drupal console globally
-if [ "$step" -lt 13 ]; then
+if [ $step -lt 13 ]; then
   echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
   # Install drupal console
   # see https://drupalconsole.com/articles/how-to-install-drupal-console
@@ -559,7 +559,7 @@ fi
 
 # Step 13
 # setup /var/wwww/oc for websites
-if [ "$step" -lt 14 ]; then
+if [ $step -lt 14 ]; then
   echo -e "$Cyan step 13: setup /var/wwww/oc for websites  $Color_Off"
   #set up website folder for apache
   if [ ! -d /var/www/oc ]; then
@@ -577,7 +577,7 @@ fi
 
 # Step 14
 # Fix adding extra characters for vi
-if [ "$step" -lt 15 ]; then
+if [ $step -lt 15 ]; then
   echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
   #Set up vi to not add extra characters
   #From: https://askubuntu.com/questions/353911/hitting-arrow-keys-adds-characters-in-vi-editor
@@ -602,7 +602,7 @@ if [[ -f ~/.zshrc ]]; then
   source ~/.zshrc
 fi
 
-if [ "$step" -lt 16 ]; then
+if [ $step -lt 16 ]; then
   echo -e "$Cyan step 15: Now add theming tools $Color_Off"
 
 #Now add theming tools
@@ -652,7 +652,7 @@ echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo s
 fi
 
 # I don't know why I can't run source in this script. But I'll leave it out for now.
-#if [ "$step" -lt 17 ]; then
+#if [ $step -lt 17 ]; then
 #  echo -e "$Cyan step 16: Setup drush aliases etc. $Color_Off"
 #
 echo "source bashrc"
