@@ -52,6 +52,9 @@ then
     w)
     cd $ocwroot/
     ;;
+    x)
+    cd /etc/nginx/sites-available
+    ;;
     *)
     cd $site_path/$sitename_var
     ;;

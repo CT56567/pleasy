@@ -32,6 +32,14 @@ You can then move around between sites using plcd
 ```angular2html
 plcd d9 #Takes you to the root of the site
 plcd d9 d #Takes you to the webroot of the site
+plcd d9 t #Takes you to the default theme of the site
+plcd d9 b #Takes you to the backups of the site
+plcd d9 sd #Takes you to the sites/default folder of the site
+plcd a #Takes you to /etc/apache2/sites-available
+plcd b #Takes you to site backups
+plcd l #Takes you to /usr/local/bin
+plcd s #Takes you to pleasy scripts
+plcd x #Takes you to /etc/nginx/sites-available
 ```
 
 The infrastructure for each site is setup including a stage version, eg for d9 the stage version is stg_d9.
