@@ -43,7 +43,7 @@ plcd x #Takes you to /etc/nginx/sites-available
 ```
 
 The infrastructure for each site is setup including a stage version, eg for d9 the stage version is stg_d9.
-Once a production version is created, both production and test sites are also created by the initserver script, ie prod_d9 and test_d9.
+Once a production version is created (follow the instructions in the server script readme to set up the production site [readme](https://github.com/rjzaar/pleasy/blob/master/server/README.md)), both production and test sites are also created by the initserver script, ie prod_d9 and test_d9.
 
 Here is the overview of all the possible locations using the d9 sitename as an example.
 
