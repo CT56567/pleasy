@@ -647,7 +647,7 @@ pl open loc
 
 <details>
 
-**<summary>proddown: Overwrite the stage site with production 👷 </summary>**
+**<summary>proddownold: Overwrite the stage site with production 👷 </summary>**
 Usage: pl proddown [OPTION] ... [SITE]
 This script is used to overwrite a local site with the actual external production
 site. Note: If the local site will be deleted if it already exists.
@@ -663,6 +663,50 @@ Mandatory arguments to long options are mandatory for short options too.
 Examples:
 pl proddown stg_d9
 pl proddown stg_d9 -s=2
+END HELP
+
+</details>
+
+<details>
+
+**<summary>proddownr: Overwrite the stage site with production 👷 </summary>**
+Usage: pl proddownr [OPTION] ... [SITE]
+This script is used to overwrite a local site with the actual external production
+site. Note: The local site will be deleted if it already exists.
+Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -s --step=[1-2]         Select step to proceed (If it stalls on a step)
+  -d --debug              Provide messages to help with debugging this function
+  -y --yes                Answer yes to all prompts
+
+
+Examples:
+pl proddownr stg_d9
+pl proddownr stg_d9 -s=2
+END HELP
+
+</details>
+
+<details>
+
+**<summary>proddownt: Overwrite the stage site with production using tar 👷 </summary>**
+Usage: pl proddownt [OPTION] ... [SITE]
+This script is used to overwrite a local site with the actual external production
+site. Note: If the local site will be deleted if it already exists.
+Production will be downloaded to stg_[SITE]. The external site details are set in pl.yml under 'prod:'.
+
+Mandatory arguments to long options are mandatory for short options too.
+  -h --help               Display help (Currently displayed)
+  -s --step=[1-2]         Select step to proceed (If it stalls on a step)
+  -d --debug              Provide messages to help with debugging this function
+  -y --yes                Answer yes to all prompts
+
+
+Examples:
+pl proddownt stg_d9
+pl proddownt stg_d9 -s=2
 END HELP
 
 </details>

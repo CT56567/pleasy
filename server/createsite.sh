@@ -121,7 +121,9 @@ mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE USER $dbuser@localh
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER, CREATE TEMPORARY TABLES ON $dbname.* TO '$dbuser'@'localhost' IDENTIFIED BY '"$dbpass"';"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
 mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";
-mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < prod.sql
+options=($(find -maxdepth 1 -name "*.sql" -print0 | xargs -0 ls -1 -t))
+Name=${options[0]:2}
+mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < $Name
 
 echo "set up cron"
 # This is not tested yet!!! see https://docs.drush.org/en/8.x/cron/

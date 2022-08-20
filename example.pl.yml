@@ -29,8 +29,8 @@ github:
   user: githubuser
   key:  github
   email: myname@gmail.com
-plgit: ocback:/home/git/pleasy.git
-#plgit: git@github.com:rjzaar/pleasy.git
+#plgit: ocback:/home/git/pleasy.git
+plgit: git@github.com:rjzaar/pleasy.git
 #prod:
 #  alias: ctn
 #  uri: "covidteachernetwork.org"

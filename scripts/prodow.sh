@@ -147,8 +147,12 @@ Name2=${Name::-4}".tar.gz"
 echo "scp: $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/$Name"
 ssh $prod_alias "if [ ! -d $prod_uri ]; then mkdir $prod_uri; fi"
 ssh $prod_alias "if [ ! -d test.$prod_uri ]; then mkdir test.$prod_uri; fi"
+if [[ "ssh opencat  test -f  $prod_uri/$Name && echo \"YES\" || echo \"no\"" == "no"  ]]; then
  scp $folderpath/sitebackups/$sitename_var/$Name $prod_alias:$prod_uri/$Name
  scp $folderpath/sitebackups/$sitename_var/$Name2 $prod_alias:$prod_uri/$Name2
+ else
+   echo "backups had already been uploaded to server"
+fi
 echo "Files and db transfered."
 
 fi
@@ -176,7 +180,7 @@ exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
     if [ "$exists" = "exists" ]; then
       #run the restore function
       echo "Prod exits so just restoring it."
-      ssh $prod_alias "./restoreprod.sh $prod_docroot -f"
+      ssh $prod_alias "./restorefiles.sh $prod_docroot -f"
       else
 echo "Prod doesn't exist so creating it."
 ssh $prod_alias "./createsites.sh $prod_docroot"
@@ -187,7 +191,7 @@ if [ $step -lt 4 ] ; then
 echo -e "$Pcolor step 3: creating sites $prod_docroot $prod_profile$Color_off"
     # For now the script should work, but needs various improvments such as, being able to restore on error.
 ocmsg "Prod alias $prod_alias uri $uri" debug
-exists="$(ssh  $prod_alias "if [ -d /var/www/$uri ]; then echo \"exists\"; fi")"
+exists="$(ssh  $prod_alias "if [ -f /home/$user/$uri/settings.php ]; then echo \"exists\"; fi")"
     if [ ! "$exists" = "exists" ]; then
 #      echo "Site $prod_docroot exists so just updating it."
 ##      ssh $prod_alias "./updatesite.sh $prod_docroot"

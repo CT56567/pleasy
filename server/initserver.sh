@@ -4,12 +4,14 @@ set -eux
 
 SECONDS=0
 scriptname="$(basename $0)"
-
+Cyan='\033[0;36m'   # Cyan
+Color_Off='\033[0m' # Text Reset
+pltest="n"
 # Update the prod site.
 # It is presumed the site files have been uploaded.
 
 # step is defined for script debug purposesstep=${step:-1}
-
+step=1
 args=$(getopt -o yhs:ndt -l yes,help,step:,nopassword,debug,test --name "$scriptname" -- "$@")
 # echo "$args"
 
@@ -74,74 +76,63 @@ source secrets.sh
 ip=$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
 webroot=$(basename $prod_docroot)
 prod=$(dirname $prod_docroot)
-#test_uri="test.$url"
-#test_docroot="$(dirname $prod)/$test_uri/$webroot"
+test_uri="test.$url"
+test_docroot="$(dirname $prod)/$test_uri/$webroot"
 #test="$(dirname $prod)/$test_uri"
 
 
 echo "setup Production"
 #echo "Test site: $test"
-#echo "Test docroot: $test_docroot"
+echo "Test docroot: $test_docroot"
 echo "Prod site: $prod"
 echo "Prod docroot: $prod_docroot"
 echo "Prod uri: $url"
 #echo "Test uri: $test_uri"
 echo "User: $user"
 
+# Step 4
+# Create mysql root password file
+if [[ $step -lt 2 ]]; then
+  echo -e "$Cyan step 1: Create mysql root password file $Color_Off"
+  # Create mysql root password file
+  dbpass=$(date +%N | sha256sum | base64 | head -c 32 ; echo)
+  # Check if one exists
+  if [ ! -f /home/$user/mysql.cnf ]; then
+    echo "Creating /home/$user/mysql.cnf"
 
+    if [[ "$pltest" == "y" ]]; then
+      echo "Testing: mysql root setup at  /home/$user/mysql.cnf"
+      cat >/home/$user/mysql.cnf<<EOL
+[client]
+user=root
+password=$dbpass
+host=localhost
+EOL
+    else
+      cat >/home/$user/mysql.cnf <<EOL
+[client]
+user=root
+password=$dbpass
+host=localhost
+EOL
+      #Check if mysql is installed
+      if type mysql >/dev/null 2>&1; then
+        # User needs to add mysql root credentials.
+        echo "mysql already installed. Please edit /home/$user/mysql.cnf with your mysql root credentials."
+      fi
+    fi
+  else
+    echo "mysql.cnf already exists"
+  fi
+#sudo chmod 0600 $(dirname $script_root)/mysql.cnf
 
-apt update && apt upgrade -y
-
-#Setup the timezone set in the secrets file. This should match the dev machine.
-timedatectl set-timezone "$server_timezone"
-# see line 320 in init.sh.
-  #setup unattended upgrades
-  sudo apt install unattended-upgrades
-  #todo setup the config for this
-  # https://linoxide.com/enable-automatic-updates-on-ubuntu-20-04/
-  # https://www.cyberciti.biz/faq/set-up-automatic-unattended-updates-for-ubuntu-20-04/
-
-#From: https://haydenjames.io/how-to-enable-unattended-upgrades-on-ubuntu-debian/
-#APT::Periodic::Update-Package-Lists "1";
-#APT::Periodic::Unattended-Upgrade "1";
-#APT::Periodic::Download-Upgradeable-Packages "1";
-#APT::Periodic::AutocleanInterval "1";
-
-# apt-get -o Dpkg::Options::="--force-confnew --force-confdef" --force-yes -y upgrade
-# adduser $user
-if ! id -u $user; then
-  sudo adduser $user --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
 fi
-echo "$user:$pword" | sudo chpasswd
-
-usermod -aG sudo $user
-ufw allow OpenSSH
-ufw allow http
-ufw allow https
-ufw enable
-ufw status
-
-user_sudo_enable="$user ALL=(ALL:ALL) NOPASSWD: ALL" 
-if ! grep "$user_sudo_enable" /etc/sudoers; then
-  echo "$user_sudo_enable" | EDITOR="tee -a" visudo
-fi
-
-# copy over ssh auth in new user
-echo "Copying over SSH auth from $USER to $user"
-
-sudo mkdir -p /home/$user/.ssh
-sudo cp -p $HOME/.ssh/authorized_keys /home/$user/.ssh/authorized_keys
-sudo chown $user:$user /home/$user/.ssh/authorized_keys
-
-# Stop password authentication
-sudo sed -i 's/#\?\(PasswordAuthentication\s*\).*$/\1 no/g' /etc/ssh/sshd_config
-sudo systemctl restart ssh
 
 MARIADB_VERSION="$(apt-cache madison mariadb-server | head -n 1 | sed -r 's/.*[0-9]+:([0-9]+\.[0-9]+).*/\1/')"
 export DEBIAN_FRONTEND=noninteractive
 {
-  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password 'root';
-  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password 'root';
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password password '$dbpass';
+  echo "mariadb-server-$MARIADB_VERSION" mysql-server/root_password_again password '$dbpass';
 } | sudo debconf-set-selections;
 
 if dpkg -l mariadb-server > /dev/null; then
@@ -154,7 +145,7 @@ sudo apt install mariadb-server -y
 
 sudo mysql -sfu root <<EOF || true
 -- set root password
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$dbpass');
 -- delete anonymous users
 DELETE FROM mysql.user WHERE User='';
 -- delete remote root capabilities
@@ -206,9 +197,15 @@ sudo sed -i '/cgi.fix_pathinfo *=* 0/s/^;//' /etc/php/$PHP_VERSION/fpm/php.ini
 sudo systemctl restart php${PHP_VERSION}-fpm
 sudo systemctl enable php${PHP_VERSION}-fpm
 
+echo "certbot - ssl cert install if needed"
+if [[ ! -f /etc/letsencrypt/renewal/opencat.org.conf ]]; then
+  echo "install certificate(s)"
 sudo apt install certbot -y
 sudo systemctl stop nginx
 sudo certbot certonly --rsa-key-size 2048 --standalone --agree-tos --no-eff-email --email $email -d $url -d test.$url
+else
+  echo "ssl certificate(s) already installed"
+fi
 # see https://www.nginx.com/resources/wiki/start/topics/recipes/drupal/
 
 sudo cat >/etc/nginx/sites-available/$url <<EOL
@@ -224,8 +221,8 @@ server {
     ssl_certificate_key  /etc/letsencrypt/live/$url/privkey.pem;
 
     # Redirect HTTP to HTTPS
-    if ($scheme = http) {
-        return 301 https://$server_name$request_uri;
+    if (\$scheme = http) {
+        return 301 https://\$server_name\$request_uri;
     }
 
     location = /favicon.ico {
@@ -271,12 +268,12 @@ server {
     }
 
      location / {
-         # try_files $uri @rewrite; # For Drupal <= 6
-         try_files $uri /index.php?$query_string; # For Drupal >= 7
+         # try_files \$uri @rewrite; # For Drupal <= 6
+         try_files \$uri /index.php?\$query_string; # For Drupal >= 7
      }
 
      location @rewrite {
-         #rewrite ^/(.*)$ /index.php?q=$1; # For Drupal <= 6
+         #rewrite ^/(.*)$ /index.php?q=\$1; # For Drupal <= 6
          rewrite ^ /index.php; # For Drupal >= 7
      }
 
@@ -306,16 +303,16 @@ server {
      location ~ '\.php$|^/update.php' {
          fastcgi_split_path_info ^(.+?\.php)(|/.*)$;
          # Ensure the php file exists. Mitigates CVE-2019-11043
-         try_files $fastcgi_script_name =404;
+         try_files \$fastcgi_script_name =404;
          # Security note: If you're running a version of PHP older than the
          # latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.
          # See http://serverfault.com/q/627903/94922 for details.
          include fastcgi_params;
          # Block httpoxy attacks. See https://httpoxy.org/.
          fastcgi_param HTTP_PROXY "";
-         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-         fastcgi_param PATH_INFO $fastcgi_path_info;
-         fastcgi_param QUERY_STRING $query_string;
+         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+         fastcgi_param PATH_INFO \$fastcgi_path_info;
+         fastcgi_param QUERY_STRING \$query_string;
          fastcgi_intercept_errors on;
          # PHP 5 socket location.
          #fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -324,7 +321,7 @@ server {
      }
 
    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        try_files $uri @rewrite;
+        try_files \$uri @rewrite;
         expires max;
         log_not_found off;
     }
@@ -332,30 +329,35 @@ server {
     # Fighting with Styles? This little gem is amazing.
     # location ~ ^/sites/.*/files/imagecache/ { # For Drupal <= 6
     location ~ ^/sites/.*/files/styles/ { # For Drupal >= 7
-        try_files $uri @rewrite;
+        try_files \$uri @rewrite;
     }
 
     # Handle private files through Drupal. Private file's path can come
     # with a language prefix.
     location ~ ^(/[a-z\-]+)?/system/files/ { # For Drupal >= 7
-        try_files $uri /index.php?$query_string;
+        try_files \$uri /index.php?\$query_string;
     }
 
     # Enforce clean URLs
     # Removes index.php from urls like www.example.com/index.php/my-page --> www.example.com/my-page
     # Could be done with 301 for permanent or other redirect codes.
-    if ($request_uri ~* "^(.*/)index\.php/(.*)") {
-        return 307 $1$2;
+    if (\$request_uri ~* "^(.*/)index\.php/(.*)") {
+        return 307 \$1\$2;
     }
         access_log /var/log/nginx/opencat.log;
         error_log /var/log/nginx/opencaterror.log;
 }
 EOL
 
+echo "Is /etc/nginx/sites-enabled/$url linked?"
+if [[ ! -L /etc/nginx/sites-enabled/$url ]]; then
 sudo ln -s /etc/nginx/sites-available/$url /etc/nginx/sites-enabled/
+else
+  echo "/etc/nginx/sites-enabled/$url already exists"
+fi
 
 #Set up test site
-sudo cat >/etc/nginx/sites-available/$url <<EOL
+sudo cat >/etc/nginx/sites-available/test.$url <<EOL
 server {
     server_name test.$url;
     root $test_docroot;
@@ -364,8 +366,8 @@ server {
     listen [::]:80;
 
     # Redirect HTTP to HTTPS
-    if ($scheme = http) {
-        return 301 https://$server_name$request_uri;
+    if (\$scheme = http) {
+        return 301 https://\$server_name\$request_uri;
     }
 
     location = /favicon.ico {
@@ -411,12 +413,12 @@ server {
     }
 
      location / {
-         # try_files $uri @rewrite; # For Drupal <= 6
-         try_files $uri /index.php?$query_string; # For Drupal >= 7
+         # try_files \$uri @rewrite; # For Drupal <= 6
+         try_files \$uri /index.php?\$query_string; # For Drupal >= 7
      }
 
      location @rewrite {
-         #rewrite ^/(.*)$ /index.php?q=$1; # For Drupal <= 6
+         #rewrite ^/(.*)$ /index.php?q=\$1; # For Drupal <= 6
          rewrite ^ /index.php; # For Drupal >= 7
      }
 
@@ -446,16 +448,16 @@ server {
      location ~ '\.php$|^/update.php' {
          fastcgi_split_path_info ^(.+?\.php)(|/.*)$;
          # Ensure the php file exists. Mitigates CVE-2019-11043
-         try_files $fastcgi_script_name =404;
+         try_files \$fastcgi_script_name =404;
          # Security note: If you're running a version of PHP older than the
          # latest 5.3, you should have "cgi.fix_pathinfo = 0;" in php.ini.
          # See http://serverfault.com/q/627903/94922 for details.
          include fastcgi_params;
          # Block httpoxy attacks. See https://httpoxy.org/.
          fastcgi_param HTTP_PROXY "";
-         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-         fastcgi_param PATH_INFO $fastcgi_path_info;
-         fastcgi_param QUERY_STRING $query_string;
+         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+         fastcgi_param PATH_INFO \$fastcgi_path_info;
+         fastcgi_param QUERY_STRING \$query_string;
          fastcgi_intercept_errors on;
          # PHP 5 socket location.
          #fastcgi_pass unix:/var/run/php5-fpm.sock;
@@ -464,7 +466,7 @@ server {
      }
 
    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-        try_files $uri @rewrite;
+        try_files \$uri @rewrite;
         expires max;
         log_not_found off;
     }
@@ -472,33 +474,38 @@ server {
     # Fighting with Styles? This little gem is amazing.
     # location ~ ^/sites/.*/files/imagecache/ { # For Drupal <= 6
     location ~ ^/sites/.*/files/styles/ { # For Drupal >= 7
-        try_files $uri @rewrite;
+        try_files \$uri @rewrite;
     }
 
     # Handle private files through Drupal. Private file's path can come
     # with a language prefix.
     location ~ ^(/[a-z\-]+)?/system/files/ { # For Drupal >= 7
-        try_files $uri /index.php?$query_string;
+        try_files \$uri /index.php?\$query_string;
     }
 
     # Enforce clean URLs
     # Removes index.php from urls like www.example.com/index.php/my-page --> www.example.com/my-page
     # Could be done with 301 for permanent or other redirect codes.
-    if ($request_uri ~* "^(.*/)index\.php/(.*)") {
-        return 307 $1$2;
+    if (\$request_uri ~* "^(.*/)index\.php/(.*)") {
+        return 307 \$1\$2;
     }
         access_log /var/log/nginx/opencat.log;
         error_log /var/log/nginx/opencaterror.log;
 }
 EOL
 
+echo "Is /etc/nginx/sites-enabled/test.$url linked?"
+if [[ ! -L /etc/nginx/sites-enabled/test.$url ]]; then
 sudo ln -s /etc/nginx/sites-available/test.$url /etc/nginx/sites-enabled/
+else
+  echo "/etc/nginx/sites-enabled/test.$url already exists"
+fi
 sudo nginx -t
 sudo systemctl restart nginx
 
 # Step 10
 #  Install Composer
-if [ $step -lt 11 ]; then
+if [[ $step -lt 11 ]]; then
   echo -e "$Cyan step 10: Install Composer  $Color_Off"
   #Check if composer is installed otherwise install it
   # From https://www.digitalocean.com/community/tutorials/how-to-install-and-use-composer-on-ubuntu-16-04?comment=67716
@@ -516,7 +523,7 @@ fi
 
 # Step 11
 # Install Drush globally
-if [ $step -lt 12 ]; then
+if [[ $step -lt 12 ]]; then
   echo -e "$Cyan step 11: Install Drush globally $Color_Off"
   # Install drush globally with drush launcher
   # see: https://github.com/drush-ops/drush-launcher  ### xdebug issues?
@@ -554,7 +561,8 @@ if [ $step -lt 12 ]; then
   fi
 
   # sudo chown -R $USER /home/travis/.composer/
-  composer global require consolidation/cgr
+  composer global require --ignore-platform-req php consolidation/cgr
+  #composer global require consolidation/cgr
   echo "echo path into bashrc"
   cd
   # ls -la
@@ -562,7 +570,7 @@ if [ $step -lt 12 ]; then
   echo "composer home: $(composer config -g home)"
   comphome=$(composer config -g home)
 
-  vendor_bin_source="export PATH=\"\$PATH:$comphome/vendor/bin\"" 
+  vendor_bin_source="export PATH=\"\$PATH:$comphome/vendor/bin\""
   if ! grep "$vendor_bin_source" ~/.bashrc; then
     echo "$vendor_bin_source" >> ~/.bashrc
   fi
@@ -579,7 +587,7 @@ if [ $step -lt 12 ]; then
     fi
     #sudo ln -s ~/.config/composer/vendor/bin/drush .
     cd
-    drush_source="export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush" 
+    drush_source="export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush"
     if ! grep "$drush_source" ~/.bashrc; then
       echo "$drush_source" >> ~/.bashrc
     fi
@@ -590,7 +598,7 @@ if [ $step -lt 12 ]; then
         sudo ln -s ~/.composer/vendor/bin/cgr .
       fi
       cd
-      drush_source="export DRUSH_LAUNCHER_FALLBACK=~/.composer/vendor/bin/drush" 
+      drush_source="export DRUSH_LAUNCHER_FALLBACK=~/.composer/vendor/bin/drush"
       if ! grep "$drush_source" ~/.bashrc; then
         echo "$drush_source" >> ~/.bashrc
       fi
@@ -605,7 +613,7 @@ fi
 
 # Step 12
 # Install Drupal console globally
-if [ $step -lt 13 ]; then
+if [[ $step -lt 13 ]]; then
   echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
   # Install drupal console
   # see https://drupalconsole.com/articles/how-to-install-drupal-console
@@ -634,7 +642,7 @@ fi
     #echo "set up source"
     #source "$HOME/.console/console.rc" 2>/dev/null
     echo "put into bashrc"
-    console_source="source \"$HOME/.console/console.rc\" 2>/dev/null" 
+    console_source="source \"$HOME/.console/console.rc\" 2>/dev/null"
     if ! grep "$console_source" ~/.bashrc; then
       echo "$console_source" >> ~/.bashrc
     fi
@@ -656,17 +664,17 @@ fi
 
 # Step 14
 # Fix adding extra characters for vi
-if [ $step -lt 15 ]; then
-  echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
-  #Set up vi to not add extra characters
-  #From: https://askubuntu.com/questions/353911/hitting-arrow-keys-adds-characters-in-vi-editor
-  echo -e "$Cyan \n  $Color_Off"
-  cat >$(dirname $script_root)/.vimrc <<EOL
-set nocompatible
-EOL
-fi
+#if [[ $step -lt 15 ]]; then
+#  echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
+#  #Set up vi to not add extra characters
+#  #From: https://askubuntu.com/questions/353911/hitting-arrow-keys-adds-characters-in-vi-editor
+#  echo -e "$Cyan \n  $Color_Off"
+#  cat >$(dirname $script_root)/.vimrc <<EOL
+#set nocompatible
+#EOL
+#fi
 
-if [ $step -lt 16 ]; then
+if [[ $step -lt 16 ]]; then
   echo -e "$Cyan step 15: Add email tools  $Color_Off"
 
 # todo This needs work. Dumping some of what is needed for now.

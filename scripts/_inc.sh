@@ -1133,6 +1133,52 @@ gitprodpush() {
 
 }
 
+backup_prodr() {
+
+      if [ "${site_to: -4}" = "prod" ]; then
+        siteto_var_len=$(echo -n $site_to | wc -m)
+        sitename_pre=${site_to:0:$(($siteto_var_len - 5))}
+        ocmsg "site_to $site_to sitename_pre $sitename_pre" debug
+        # Store the backup to the production folder on the dev machine.
+
+        if [ ! -d "$folderpath/sitebackups/$sitename_pre" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_pre"
+        fi
+        if [ ! -d "$folderpath/sitebackups/$sitename_pre/prod" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_pre/prod"
+        fi
+        site_to="$sitename_pre/prod"
+      else
+
+        # Check if site backup folder exists
+        if [ ! -d "$folderpath/sitebackups/$sitename_var" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_var"
+        fi
+        if [ ! -d "$folderpath/sitebackups/$sitename_var/prod" ]; then
+          mkdir "$folderpath/sitebackups/$sitename_var/prod"
+        fi
+        site_to="$sitename_var/prod"
+      fi
+      msg="${msg// /_}"
+      ocmsg "Backing up production site $sitename_var on server with alias $prod_alias with message $msg and onto dev at $folderpath/sitebackups/$site_to" debug
+
+      #site_info
+      #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
+
+    ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
+
+      # Get the latest backup name
+      Prodsql=$(ssh $prod_alias -t "./getlatestbackup.sh $prod_uri")
+      # todo this next line is needed for some reason don't know why.
+      Prodsql=${Prodsql::-1}
+      ocmsg "Prodsql >$Prodsql<" debug
+      Name="${Prodsql::-4}.tar.gz"
+      ocmsg "sql: $Prodsql tar: $Name" debug
+      Namesql="$folderpath/sitebackups/$site_to/$Prodsql"
+      ocmsg "backup name /home/$prod_user/$prod_uri/$Prodsql" debug
+      cp "$prod_alias:/home/$prod_user/$prod_uri/$Prodsql" "$Namesql"
+}
+
 #
 #
 backup_prod() {
@@ -1146,7 +1192,7 @@ backup_prod() {
   if [[ "$sitename_var" == "$site_to" ]]; then
     # Backup production on production
     echo "Backing up production site $sitename_var on server only."
-    ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
+    #rz#ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
 
   else
 
@@ -1201,7 +1247,7 @@ backup_prod() {
       #site_info
       #Name="$folderpath/sitebackups/prod/prod$(date +%Y%m%d\T%H%M%S-)$msg"
 
-      ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
+      #rz#ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
 
       # Get the latest backup name
       Prodsql=$(ssh $prod_alias -t "./getlatestbackup.sh $prod_uri")
@@ -1212,9 +1258,47 @@ backup_prod() {
       ocmsg "sql: $Prodsql tar: $Name" debug
       Namesql="$folderpath/sitebackups/$site_to/$Prodsql"
       ocmsg "backup name /home/$prod_user/$prod_uri/$Prodsql" debug
-      scp "$prod_alias:/home/$prod_user/$prod_uri/$Prodsql" "$Namesql"
+      #rz#scp "$prod_alias:/home/$prod_user/$prod_uri/$Prodsql" "$Namesql"
       echo -e "\e[34mbackup files $Name\e[39m"
-      scp "$prod_alias:/home/$prod_user/$prod_uri/$Name" "$folderpath/sitebackups/$site_to/$Name"
+      if [[ "$pdmethod" == "tar" ]] ; then
+        scp "$prod_alias:/home/$prod_user/$prod_uri/$Name" "$folderpath/sitebackups/$site_to/$Name"
+      else
+        PD=$prod_docroot
+            P_NODUPSLASH="${PD//\/*(\/)/\/}"
+            P_ENDNOSLASH="${P_NODUPSLASH%%/}"
+            prod_folder="${P_ENDNOSLASH%/*}/"
+        ocmsg "Prod folder: $prod_folder"
+        ocmsg "using rsync to bring down the production site: $prod_alias:$prod_folder to $site_path/$rsync_var/"
+
+
+        ## todo could add code so it deals with whatever the webroot is.
+        rsync -rav --delete --exclude 'docroot/sites/default/settings.*' \
+                    --exclude 'docroot/sites/default/services.yml' \
+                    --exclude 'docroot/sites/default/files/' \
+                    --exclude 'web/sites/default/settings.*' \
+                    --exclude 'web/sites/default/services.yml' \
+                    --exclude 'web/sites/default/files/' \
+                    --exclude 'html/sites/default/settings.*' \
+                    --exclude 'html/sites/default/services.yml' \
+                    --exclude 'html/sites/default/files/' \
+                    --exclude '.git/' \
+                    --exclude '.gitignore' \
+                    --exclude 'private/' \
+                    --exclude '*/node_modules/' \
+                    --exclude 'node_modules/' \
+                    --exclude 'dev/' \
+                    "$prod_alias:$prod_folder"  "$site_path/$rsync_var/" # > rsyncerrlog.txt
+        # &> rsyncerrlog.txt
+        if [ "$verbose" == "debug"  ] ; then
+          if grep -q 'rsync' rsyncerrlog.txt; then
+            echo "Error Message from rsync"
+        cat rsyncerrlog.txt | grep "rsync"
+        fi
+          fi
+        #rm rsyncerrlog.txt
+        ocmsg "Rsync Finished." debug
+
+        fi
     fi
   fi
 }

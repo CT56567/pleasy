@@ -2,7 +2,7 @@
 
 print_help() {
   cat <<-HELP
-Restore a particular site's files and database from backup
+Restore a particular site's files from backup
 Usage: pl restore [FROM] [TO] [OPTION]
 You just need to state the sitename, eg dev.
 You can alternatively restore the site into a different site which is the second argument.
@@ -116,34 +116,4 @@ sudo tar -zxf "/home/$user/$uri/${Name::-4}.tar.gz" --directory   "$prod" --stri
 wait
 #cd $1/..
 #git reset --hard
-
-#presume files are corrupt and need to be fully replaced.
-#cd $prod
-#git clone $2 "$uri"
-
-# Move settings back into place
-# Check if settings.php exists if not create it!
-
-sudo cp /home/$user/$uri/settings.php $prod_docroot/sites/default/settings.php
-# make sure settings.local.php does not exist - could have come from the dev machine.
-sudo rm -rf $prod_docroot/sites/default/settings.local.php
-
-# Fix permissions
-cd
-sudo ./dfp.sh --drupal_user=$user --drupal_path=$prod_docroot &
-wait
-
-#restore the prod db 
-# Get the database details from settings.php
-echo "restoring database"
-dbname=$(grep "'database' =>" $prod_docroot/sites/default/settings.php  | cut -d ">" -f 2 | cut -d "'" -f 2 | tail -1)
-
-mysql --defaults-extra-file=/home/$user/mysql.cnf -e "DROP DATABASE $dbname;"
-mysql --defaults-extra-file=/home/$user/mysql.cnf -e "CREATE DATABASE $dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci";
-mysql --defaults-extra-file=/home/$user/mysql.cnf $dbname < /home/$user/$uri/$Name
-
-echo "Database restored."
-bash /home/$user/mainoff.sh $prod_docroot
-#Now check the site
-
 

@@ -10,11 +10,12 @@ https://www.howtoforge.com/tutorial/debian-nginx-drupal/
 
 STEPS
 
-1) set up ssh keys
-2) pl updateserver [site] # this pushes the scripts up.
-3) change example.secrets.sh to secrets.sh and edit it.
-4) run initserver.sh
-5) run prodow (which calls createsites.sh)
+1) set up ssh keys for root. (Linode has this as an option when setting up a new linode)
+2) make sure you have .ssh/config set up correctly and pl.yml. then run pl updateserver [site-root user] # this pushes the scripts up.
+3) change example.secrets.sh to secrets.sh and edit it on the server as root.
+4) run initserverroot.sh as root and copy secrets.sh to your user. run pl updateserver [site] 
+5) then ssh in as your normal user and run initserver.sh 
+6) run prodow (which calls createsites.sh) from your dev machine.
 
 
-Use Lando locally as test site for scripts.
+todo: Use Lando locally as test site for scripts.
