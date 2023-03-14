@@ -13,8 +13,8 @@ You set pleasy up with the following commands
 ```
 cd $home
 git clone git@github.com:mayostudio/pleasy.git 
-bash ./pleasy/bin/pl  init
-source ~/.bashrc
+sudo bash ./pleasy/bin/pl  init
+sudo source ~/.bashrc
 pl update
 ```
 Now edit pl.yml with your settings or just use the defaults
