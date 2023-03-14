@@ -12,7 +12,7 @@ You set pleasy up with the following commands
 
 ```
 cd $home
-git clone git@github.com:mayostudio/pleasy.git 
+git clone https://github.com/mayostudio/pleasy.git
 sudo bash ./pleasy/bin/pl  init
 sudo source ~/.bashrc
 pl update
