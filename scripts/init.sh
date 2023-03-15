@@ -190,6 +190,8 @@ if [[ "$step" -lt 2 ]]; then
   #  sudo apt install gawk=1:5.0.1+dfsg-1
   # It installs 5.0.1, but when you run gawk -Wv it says it 4.2.1. Anyway it works. I don't know another way of doing it.
   fi
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
 fi
 
 # Step 2
@@ -214,6 +216,9 @@ fi
 no_config_update="true"
 # Import yaml, presumes $script_root is set
 parse_pl_yml
+clear
+echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
 #echo "wwwpath $www_path"
 
 # Step 3
@@ -238,6 +243,10 @@ if [[ "$step" -lt "4" ]]; then
 
   cd
   source ~/.bashrc
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
 #plsource
 fi
 
@@ -275,7 +284,11 @@ EOL
     echo "mysql.cnf already exists"
   fi
 #sudo chmod 0600 $(dirname $script_root)/mysql.cnf
-
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
 fi
 
 # Step 5
@@ -311,8 +324,10 @@ if [[ "$step" -lt "6" ]]; then
   # Install vim to make sure arrow keys work properly.
   sudo apt update
   sudo apt-get -y install apache2 php$phpv libapache2-mod-php$phpv php$phpv-mysql php$phpv-common curl php$phpv-cli php$phpv-gd php$phpv-mbstring php$phpv-xml php$phpv-curl php$phpv-bz2 php$phpv-zip git unzip php-xdebug vim -y
+  sudo apt-get -y install php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-common curl php7.1-cli php7.0-gd php7.1-mbstring php7.1-xml php7.1-curl php7.1-bz2 php7.1-zip -y
+  sudo apt-get -y install php5.6 libapache2-mod-php5.6 php5.6-mysql php5.6-common curl php5.6-cli php5.6-gd php5.6-mbstring php5.6-xml php5.6-curl php5.6-bz2 php5.6-zip -y
 
-  # If Travis, then add some environment variables, particularly to add more memory to php.
+  # If Travis, then add some environment variables, partsuicularly to add more memory to php.
 #  echo "pwd: $(pwd)"
 #  if [[ "$(pwd)" == "/home/travis" ]]; then
 #    cd build/rjzaar
@@ -343,6 +358,12 @@ echo "phpmem $phpmem"
 sudo sed -i 's,^memory_limit =.*$,memory_limit = -1,' ${phploc[4]}
 phpmem=$(grep '^memory_limit ' ${phploc[4]} )
 echo "$phpmem"
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
 fi
 
 # Step 6
@@ -356,6 +377,13 @@ if [[ "$step" -lt "7" ]]; then
 fi
 
 echo "github credentials added"
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
 # Step 7
 # Installing MySQL
 if [[ "$step" -lt "8" ]]; then
@@ -386,6 +414,14 @@ if [[ "$step" -lt "8" ]]; then
   #sudo systemctl restart mariadb
 
 #fi
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
 
 fi
 
@@ -394,6 +430,15 @@ fi
 if [[ "$step" -lt "9" ]]; then
   echo -e "$Cyan Installing phpMyAdmin $Color_Off"
   sudo apt-get install phpmyadmin -y
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
 fi
 
 ## TWEAKS and Settings
@@ -413,6 +458,16 @@ if [[ "$step" -lt "10" ]]; then
   # Restart Apache
   echo -e "$Cyan \n Restarting Apache $Color_Off"
   sudo service apache2 restart
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
 fi
 
 # Step 10
@@ -432,6 +487,17 @@ if [[ "$step" -lt "11" ]]; then
 # Not sure why this next line might be needed.... @rjzaar
 # this line is used for giving perms to other users @Cherrytree56567
 #sudo chown -R $user .composer/
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
 fi
 
 # Step 11
@@ -442,76 +508,36 @@ if [[ "$step" -lt "12" ]]; then
   # see: https://github.com/drush-ops/drush-launcher  ### xdebug issues?
   if [ ! -f /usr/local/bin/drush ]; then
     wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/download/$druv/drush.phar
-    sudo chmod +x drush.phar
+    php drush.phar core-status
+    chmod +x drush.phar
     sudo mv drush.phar /usr/local/bin/drush
+    drush init
+
+# Optional. Enrich the bash startup file with completion and aliases.
+drush init
     echo "drush installed"
   else
     echo "drush already present."
   fi
-
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
+fi
   # Also need to install drush globally so drush will work outside of drupal sites
   # see https://www.jeffgeerling.com/blog/2018/drupal-vm-48-and-drush-900-some-major-changes
   # see https://docs.drush.org/en/8.x/install-alternative/  and
   # see https://github.com/consolidation/cgr
   #
   # if there is an issue with swap use this to fix it: https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-16-04
-  comppres="false"
-  cd
-  #composer global require drush/drush
-  echo "composer install consoildation/cgr"
-  # sudo ls -la .config
-  if [[ -d "$home/.config" ]]; then
-    sudo chown -R $USER "$home/.config"
-    comppres="true"
-  fi
-
-  if [[ -d "$home/.composer" ]]; then
-    sudo chown -R $USER "$home/.composer"
-    comppres="true"
-  fi
-  if [[ "$comppres" == "false" ]]; then
-    echo "Don't know where composer is. I thought I installed it.1"
-  fi
-
-  # sudo chown -R $USER /home/travis/.composer/
-  composer global require consolidation/cgr
-  echo "echo path into bashrc"
-  # ls -la
-
-  echo "composer home: $(composer config -g home)"
-  comphome=$(composer config -g home)
-
-  echo "export PATH=\"\$PATH:$comphome/vendor/bin\"" >>~/.bashrc
-  source ~/.bashrc
-  # cat .bashrc
-
-  # https://github.com/consolidation/cgr/issues/29#issuecomment-422852318
-  cd /usr/local/bin
-
-  if [[ -d "/home/$USER/.config" ]]; then
-    if [[ ! -L './cgr' ]]; then
-      echo "Creating symlink"
-      sudo ln -s $comphome/vendor/bin/cgr .
-    fi
-    #sudo ln -s ~/.config/composer/vendor/bin/drush .
-    cd
-    echo "export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush" >>~/.bashrc
-  elif [[ -d "$home/.composer" ]]; then
-    if [[ ! -L ~/.composer/vendor/bin/cgr ]]; then
-      if [[ ! -L './cgr' ]]; then
-        echo "Creating symlink2"
-        sudo ln -s ~/.composer/vendor/bin/cgr .
-      fi
-      cd
-      echo "export DRUSH_LAUNCHER_FALLBACK=~/.composer/vendor/bin/drush" >>~/.bashrc
-    fi
-  else
-    echo "Don't know where composer is. I thought I installed it.2"
-  fi
-  cd
-  source ~/.bashrc
-  cgr drush/drush
-fi
 
 # Step 12
 # Install Drupal console globally
@@ -521,14 +547,14 @@ if [[ "$step" -lt "13" ]]; then
   # see https://drupalconsole.com/articles/how-to-install-drupal-console
   if [ ! -f /usr/local/bin/drupal ]; then
     echo "curl"
-    wget -o https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
+    wget https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
     dcon=$(sed '2q;d' drupal.phar)
 echo "dcon $dcon"
 if [[ "$dcon" == "<html><head>" || "$dcon" == "" ]] ; then
 
 # if drupalconsole.com/installer is down. get it from https://github.com/rjzaar/drupal.phar.git
 rm drupal.phar
-wget -o https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
+wget https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
 mv drupal.phar drupal.pha
 mv drupal.pha/drupal.phar drupal.phar
 rm drupal.pha -rf
@@ -561,6 +587,19 @@ fi
   else
     echo "Drupal console already present"
   fi
+  clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
+  echo -e "$Cyan Installing Drupal console globally  $Color_Off"
 fi
 
 # Step 13
@@ -579,6 +618,20 @@ if [[ "$step" -lt "14" ]]; then
 #These lines are not needed since this is the setup up and update configs will be run after a site is installed.
 #no_config_update="false"
 #update_all_configs
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
+  echo -e "$Cyan Installing Drupal console globally  $Color_Off"
+  echo -e "$Cyan setting up /var/wwww/oc for websites  $Color_Off"
 fi
 
 # Step 14
@@ -594,13 +647,26 @@ EOL
 fi
 echo " open this link to add the xdebug extension for the browser you want to use"
 echo "https://www.jetbrains.com/help/phpstorm/2019.3/browser-debugging-extensions.html?utm_campaign=PS&utm_medium=link&utm_source=product&utm_content=2019.3 "
-
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
+  echo -e "$Cyan Installing Drupal console globally  $Color_Off"
+  echo -e "$Cyan setting up /var/wwww/oc for websites  $Color_Off"
+  echo -e "$Cyan Fixing extra characters for vi  $Color_Off"
 # Step 15
 # I don't think this step is needed since theming tools are added to each instance via pl install
 # jump this step
 if [[ -f ~/.bashrc ]]; then
   ocmsg "source ~/.bashrc" debug
-  cd
   source .bashrc
 fi
 if [[ -f ~/.zshrc ]]; then
@@ -608,7 +674,7 @@ if [[ -f ~/.zshrc ]]; then
   source ~/.zshrc
 fi
 
-if [ "$step" -lt 16 ]; then
+if [[ "$step" -lt "16" ]]; then
   echo -e "$Cyan step 15: Now add theming tools $Color_Off"
 
 #Now add theming tools
@@ -654,7 +720,22 @@ npm install -g yarn
 
 ocmsg "Increase watch speed for gulp: requires sudo." debug
 echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
+clear
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
+  echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Enabling Modules  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
+  echo -e "$Cyan Installing Drupal console globally  $Color_Off"
+  echo -e "$Cyan setting up /var/wwww/oc for websites  $Color_Off"
+  echo -e "$Cyan Fixing extra characters for vi  $Color_Off"
+  echo -e "$Cyan step 15: Now add theming tools $Color_Off"
 fi
 
 # I don't know why I can't run source in this script. But I'll leave it out for now.
@@ -662,7 +743,6 @@ fi
 #  echo -e "$Cyan step 16: Setup drush aliases etc. $Color_Off"
 #
 echo "source bashrc"
-cd
 source .bashrc
 echo "source bashrc2"
 source ~/.bashrc
@@ -680,5 +760,3 @@ source ~/.bashrc
 #
 #fi
 echo "All done!"
-
-exit 0
