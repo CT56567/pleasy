@@ -26,6 +26,11 @@
 # Change this to debug to debug this script
 verbose="none"
 plcstatus="pass"
+phpv="8.1"
+gawkv="5.2.1"
+marv="10.11"
+druv="10.2"
+drulv="1.9.7"
 # User help
 # Prints user guide
 print_help() {
@@ -143,7 +148,7 @@ fi
 # Step 1
 # Attempt to install gawk
 if [[ "$step" -lt 2 ]]; then
-  echo -e "$Cyan step 1: Will need to install gawk - sudo required $Color_Off"
+  echo -e "$Cyan Installing gawk - sudo required $Color_Off"
   # This is needed to avoid the awk: line 43: functionWill
   # need to install gawk - sudo required asorti never
   # defined error
@@ -178,8 +183,8 @@ if [[ "$step" -lt 2 ]]; then
    # 1:4.1.4+dfsg-1build1
     sudo apt-get remove gawk -y
 
-    wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz
-    tar -xvpzf gawk-4.2.1.tar.gz
+    wget https://ftp.gnu.org/gnu/gawk/gawk-$gawkv.tar.gz
+    tar -xvpzf gawk-$gawkv.tar.gz
     cd gawk-4.2.1
     sudo ./configure && sudo make && sudo make install
   #  sudo apt install gawk=1:5.0.1+dfsg-1
@@ -190,7 +195,7 @@ fi
 # Step 2
 # This step must run, regardless of statement since the functions must be included for any other steps to be able to run
 # Since the following steps will need the variables that will be accessible only if parse_pl_yml is run.
-echo -e "$Cyan step 2 (must be run): checking if folder $sitename_var exists $Color_Off"
+echo -e "$Cyan checking if folder \"$sitename_var\" exists $Color_Off"
 echo running include files...
 # This includes all the functions in _inc.sh for use by init.sh @JamesCHLim
 . "$script_root/_inc.sh"
@@ -214,7 +219,7 @@ parse_pl_yml
 # Step 3
 # Adding pl command to bash commands, including plextras
 if [[ "$step" -lt "4" ]]; then
-  echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
+  echo -e "$Cyan Adding pl command to bash commands, including plextras $Color_Off"
 
   update_locations
 
@@ -239,7 +244,7 @@ fi
 # Step 4
 # Create mysql root password file
 if [[ "$step" -lt "5" ]]; then
-  echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
+  echo -e "$Cyan Creating mysql root password file $Color_Off"
   # Create mysql root password file
   # Check if one exists
   if [ ! -f $(dirname $script_root)/mysql.cnf ]; then
@@ -276,7 +281,7 @@ fi
 # Step 5
 # Updating System..
 if [[ "$step" -lt "6" ]]; then
-  echo -e "$Cyan step 5: Updating System..  $Color_Off"
+  echo -e "$Cyan Updating System $Color_Off"
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
   # Update packages and Upgrade system
   sudo apt-get -qqy update && sudo apt-get -qqy upgrade
@@ -304,7 +309,8 @@ if [[ "$step" -lt "6" ]]; then
   # php-gettext not installing on ubuntu 20
   #sudo apt-get -qq install apache2 php libapache2-mod-php php-mysql php-gettext curl php-cli php-gd php-mbstring php-xml php-curl php-bz2 php-zip git unzip php-xdebug -y
   # Install vim to make sure arrow keys work properly.
-  sudo apt-get -y install apache2 php7.3 libapache2-mod-php7.3 php7.3-mysql php7.3-common curl php7.3-cli php7.3-gd php7.3-mbstring php7.3-xml php7.3-curl php7.3-bz2 php7.3-zip git unzip php-xdebug vim -y
+  sudo apt update
+  sudo apt-get -y install apache2 php$phpv libapache2-mod-php$phpv php$phpv-mysql php$phpv-common curl php$phpv-cli php$phpv-gd php$phpv-mbstring php$phpv-xml php$phpv-curl php$phpv-bz2 php$phpv-zip git unzip php-xdebug vim -y
 
   # If Travis, then add some environment variables, particularly to add more memory to php.
 #  echo "pwd: $(pwd)"
@@ -342,7 +348,7 @@ fi
 # Step 6
 # Add github credentials
 if [[ "$step" -lt "7" ]]; then
-  echo -e "$Cyan step 6: Add github credentials $Color_Off"
+  echo -e "$Cyan Adding github credentials $Color_Off"
   #add github credentials
   git config --global user.email $github_email
   git config --global user.name $github_user
@@ -353,7 +359,7 @@ echo "github credentials added"
 # Step 7
 # Installing MySQL
 if [[ "$step" -lt "8" ]]; then
-  echo -e "$Cyan step 7: Installing MySQL $Color_Off"
+  echo -e "$Cyan Installing MySQL $Color_Off"
   #Check if mysql is installed
   #if type mysql >/dev/null 2>&1; then
   #echo "mysql already installed."
@@ -368,8 +374,8 @@ if [[ "$step" -lt "8" ]]; then
   else
 
   export DEBIAN_FRONTEND=noninteractive
-  sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password password root'
-  sudo debconf-set-selections <<<'mariadb-server-10.3 mysql-server/root_password_again password root'
+  sudo debconf-set-selections <<<'mariadb-server-$marv mysql-server/root_password password root'
+  sudo debconf-set-selections <<<'mariadb-server-$marv mysql-server/root_password_again password root'
   sudo apt-get -y install mariadb-server
   fi
 
@@ -386,7 +392,7 @@ fi
 # Step 8
 # Installing phpMyAdmin
 if [[ "$step" -lt "9" ]]; then
-  echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
+  echo -e "$Cyan Installing phpMyAdmin $Color_Off"
   sudo apt-get install phpmyadmin -y
 fi
 
@@ -398,8 +404,8 @@ fi
 
 # Step 9
 # Enabling Modules
-if [[] "$step" -lt "10" ]]; then
-  echo -e "$Cyan step 9: Enabling Modules  $Color_Off"
+if [[ "$step" -lt "10" ]]; then
+  echo -e "$Cyan Enabling Modules  $Color_Off"
   # Enabling Mod Rewrite, required for WordPress permalinks and .htaccess files
   sudo a2enmod rewrite
   sudo phpenmod xml
@@ -412,28 +418,30 @@ fi
 # Step 10
 #  Install Composer
 if [[ "$step" -lt "11" ]]; then
-  echo -e "$Cyan step 10: Install Composer  $Color_Off"
+  echo -e "$Cyan Installing Composer  $Color_Off"
   #Check if composer is installed otherwise install it
   # From https://www.digitalocean.com/community/tutorials/how-to-install-and-use-composer-on-ubuntu-16-04?comment=67716
 
   php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
   php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-  php composer-setup.php
-  sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-#mv composer.phar /usr/local/bin/composer
+  php composer-setup.php --filename=composer
+  # For Global Installation @Cherrytree56567
+  #mv composer.phar /usr/local/bin/composer
+  #sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
 # Not sure why this next line might be needed.... @rjzaar
+# this line is used for giving perms to other users @Cherrytree56567
 #sudo chown -R $user .composer/
 fi
 
 # Step 11
 # Install Drush globally
 if [[ "$step" -lt "12" ]]; then
-  echo -e "$Cyan step 11: Install Drush globally $Color_Off"
+  echo -e "$Cyan Installing Drush globally $Color_Off"
   # Install drush globally with drush launcher
   # see: https://github.com/drush-ops/drush-launcher  ### xdebug issues?
   if [ ! -f /usr/local/bin/drush ]; then
-    wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
+    wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/download/$druv/drush.phar
     sudo chmod +x drush.phar
     sudo mv drush.phar /usr/local/bin/drush
     echo "drush installed"
@@ -453,12 +461,12 @@ if [[ "$step" -lt "12" ]]; then
   echo "composer install consoildation/cgr"
   # sudo ls -la .config
   if [[ -d "$home/.config" ]]; then
-    sudo chown -R $USER "/home/$USER/.config"
+    sudo chown -R $USER "$home/.config"
     comppres="true"
   fi
 
   if [[ -d "$home/.composer" ]]; then
-    sudo chown -R $USER "/home/$USER/.composer"
+    sudo chown -R $USER "$home/.composer"
     comppres="true"
   fi
   if [[ "$comppres" == "false" ]]; then
@@ -468,7 +476,6 @@ if [[ "$step" -lt "12" ]]; then
   # sudo chown -R $USER /home/travis/.composer/
   composer global require consolidation/cgr
   echo "echo path into bashrc"
-  cd
   # ls -la
 
   echo "composer home: $(composer config -g home)"
@@ -489,7 +496,7 @@ if [[ "$step" -lt "12" ]]; then
     #sudo ln -s ~/.config/composer/vendor/bin/drush .
     cd
     echo "export DRUSH_LAUNCHER_FALLBACK=$comphome/vendor/bin/drush" >>~/.bashrc
-  elif [[ -d "/home/$USER/.composer" ]]; then
+  elif [[ -d "$home/.composer" ]]; then
     if [[ ! -L ~/.composer/vendor/bin/cgr ]]; then
       if [[ ! -L './cgr' ]]; then
         echo "Creating symlink2"
@@ -509,19 +516,19 @@ fi
 # Step 12
 # Install Drupal console globally
 if [[ "$step" -lt "13" ]]; then
-  echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
+  echo -e "$Cyan Installing Drupal console globally  $Color_Off"
   # Install drupal console
   # see https://drupalconsole.com/articles/how-to-install-drupal-console
   if [ ! -f /usr/local/bin/drupal ]; then
     echo "curl"
-    curl https://drupalconsole.com/installer -L -o drupal.phar
+    wget -o https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
     dcon=$(sed '2q;d' drupal.phar)
 echo "dcon $dcon"
 if [[ "$dcon" == "<html><head>" || "$dcon" == "" ]] ; then
 
-# drupalconsole.com/installer is down. get it form git
+# if drupalconsole.com/installer is down. get it from https://github.com/rjzaar/drupal.phar.git
 rm drupal.phar
-git clone https://github.com/rjzaar/drupal.phar.git
+wget -o https://github.com/hechoendrupal/drupal-console-launcher/releases/download/$drulv/drupal.phar
 mv drupal.phar drupal.pha
 mv drupal.pha/drupal.phar drupal.phar
 rm drupal.pha -rf
@@ -559,7 +566,7 @@ fi
 # Step 13
 # setup /var/wwww/oc for websites
 if [[ "$step" -lt "14" ]]; then
-  echo -e "$Cyan step 13: setup /var/wwww/oc for websites  $Color_Off"
+  echo -e "$Cyan setting up /var/wwww/oc for websites  $Color_Off"
   #set up website folder for apache
   if [ ! -d /var/www/oc ]; then
     sudo mkdir /var/www/oc
@@ -577,7 +584,7 @@ fi
 # Step 14
 # Fix adding extra characters for vi
 if [[ "$step" -lt "15" ]]; then
-  echo -e "$Cyan step 14: Fix adding extra characters for vi  $Color_Off"
+  echo -e "$Cyan Fixing extra characters for vi  $Color_Off"
   #Set up vi to not add extra characters
   #From: https://askubuntu.com/questions/353911/hitting-arrow-keys-adds-characters-in-vi-editor
   echo -e "$Cyan \n  $Color_Off"
