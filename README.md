@@ -14,21 +14,6 @@ You set pleasy up with the following commands
 sudo apt update
 sudo apt upgrade
 cd $home
-sudo apt install nodejs
-curl -O https://hyperledger.github.io/composer/latest/prereqs-ubuntu.sh
-chmod u+x prereqs-ubuntu.sh
-npm install -g composer-cli@0.20
-npm install -g composer-rest-server@0.20
-npm install -g generator-hyperledger-composer@0.20
-npm install -g yo
-npm install -g composer-playground@0.20
-mkdir ~/fabric-dev-servers && cd ~/fabric-dev-servers
-curl -O https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.tar.gz
-tar -xvf fabric-dev-servers.tar.gz
-cd ~/fabric-dev-servers
-export FABRIC_VERSION=hlfv12
-./downloadFabric.sh
-cd $home
 git clone https://github.com/mayostudio/pleasy.git
 sudo bash ./pleasy/bin/pl init
 sudo source ~/.bashrc
