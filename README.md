@@ -11,6 +11,10 @@ some tweaking required ('example.pl.yml' copy this file to pl.yml and tweak it).
 You set pleasy up with the following commands
 
 ```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mayostudio/pleasy/master/pleasy.sh)"
+```
+
+```
 sudo apt update
 sudo apt upgrade
 cd $home
