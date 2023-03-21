@@ -14,15 +14,7 @@ You set pleasy up with the following commands
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/mayostudio/pleasy/master/pleasy.sh)"
 ```
 
-```
-sudo apt update
-sudo apt upgrade
-cd $home
-git clone https://github.com/mayostudio/pleasy.git
-sudo bash ./pleasy/bin/pl init
-sudo echo "PATH=$Path:$home/pleasy/bin" >> ~/.bashrc 
-pl update
-```
+Make sure to delete all zsh file if you are using github codespaces.
 
 Make sure you configure the phpmyadmin to apache2 and don't configure the database with dbconfig-common.
 
