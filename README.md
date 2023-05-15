@@ -11,7 +11,7 @@ some tweaking required ('example.pl.yml' copy this file to pl.yml and tweak it).
 You set pleasy up with the following commands
 
 ```
-git clone git@github.com:rjzaar/pleasy.git 
+git clone https://github.com/rjzaar/pleasy.git
 bash ./pleasy/bin/pl  init
 source ~/.bashrc
 pl update
