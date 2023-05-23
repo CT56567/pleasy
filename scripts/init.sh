@@ -213,7 +213,7 @@ parse_pl_yml
 
 # Step 3
 # Adding pl command to bash commands, including plextras
-if [ "$step" -lt 4 ]; then
+if [[ "$step" -lt 4 ]]; then
   echo -e "$Cyan step 3: Adding pl command to bash commands, including plextras $Color_Off"
 
   update_locations
