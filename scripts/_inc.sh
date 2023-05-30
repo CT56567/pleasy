@@ -1634,6 +1634,8 @@ update_locations() {
   # It presumes that _inc.sh has already been run and parse_pl_yml has been run.
 ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
  cd
+ ocmsg "cd ls" debug
+ ls
   DIRECTORY=$(cd $(dirname $0) && pwd)
   ocmsg "Directory $DIRECTORY" debug
   cd $(dirname $0)
