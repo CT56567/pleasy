@@ -1639,7 +1639,7 @@ ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
  cd bin
   ocmsg "cd bin ls" debug
  ls
- cd 
+ cd
  cd project
    ocmsg "cd project ls" debug
    ls
