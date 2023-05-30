@@ -1643,8 +1643,9 @@ ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
   IFS="/" read -ra PARTS <<<"$(pwd)"
   user=${PARTS[2]}
   project=${PARTS[3]}
-  if [[ "$project" == "project" ]] && [[ "$user" == "circleci" ]]; then
+  if [[ "$project" == "bin" ]] && [[ "$user" == "circleci" ]]; then
     # Must be a circleci build
+    ocmsg "Circleci Build" debug
     project="project"
   fi
   ocmsg "user: $user  project: $project" debug
