@@ -508,6 +508,8 @@ parse_pl_yml() {
       update_all_configs
     fi
   fi
+  echo "Completed parse_pl_lml"
+  ocmsg "Completed parse_pl_lml" debug
 }
 
 #

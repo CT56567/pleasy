@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           command: |
-            bash ./bin/pl init -d
+            bash ./bin/pl init -dt
             source ~/.bashrc
             pl update -d
             pl install -yd d8
