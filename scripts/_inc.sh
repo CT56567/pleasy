@@ -1636,6 +1636,14 @@ ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
  cd
  ocmsg "cd ls" debug
  ls
+ cd bin
+  ocmsg "cd bin ls" debug
+ ls
+ cd 
+ cd project
+   ocmsg "cd project ls" debug
+   ls
+   cd
   DIRECTORY=$(cd $(dirname $0) && pwd)
   ocmsg "Directory $DIRECTORY" debug
   cd $(dirname $0)
