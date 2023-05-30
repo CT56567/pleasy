@@ -508,8 +508,7 @@ parse_pl_yml() {
       update_all_configs
     fi
   fi
-  echo "Completed parse_pl_lml"
-  ocmsg "Completed parse_pl_lml" debug
+  ocmsg "Completed parse_pl_yml" debug
 }
 
 #
@@ -1633,9 +1632,10 @@ copy_site_folder() {
 update_locations() {
   # This will update the key directory locations set by the environment and pl.yml
   # It presumes that _inc.sh has already been run and parse_pl_yml has been run.
-echo "pwd $(pwd) directory $dirname dir+ $(dirname $0)"
+ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
  cd
   DIRECTORY=$(cd $(dirname $0) && pwd)
+  ocmsg "Directory $DIRECTORY" debug
   cd $(dirname $0)
   echo "Directory: $DIRECTORY pwd: $(pwd)"
   IFS="/" read -ra PARTS <<<"$(pwd)"
