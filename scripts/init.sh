@@ -199,7 +199,7 @@ echo running include files...
 . "$script_root/_inc.sh"
 ocmsg "parsing yml" debug
 ocmsg "location: $folderpath/pl.yml" ocmsg
-if [ ! -f "$folderpath/pl.yml" ]]; then
+if [ ! -f "$folderpath/pl.yml" ]; then
   ocmsg "Copying example.pl.yml to pl.yml and setting some defaults based on the system." debug
   cp $folderpath/example.pl.yml $folderpath/pl.yml
   # set the user
@@ -245,7 +245,7 @@ if [[ "$step" -lt 5 ]]; then
   echo -e "$Cyan step 4: Create mysql root password file $Color_Off"
   # Create mysql root password file
   # Check if one exists
-  if [ ! -f $(dirname $script_root)/mysql.cnf ]]; then
+  if [ ! -f $(dirname $script_root)/mysql.cnf ]; then
     echo "Creating $(dirname $script_root)/mysql.cnf"
 
     if [[ "$pltest" == "y" ]]; then
@@ -436,7 +436,7 @@ if [[ "$step" -lt 12 ]]; then
   echo -e "$Cyan step 11: Install Drush globally $Color_Off"
   # Install drush globally with drush launcher
   # see: https://github.com/drush-ops/drush-launcher  ### xdebug issues?
-  if [ ! -f /usr/local/bin/drush ]]; then
+  if [ ! -f /usr/local/bin/drush ]; then
     wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
     sudo chmod +x drush.phar
     sudo mv drush.phar /usr/local/bin/drush
@@ -456,16 +456,16 @@ if [[ "$step" -lt 12 ]]; then
   #composer global require drush/drush
   echo "composer install consoildation/cgr"
   # sudo ls -la .config
-  if [[ -d "/home/$USER/.config" ]]; then
+  if [ -d "/home/$USER/.config" ]; then
     sudo chown -R $USER "/home/$USER/.config"
     comppres="true"
   fi
 
-  if [[ -d "/home/$USER/.composer" ]]; then
+  if [ -d "/home/$USER/.composer" ]; then
     sudo chown -R $USER "/home/$USER/.composer"
     comppres="true"
   fi
-  if [[ "$comppres" == "false" ]]; then
+  if [ "$comppres" == "false" ]; then
     echo "Don't know where composer is. I thought I installed it.1"
   fi
 
@@ -485,8 +485,8 @@ if [[ "$step" -lt 12 ]]; then
   # https://github.com/consolidation/cgr/issues/29#issuecomment-422852318
   cd /usr/local/bin
 
-  if [[ -d "/home/$USER/.config" ]]; then
-    if [[ ! -L './cgr' ]]; then
+  if [ -d "/home/$USER/.config" ]; then
+    if [ ! -L './cgr' ]; then
       echo "Creating symlink"
       sudo ln -s $comphome/vendor/bin/cgr .
     fi
@@ -516,7 +516,7 @@ if [[ "$step" -lt 13 ]]; then
   echo -e "$Cyan step 12: Install Drupal console globally  $Color_Off"
   # Install drupal console
   # see https://drupalconsole.com/articles/how-to-install-drupal-console
-  if [ ! -f /usr/local/bin/drupal ]]; then
+  if [ ! -f /usr/local/bin/drupal ]; then
     echo "curl"
     curl https://drupalconsole.com/installer -L -o drupal.phar
     dcon=$(sed '2q;d' drupal.phar)
@@ -565,7 +565,7 @@ fi
 if [[ "$step" -lt 14 ]]; then
   echo -e "$Cyan step 13: setup /var/wwww/oc for websites  $Color_Off"
   #set up website folder for apache
-  if [ ! -d /var/www/oc ]]; then
+  if [ ! -d /var/www/oc ]; then
     sudo mkdir /var/www/oc
     sudo chown $user:www-data /var/www/oc
   else
