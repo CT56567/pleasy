@@ -282,13 +282,10 @@ if [[ "$step" -lt 6 ]]; then
   echo -e "$Cyan step 5: Updating System..  $Color_Off"
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
   # Update packages and Upgrade system
-  DEBIAN_FRONTEND=noninteractive \
-  apt-get \
-  -o Dpkg::Options::=--force-confold \
-  -o Dpkg::Options::=--force-confdef \
-  -y --allow-downgrades --allow-remove-essential --allow-change-held-packages
-  sudo apt-get -qqy update && sudo apt-get -qqy upgrade
 
+  sudo apt-get -qqy update && sudo apt-get -qqy upgrade
+# -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew
+ocmsg "Install unattended-upgrades" debug
   #setup unattended upgrades
   sudo apt install unattended-upgrades
   #todo setup the config for this
@@ -301,6 +298,7 @@ if [[ "$step" -lt 6 ]]; then
 #APT::Periodic::Download-Upgradeable-Packages "1";
 #APT::Periodic::AutocleanInterval "1";
   # Setup php 7.3
+  ocmsg "Install php" debug
   sudo apt-get -y install software-properties-common
   sudo add-apt-repository -y ppa:ondrej/php
   sudo add-apt-repository -y ppa:ondrej/apache2
@@ -312,6 +310,7 @@ if [[ "$step" -lt 6 ]]; then
   # php-gettext not installing on ubuntu 20
   #sudo apt-get -qq install apache2 php libapache2-mod-php php-mysql php-gettext curl php-cli php-gd php-mbstring php-xml php-curl php-bz2 php-zip git unzip php-xdebug -y
   # Install vim to make sure arrow keys work properly.
+  ocmsg "Install AMP" debug
   sudo apt-get -y install apache2 php7.3 libapache2-mod-php7.3 php7.3-mysql php7.3-common curl php7.3-cli php7.3-gd php7.3-mbstring php7.3-xml php7.3-curl php7.3-bz2 php7.3-zip git unzip php-xdebug vim -y
 
   # If Travis, then add some environment variables, particularly to add more memory to php.
@@ -334,7 +333,7 @@ if [[ "$step" -lt 6 ]]; then
 #    phpenv rehash
 #    cd
 #  fi
-
+ocmsg "Set php settings" debug
 # Actually just set the memory limit regardless
 phpline=$(php -i | grep "Loaded Configuration File")
 echo "phpline: $phpline"
