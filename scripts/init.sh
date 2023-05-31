@@ -283,11 +283,14 @@ if [[ "$step" -lt 6 ]]; then
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
   # Update packages and Upgrade system
 
-  sudo apt-get -qqy update && sudo apt-get -qqy -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
+  sudo apt-get -qqy update 
+  # && sudo apt-get -qqy -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
 # -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew
 ocmsg "Install unattended-upgrades" debug
   #setup unattended upgrades
   sudo apt install unattended-upgrades
+  ocmsg "Run unattended upgrade" debug
+  sudo unattended-upgrade -d
   #todo setup the config for this
   # https://linoxide.com/enable-automatic-updates-on-ubuntu-20-04/
   # https://www.cyberciti.biz/faq/set-up-automatic-unattended-updates-for-ubuntu-20-04/
