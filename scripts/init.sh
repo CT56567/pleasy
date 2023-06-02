@@ -397,9 +397,9 @@ fi
 # Installing phpMyAdmin
 if [[ "$step" -lt 9 ]]; then
   echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
-  sudo export DEBIAN_FRONTEND=noninteractive
+  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install phpmyadmin
   
-  sudo apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install phpmyadmin
+  #sudo apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install phpmyadmin
 fi
 
 ## TWEAKS and Settings
