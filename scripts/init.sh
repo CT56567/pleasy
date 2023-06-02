@@ -480,7 +480,7 @@ if [[ "$step" -lt 12 ]]; then
   fi
 
   # sudo chown -R $USER /home/travis/.composer/
-  composer global require consolidation/cgr
+  composer global require consolidation/cgr:2.x-dev
   echo "echo path into bashrc"
   cd
   # ls -la
