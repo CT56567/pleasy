@@ -398,7 +398,8 @@ fi
 if [[ "$step" -lt 9 ]]; then
   echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
   echo " php version: $(php --version)" 
-  sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install phpmyadmin
+  echo "Not going to install phpMyAdmin since its forcing php8.2 which is confusing the system."
+  #sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install phpmyadmin
   
   #sudo apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install phpmyadmin
 fi
