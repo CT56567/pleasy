@@ -563,8 +563,8 @@ fi
     ls -la
     
     echo "now source ~/.bashrc"
-    source ~/.bashrc
-
+    source /home/circleci/.bashrc
+    echo "finish source ~/.bashrc"
     #Fish: Create a symbolic link
     echo "Make fish dir"
     mkdir -p ~/.config/fish/completions/
