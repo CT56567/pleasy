@@ -535,6 +535,8 @@ if [[ "$step" -lt 13 ]]; then
 echo "dcon $dcon"
 if [[ "$dcon" == "<html><head>" || "$dcon" == "" ]] ; then
 
+echo "drupalconsole.com/installer is down. get it form git"
+
 # drupalconsole.com/installer is down. get it form git
 rm drupal.phar
 git clone https://github.com/rjzaar/drupal.phar.git
@@ -544,6 +546,7 @@ rm drupal.pha -rf
 fi
     #could test it
     # php drupal.phar
+    
     sudo mv drupal.phar /usr/local/bin/drupal
     sudo chmod +x /usr/local/bin/drupal
     echo "drupal init"
@@ -555,7 +558,11 @@ fi
     echo "put into bashrc"
     echo "source \"$HOME/.console/console.rc\" 2>/dev/null" >>~/.bashrc
     echo "reset source"
+    echo "list all of home dir"
     cd
+    ls -la
+    
+    echo "now source ~/.bashrc"
     source ~/.bashrc
 
     #Fish: Create a symbolic link
