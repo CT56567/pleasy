@@ -1634,11 +1634,11 @@ update_locations() {
   # It presumes that _inc.sh has already been run and parse_pl_yml has been run.
 ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
 cd
-  DIRECTORY=$(cd $(dirname $0) && pwd)
-  ocmsg "Directory $DIRECTORY"
+#  DIRECTORY=$(cd $(dirname $0) && pwd)
+#  ocmsg "Directory $DIRECTORY"
   echo "pwd $(pwd)"
   cd $(dirname $0)
-  echo "Directory: $DIRECTORY pwd: $(pwd)"
+#  echo "Directory: $DIRECTORY pwd: $(pwd)"
   IFS="/" read -ra PARTS <<<"$(pwd)"
   user=$USER
 project=${PARTS[3]}
