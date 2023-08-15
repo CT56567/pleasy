@@ -6,6 +6,7 @@ jobs:
     steps:
       - checkout
       - run:
+          no_output_timeout: 10m
           command: |
             bash ./bin/pl init -dt
             source ~/.bashrc

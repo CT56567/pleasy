@@ -282,10 +282,15 @@ if [[ "$step" -lt 6 ]]; then
   echo -e "$Cyan step 5: Updating System..  $Color_Off"
   # see: https://www.drupal.org/docs/develop/local-server-setup/linux-development-environments/installing-php-mysql-and-apache-under
   # Update packages and Upgrade system
-  sudo apt-get -qqy update && sudo apt-get -qqy upgrade
 
+  sudo apt-get -qqy update 
+  # && sudo apt-get -qqy -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew upgrade
+# -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew
+ocmsg "Install unattended-upgrades" debug
   #setup unattended upgrades
   sudo apt install unattended-upgrades
+  ocmsg "Run unattended upgrade" debug
+  sudo unattended-upgrade -d
   #todo setup the config for this
   # https://linoxide.com/enable-automatic-updates-on-ubuntu-20-04/
   # https://www.cyberciti.biz/faq/set-up-automatic-unattended-updates-for-ubuntu-20-04/
@@ -296,6 +301,7 @@ if [[ "$step" -lt 6 ]]; then
 #APT::Periodic::Download-Upgradeable-Packages "1";
 #APT::Periodic::AutocleanInterval "1";
   # Setup php 7.3
+  ocmsg "Install php" debug
   sudo apt-get -y install software-properties-common
   sudo add-apt-repository -y ppa:ondrej/php
   sudo add-apt-repository -y ppa:ondrej/apache2
@@ -307,7 +313,8 @@ if [[ "$step" -lt 6 ]]; then
   # php-gettext not installing on ubuntu 20
   #sudo apt-get -qq install apache2 php libapache2-mod-php php-mysql php-gettext curl php-cli php-gd php-mbstring php-xml php-curl php-bz2 php-zip git unzip php-xdebug -y
   # Install vim to make sure arrow keys work properly.
-  sudo apt-get -y install apache2 php7.3 libapache2-mod-php7.3 php7.3-mysql php7.3-common curl php7.3-cli php7.3-gd php7.3-mbstring php7.3-xml php7.3-curl php7.3-bz2 php7.3-zip git unzip php-xdebug vim -y
+  ocmsg "Install AMP" debug
+  sudo apt-get -y install apache2 php7.3 libapache2-mod-php7.3 php7.3-mysql php7.3-common curl php7.3-cli php7.3-gd php7.3-mbstring php7.3-xml php7.3-curl php7.3-bz2 php7.3-zip git unzip php7.3-xdebug vim -y
 
   # If Travis, then add some environment variables, particularly to add more memory to php.
 #  echo "pwd: $(pwd)"
@@ -329,7 +336,7 @@ if [[ "$step" -lt 6 ]]; then
 #    phpenv rehash
 #    cd
 #  fi
-
+ocmsg "Set php settings" debug
 # Actually just set the memory limit regardless
 phpline=$(php -i | grep "Loaded Configuration File")
 echo "phpline: $phpline"
@@ -390,7 +397,11 @@ fi
 # Installing phpMyAdmin
 if [[ "$step" -lt 9 ]]; then
   echo -e "$Cyan step 8: Installing phpMyAdmin $Color_Off"
-  sudo apt-get install phpmyadmin -y
+  echo " php version: $(php --version)" 
+  echo "Not going to install phpMyAdmin since its forcing php8.2 which is confusing the system."
+  #sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install phpmyadmin
+  
+  #sudo apt-get -yq -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confnew install phpmyadmin
 fi
 
 ## TWEAKS and Settings
@@ -423,7 +434,8 @@ if [[ "$step" -lt 11 ]]; then
   php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
   HASH="$(wget -q -O - https://composer.github.io/installer.sig)"
   php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-  sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=1.10.17
+  sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer   
+  # --version=1.10.17
 #mv composer.phar /usr/local/bin/composer
 
 # Not sure why this next line might be needed.... @rjzaar
@@ -470,7 +482,7 @@ if [[ "$step" -lt 12 ]]; then
   fi
 
   # sudo chown -R $USER /home/travis/.composer/
-  composer global require consolidation/cgr
+  composer global require consolidation/cgr:2.x-dev
   echo "echo path into bashrc"
   cd
   # ls -la
@@ -523,6 +535,8 @@ if [[ "$step" -lt 13 ]]; then
 echo "dcon $dcon"
 if [[ "$dcon" == "<html><head>" || "$dcon" == "" ]] ; then
 
+echo "drupalconsole.com/installer is down. get it form git"
+
 # drupalconsole.com/installer is down. get it form git
 rm drupal.phar
 git clone https://github.com/rjzaar/drupal.phar.git
@@ -532,6 +546,7 @@ rm drupal.pha -rf
 fi
     #could test it
     # php drupal.phar
+    
     sudo mv drupal.phar /usr/local/bin/drupal
     sudo chmod +x /usr/local/bin/drupal
     echo "drupal init"
@@ -543,9 +558,13 @@ fi
     echo "put into bashrc"
     echo "source \"$HOME/.console/console.rc\" 2>/dev/null" >>~/.bashrc
     echo "reset source"
+    echo "list all of home dir"
     cd
-    source ~/.bashrc
-
+    ls -la
+    
+    echo "now source ~/.bashrc"
+    source /home/circleci/.bashrc
+    echo "finish source ~/.bashrc"
     #Fish: Create a symbolic link
     echo "Make fish dir"
     mkdir -p ~/.config/fish/completions/
