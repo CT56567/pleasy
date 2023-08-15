@@ -1637,7 +1637,7 @@ cd
 #  DIRECTORY=$(cd $(dirname $0) && pwd)
 #  ocmsg "Directory $DIRECTORY"
   echo "pwd $(pwd)"
-  cd $(dirname $0)
+#  cd $(dirname $0)
 #  echo "Directory: $DIRECTORY pwd: $(pwd)"
   IFS="/" read -ra PARTS <<<"$(pwd)"
   user=$USER
