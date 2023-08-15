@@ -1633,29 +1633,18 @@ update_locations() {
   # This will update the key directory locations set by the environment and pl.yml
   # It presumes that _inc.sh has already been run and parse_pl_yml has been run.
 ocmsg "pwd $(pwd) directory $dirname dir+ $(dirname $0)  0 $0" debug
- cd
- ocmsg "cd ls" debug
- ls
- cd bin
-  ocmsg "cd bin ls" debug
- ls
- cd
- cd project
-   ocmsg "cd project ls" debug
-   ls
-   cd
+cd
   DIRECTORY=$(cd $(dirname $0) && pwd)
-  ocmsg "Directory $DIRECTORY" debug
+  ocmsg "Directory $DIRECTORY"
+  echo "pwd $(pwd)"
   cd $(dirname $0)
   echo "Directory: $DIRECTORY pwd: $(pwd)"
   IFS="/" read -ra PARTS <<<"$(pwd)"
-  user=${PARTS[2]}
-  project=${PARTS[3]}
-  if [[ "$project" == "bin" ]] && [[ "$user" == "circleci" ]]; then
-    # Must be a circleci build
-    ocmsg "Circleci Build" debug
-    project="project"
-  fi
+  user=$USER
+project=${PARTS[3]}
+  for ((i = 4 ; i < ${#PARTS[@]}-1 ; i++)); do
+    $project=$project +"/"+ ${PARTS[i]}
+  done
   ocmsg "user: $user  project: $project" debug
   store_project=$project
   # Check correct user name
