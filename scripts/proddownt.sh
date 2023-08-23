@@ -89,6 +89,7 @@ update_all_configs
 import_site_config $sitename_var
 echo "step $step"
 
+
   if [ "${sitename_var:0:3}" = "stg" ]; then
     # set up stg
     sitename_short=${sitename_var:4}

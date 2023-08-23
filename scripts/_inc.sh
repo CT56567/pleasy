@@ -553,7 +553,7 @@ update_all_configs() {
     mkdir $user_home/.console/sites
   fi
   # Clear current file
-  ocmsg "$user_home/.console/sites/$folder.yml"
+  ocmsg "console location: $user_home/.console/sites/$folder.yml"
   if [ -f "$user_home/.console/sites/$folder.yml" ]; then
     echo "" >"$user_home/.console/sites/$folder.yml"
   fi
@@ -563,7 +563,7 @@ update_all_configs() {
   #Collect the drush location: messy but it works!
   # This command might list some warnings. It is a bug with drush: https://github.com/drush-ops/drush/issues/3226
 
-  ocmsg "$folderpath/drush.tmp" debug
+  ocmsg "Drush tmp: $folderpath/drush.tmp" debug
   source ~/.bashrc
   ocmsg "drush core:init" debug
   drush core:init -y
@@ -571,7 +571,7 @@ update_all_configs() {
   ocmsg "drush status" debug
   drush status
   #  if [[ $folderpath/drush.tmp =~ (@loc) ]] ; then
-  drush @loc status >"$folderpath/drush.tmp"
+#  drush @loc status >"$folderpath/drush.tmp"
   #  else
   drush status >"$folderpath/drush.tmp"
   #  fi
@@ -1193,7 +1193,7 @@ backup_prod() {
   if [[ "$sitename_var" == "$site_to" ]]; then
     # Backup production on production
     echo "Backing up production site $sitename_var on server only."
-    #rz#ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
+    ssh $prod_alias -t "./backupprod.sh $prod_docroot $msg"
 
   else
 
@@ -1637,7 +1637,7 @@ cd
 #  DIRECTORY=$(cd $(dirname $0) && pwd)
 #  ocmsg "Directory $DIRECTORY"
   echo "pwd $(pwd)"
-#  cd $(dirname $0)
+ cd $(dirname $0)
 #  echo "Directory: $DIRECTORY pwd: $(pwd)"
   IFS="/" read -ra PARTS <<<"$(pwd)"
   user=$USER
