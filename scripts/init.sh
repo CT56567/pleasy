@@ -172,22 +172,6 @@ if [[ $step -lt 2 ]]; then
   gout=$(gawk -Wv)
   gversion=${gout:8:1}
   echo "Gawk version: >$gversion<"
-
-  if [[ "$gversion" == "6" ]]; then
-    echo "Need to purge gawk and install version 4 of gawk"
-   # 1:4.1.4+dfsg-1build1
-    sudo apt-get remove gawk -y
-
-    wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz
-    tar -xvpzf gawk-4.2.1.tar.gz
-    cd gawk-4.2.1
-    sudo ./configure && sudo make && sudo make install
-      gout=$(gawk -Wv)
-      gversion=${gout:8:1}
-      echo "New Gawk version: >$gversion<"
-  #  sudo apt install gawk=1:5.0.1+dfsg-1
-  # It installs 5.0.1, but when you run gawk -Wv it says it 4.2.1. Anyway it works. I don't know another way of doing it.
-  fi
 fi
 
 # Step 2
