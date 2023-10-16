@@ -1,0 +1,28 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Test
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  symfony-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3=
+    - name: Test
+      run: |
+        sudo apt update
+        git clone https://github.com/cherrytree56567/pleasy.git
+        bash ./pleasy/bin/pl  init
+        source ~/.bashrc
+        pl update
