@@ -3,7 +3,7 @@
 
 if [ "$1" = "init" ]; then
   cd $HOME
-  git clone https://github.com/cherrytree56567/pleasy.git
+  git clone https://github.com/rjzaar/pleasy.git
 fi
 
 set -e
