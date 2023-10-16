@@ -22,7 +22,7 @@ jobs:
     - name: Test
       run: |
         sudo apt update
-        git clone https://github.com/cherrytree56567/pleasy.git
+        git clone https://github.com/rjzaar/pleasy.git
         bash ./pleasy/bin/pl  init
         source ~/.bashrc
         pl update
