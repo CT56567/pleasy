@@ -14,7 +14,7 @@ You set pleasy up with the following commands
 sudo apt update
 sudo add-apt-repository -y ppa:ondrej/php
 sudo add-apt-repository -y ppa:ondrej/apache2
-git clone https://github.com/cherrytree56567/pleasy.git
+git clone https://github.com/rjzaar/pleasy.git
 bash ./pleasy/bin/pl  init
 source ~/.bashrc
 pl update
