@@ -1,6 +1,6 @@
 # Pleasy
 
-[![Build Status](https://travis-ci.com/rjzaar/pleasy.svg?branch=master)](https://travis-ci.com/rjzaar/pleasy)
+[![Test](https://github.com/Cherrytree56567/pleasy/actions/workflows/test.yml/badge.svg)](https://github.com/Cherrytree56567/pleasy/actions/workflows/test.yml)
 
 This is a Devops framework for drupal sites, particularly based on varbase.
 The framework is run through the pl (short for please), plcd and plvi commands.
