@@ -1,6 +1,11 @@
 #!/bin/bash
 # stolen from https://github.com/pendashteh/drop
 
+if [ "$1" = "init" ]; then
+  cd $HOME
+  git clone https://github.com/rjzaar/pleasy.git
+fi
+
 set -e
 # verbose is either none or debug. Set to debug so you can debug this script.
 verbose="none"

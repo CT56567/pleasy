@@ -172,22 +172,6 @@ if [[ $step -lt 2 ]]; then
   gout=$(gawk -Wv)
   gversion=${gout:8:1}
   echo "Gawk version: >$gversion<"
-
-  if [[ "$gversion" == "5" ]]; then
-    echo "Need to purge gawk and install version 4 of gawk"
-   # 1:4.1.4+dfsg-1build1
-    sudo apt-get remove gawk -y
-
-    wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz
-    tar -xvpzf gawk-4.2.1.tar.gz
-    cd gawk-4.2.1
-    sudo ./configure && sudo make && sudo make install
-      gout=$(gawk -Wv)
-      gversion=${gout:8:1}
-      echo "New Gawk version: >$gversion<"
-  #  sudo apt install gawk=1:5.0.1+dfsg-1
-  # It installs 5.0.1, but when you run gawk -Wv it says it 4.2.1. Anyway it works. I don't know another way of doing it.
-  fi
 fi
 
 # Step 2
@@ -303,8 +287,6 @@ ocmsg "Install unattended-upgrades" debug
   # Setup php 7.3
   ocmsg "Install php" debug
   sudo apt-get -y install software-properties-common
-  sudo add-apt-repository -y ppa:ondrej/php
-  sudo add-apt-repository -y ppa:ondrej/apache2
   #
   sudo apt -qqy update
 
@@ -535,7 +517,7 @@ if [[ "$step" -lt 13 ]]; then
 echo "dcon $dcon"
 if [[ "$dcon" == "<html><head>" || "$dcon" == "" ]] ; then
 
-echo "drupalconsole.com/installer is down. get it form git"
+echo "drupalconsole.com/installer is down. get it from git"
 
 # drupalconsole.com/installer is down. get it form git
 rm drupal.phar
@@ -563,7 +545,7 @@ fi
     ls -la
     
     echo "now source ~/.bashrc"
-    source /home/circleci/.bashrc
+    source /home/$(whoami)/.bashrc
     echo "finish source ~/.bashrc"
     #Fish: Create a symbolic link
     echo "Make fish dir"
@@ -619,10 +601,6 @@ if [[ -f ~/.bashrc ]]; then
   cd
   source .bashrc
 fi
-if [[ -f ~/.zshrc ]]; then
-  ocmsg "source ~/.zshrc" debug
-  source ~/.zshrc
-fi
 
 if [[ "$step" -lt 16 ]]; then
   echo -e "$Cyan step 15: Now add theming tools $Color_Off"
@@ -634,10 +612,10 @@ if [[ "$step" -lt 16 ]]; then
 # and: https://github.com/nvm-sh/nvm
 ocmsg "Using nvm to install nodejs and npm" debug
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-export NVM_DIR="$HOME/.nvm"
+export NVM_DIR="/usr/local/share/nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-# source ~/.bashrc
+source ~/.bashrc
 nvm install node
 sudo apt install build-essential
 # varbase needs bower installed
