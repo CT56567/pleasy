@@ -434,6 +434,7 @@ if [[ "$step" -lt 12 ]]; then
     wget -O drush.phar https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar
     sudo chmod +x drush.phar
     sudo mv drush.phar /usr/local/bin/drush
+    composer global require drush/drush
     echo "drush installed"
   else
     echo "drush already present."
